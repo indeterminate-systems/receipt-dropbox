@@ -170,6 +170,44 @@ The rest of the Mexico section applies to `company`, `nonprofit` and `donataria-
 - Persons morales, non-profits included, keep electronic accounting (CFF art. 28; catalogue and
   trial balance sent through the SAT portal unless exempt).
 
+### 8. Crossing borders: foreign accounts and foreign vendors
+
+Two cases come up when supporters or vendors are outside Mexico. Neither changes matching,
+redaction or the audit trail; both are to be confirmed by a contador.
+
+**A foreign account paying a Mexican business** (for example, a supporter's US card at a Mexican
+shop):
+
+- The proof is unchanged: a CFDI from the Mexican business to the organization's RFC. The country
+  of the card doesn't matter to the CFDI.
+- The foreign statement is still payment evidence (date, amount, that the supporter paid). A card
+  is an electronic means of payment for LISR art. 27 fr. III; whether a *personal* card is
+  acceptable is open question 1.
+- The amounts differ: the CFDI is in pesos (or carries its own *TipoCambio* if issued in another
+  currency) and the statement is in the card's currency, after the bank's rate, margin and any
+  foreign transaction fee. Matching needs a rate for the date and a tolerance; the fee is the
+  supporter's cost unless the organization's policy reimburses it.
+- For the books, foreign-currency amounts are converted at the rate the CFF uses (art. 20: the
+  Banxico rate published in the DOF for the previous business day, to confirm). The reimbursement
+  is booked in pesos at what the organization actually pays the supporter, and any difference is
+  an exchange gain or loss.
+
+**A Mexican organization paying a foreign vendor** that cannot issue a CFDI (software, a venue or
+supplier abroad, an online platform):
+
+- A foreign resident without a permanent establishment in Mexico doesn't issue CFDIs. The proof is
+  the vendor's own invoice, which must carry minimum details set by the RMF (vendor name, address
+  and tax id, description, amount, date and the organization as buyer; to confirm the current
+  rule).
+- **VAT on imported services:** when the organization uses in Mexico a service or intangible from
+  abroad, it may have to self-assess IVA (LIVA arts. 24 and 26). **Digital services** from foreign
+  platforms registered with the SAT (LIVA art. 18-B onward) are different: the platform charges
+  IVA itself and issues a receipt, not a CFDI.
+- **Withholding:** some payments abroad (fees, royalties, some services) can carry ISR withholding
+  under LISR Title V. The app flags foreign-vendor expenses for the contador and never computes
+  the tax.
+- Under `informal-group` there is no SAT side, so a foreign invoice is simply the receipt.
+
 ## United States (secondary)
 
 - **Accountable plan** (IRC § 62(c), Treas. Reg. § 1.62-2, IRS Publication 463 ch. 6, Publication
@@ -245,6 +283,17 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
 - **R10.** "Donate instead of reimburse" exists only behind an organization setting, off until a
   contador confirms the mechanism (open question 3).
 
+- **R16. Multi-currency matching** (piece 6). A statement line and a receipt or CFDI in different
+  currencies match on the converted amount within a tolerance; the rate source (Banxico FIX per
+  the DOF, or the card network's rate) and the tolerance are Nickel policy. Store both amounts,
+  the rate and its date; book foreign-transaction fees and exchange differences to their own
+  accounts. The redacted statement shows the original currency and the booked pesos.
+- **R17. Foreign invoices** (piece 15). Accept a foreign vendor's invoice as proof when the
+  vendor is not a Mexican taxpayer, check it for the RMF's minimum details, and flag it for the
+  contador: possible IVA self-assessment on imported services, possible withholding, and whether
+  the vendor is a SAT-registered digital platform. Applies to every proof policy except
+  `informal-group`, where it is just a receipt.
+
 ### Supporter data and retention (piece 16)
 
 - **R11. Privacy notice and consent (LFPDPPP).** Show the organization's *aviso de privacidad* at
@@ -290,6 +339,11 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
 10. For a persona física with **employees who is not registered** with the SAT for that activity:
     what must they do to regularize (RFC activity, IMSS, payroll), and can expenses from before
     registration be supported retroactively?
+11. For **foreign-currency payments**: which exchange rate books the expense and the
+    reimbursement, and does the organization reimburse the supporter's foreign transaction fees?
+12. For **foreign vendors**: what must a foreign invoice show, when does the organization owe IVA
+    on an imported service or withhold ISR, and how are SAT-registered digital platforms'
+    receipts handled?
 
 ## Sources
 
