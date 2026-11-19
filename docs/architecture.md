@@ -120,7 +120,7 @@ same names, so the crate can be built two ways:
 | :-- | :-- | :-- |
 | PWA | Rust UI (Leptos, client-side rendering) + core, `wasm32-unknown-unknown` via `wasm-bindgen` | WebAuthn PRF through `web-sys`; OPFS storage; Typst and Tesseract run in the page. The service worker is generated, not hand-written. |
 | Cloudflare | `worker` crate (`workers-rs`) | Email Routing hands mail to the Worker; encrypt on arrival to the sender's public keys from KV, store in R2, discard plaintext. |
-| Google | Cloud Run service embedding wasmtime | Gmail push notifications through Pub/Sub; Drive folders as intake and blob store. |
+| Google (later) | Cloud Run service embedding wasmtime | Gmail push notifications through Pub/Sub; Drive folders as intake and blob store. Not scheduled; see the roadmap. |
 | Local | `rdx` binary embedding wasmtime | Runs plans from the command line; the agents' code-mode entrypoint. |
 
 The native host binaries (`rdx`, the Cloud Run service) are thin Rust shells around wasmtime: they

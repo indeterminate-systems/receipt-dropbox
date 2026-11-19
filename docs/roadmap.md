@@ -19,9 +19,29 @@ green.
 | 10 | **Typst rendering** | Typst compiled into the core, a statement template fed only from elided envelope data: "Personal, redacted" rows, opening and closing balances, total redacted, root digest, UR/QR | `publish-redacted-statement` | 7 |
 | 11 | **OCR fallback** | Pure-Rust OCR (for example `ocrs`) behind the `ocr` capability, used when a PDF has no text layer | adds a step to `ingest-statement` | 4 |
 | 12 | **Audit trail and grants** | Append-only audit log linking ledger entries and viewable rows to receipts and encrypted originals; uploader-granted access to an original for an accountant | `grant-original`, `audit-trail` | 7, 9 |
-| 13 | **Email intake on Cloudflare** | Allowlist and SPF/DKIM/DMARC checks, encrypt-on-arrival to sender keys, quarantine key with expiry, one rate-limited verification reply, expiry cleanup; a `workers-rs` host with R2 and KV | `triage-quarantine` | 2, 8 |
+| 13 | **Email intake on Cloudflare** | Allowlist and SPF/DKIM/DMARC checks, encrypt-on-arrival to sender keys, quarantine key with expiry, one rate-limited verification reply, expiry cleanup; a `workers-rs` host with R2 and KV. Email Routing hands the message to the Worker in memory, so plaintext never rests anywhere. (A hosted inbox such as AgentMail was considered: it stores messages in plaintext by default, which breaks "plaintext discarded"; it could be a later `intake-adapter` if deletion is shown to purge attachments.) | `triage-quarantine` | 2, 8 |
 | 14 | **PWA** | Leptos client-side app in Rust: passkey unlock, OPFS storage, upload folder, match review, publishing, accountant view; installable and offline | – (people use it; agents use skills) | 2, 8; integrates 4 to 10 |
-| 15 | **Google deployment** | Cloud Run service embedding wasmtime, Gmail push through Pub/Sub, Drive folders as intake and blob store | reuses `triage-quarantine` | 13 |
+
+## Later (not scheduled)
+
+| Piece | Delivers | Depends on |
+| :-- | :-- | :-- |
+| **Google deployment** | Cloud Run service embedding wasmtime, Gmail push through Pub/Sub, Drive folders as intake and blob store. Deferred: no Google Cloud account yet. The host layer (piece 2) keeps it possible. | 13 |
+
+## Test corpora
+
+Public synthetic datasets on Hugging Face supplement the generated fixtures (piece 3). They are
+fetched at a pinned revision by a test-only command, never committed, and only permissively
+licensed ones are used:
+
+| Dataset | License | Used by |
+| :-- | :-- | :-- |
+| [Bankstatemently/bank-statement-parsing-benchmark](https://hf.co/datasets/Bankstatemently/bank-statement-parsing-benchmark): synthetic statement PDFs, 12 countries, 8 languages (ground truth not published) | MIT | 4 |
+| [drew-ipp/invoice-extraction-benchmark](https://hf.co/datasets/drew-ipp/invoice-extraction-benchmark): 181 synthetic invoices with answer keys | CC-BY-4.0 | 5 |
+| [Voxel51/scanned_receipts](https://hf.co/datasets/Voxel51/scanned_receipts) (SROIE), [Voxel51/consolidated_receipt_dataset](https://hf.co/datasets/Voxel51/consolidated_receipt_dataset) (CORD): scanned receipts with labels | CC-BY-4.0 | 5, 11 |
+
+None of them pairs statements with their receipts, so the matching tests (6, 9) rely on piece 3's
+generator.
 
 ## Order
 
@@ -30,7 +50,6 @@ wave 1 (now, in parallel):   1   2   3
 wave 2:                      4   5   6   7
 wave 3:                      8   9   10  11
 wave 4:                      12  13  14
-wave 5:                      15
 ```
 
 Pieces in a wave don't depend on each other. Within a wave, start with the piece most others wait
