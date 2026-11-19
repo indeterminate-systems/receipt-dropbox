@@ -1,0 +1,19 @@
+[package]
+name = "rdx-plan"
+version = "0.1.0"
+description = "Receipt Dropbox plans: the typed code-mode entrypoint, its validation and executor"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[features]
+default = ["nickel"]
+# Evaluate `.ncl` plans with nickel-embed. Without it, plans are accepted as JSON only.
+nickel = ["dep:nickel-embed"]
+
+[dependencies]
+nickel-embed = { workspace = true, optional = true }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true

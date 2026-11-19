@@ -1,0 +1,36 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [
+      "plan smoke test on local"
+    ],
+    "ok": true,
+    "plan_digest": "sha256:052ad8ae85da7b110a8ed144f3f9e3f62e74626f9c537a64a27957149e3452b2",
+    "skill": "plan-smoke-test",
+    "steps": [
+      {
+        "id": "hello",
+        "op": "core.note",
+        "output": {
+          "message": "plan smoke test on local"
+        },
+        "output_digest": "sha256:c32487859db064667fdd003ad63bf4f8c3b94045db38d066665a4711f7ee9882",
+        "status": "done"
+      },
+      {
+        "id": "linked",
+        "op": "core.digest",
+        "output": "sha256:c32487859db064667fdd003ad63bf4f8c3b94045db38d066665a4711f7ee9882",
+        "output_digest": "sha256:40c3e56e42d34a830bbfd627964ae6c3c68d57cca20294c89f295edb5ee315d0",
+        "status": "done"
+      },
+      {
+        "op": "core.digest",
+        "output": "sha256:23b8c8f8ee0b75ad58fcf600230f0352ea1ff8da5c57d06effd43217bc787612",
+        "output_digest": "sha256:9ae22372f874e4187a48c37634c689c7659af9471719833777da2bcbb5e5ced8",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {}
+}

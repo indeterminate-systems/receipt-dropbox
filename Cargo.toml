@@ -1,0 +1,17 @@
+[workspace]
+resolver = "3"
+members = ["crates/*", "xtask"]
+
+[workspace.package]
+edition = "2024"
+license = "Apache-2.0"
+rust-version = "1.90"
+
+[workspace.dependencies]
+# nickel-embed breaks with nickel-lang-core's minor releases, so it is pinned to a commit and
+# bumped deliberately.
+nickel-embed = { git = "https://github.com/costacombat/rust-nickel", rev = "3a225ba18c235dfdcf738460438a23f8db8381bd" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+thiserror = "2"
