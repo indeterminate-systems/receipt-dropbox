@@ -23,7 +23,10 @@ elision. Read [docs/architecture.md](docs/architecture.md) before changing anyth
 
 | Command | What it does |
 | :-- | :-- |
+| `cargo xtask doctor` | checks the shell: Rust version, both wasm targets, wasmtime, wasm-bindgen (matching `Cargo.lock`), Nickel, Typst |
+| `cargo xtask ci` | everything CI runs, in CI's order; run it before pushing |
 | `cargo test` | all unit and integration tests, natively |
+| `cargo test -p <crate> --target wasm32-wasip2` | the same tests as WebAssembly, under wasmtime (runner in `.cargo/config.toml`) |
 | `cargo run -p rdx-cli -- run <skill> [--input FIELD=VALUE] [--execute]` | runs a skill's plan on the local host (dry run unless `--execute`); see `rdx --help` |
 | `cargo check -p <crate> --target wasm32-unknown-unknown` (and `wasm32-wasip2`) | the WebAssembly builds CI requires |
 | `cargo xtask check [SKILL…]` | validates skills against the Agent Skills spec and repo rules, evaluates each product skill's `scripts/main.ncl` and compares its dry-run reports with `tests/*.json` |
@@ -32,7 +35,12 @@ elision. Read [docs/architecture.md](docs/architecture.md) before changing anyth
 | `cargo xtask smoke-wasm` | builds `rdx` for `wasm32-wasip2` and runs `plan-smoke-test` with it under `wasmtime` |
 | `cargo fmt`, `cargo clippy --all-targets` | formatting and lints; CI runs both |
 
-The dev shell (`nix develop`, or `direnv allow`) provides the toolchain with both wasm targets.
+The dev shell (`nix develop`, or `direnv allow`) provides the toolchain with both wasm targets and
+every tool above; CI runs `nix develop --command cargo xtask ci`, so a green local run predicts a
+green CI. `nix flake check` builds the dev shell and checks the Nix formatting. The same shell is
+the `rust-wasm-nickel` template in
+[nix-dev-environment-templates](https://github.com/bahiamovementcenter/nix-dev-environment-templates);
+change both together.
 
 ## Layout
 

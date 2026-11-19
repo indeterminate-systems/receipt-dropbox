@@ -71,4 +71,4 @@ how to act on the report.
 Two development skills ship with the scaffold:
 
 - `skill-author`: stages 4 and 5, and the spec rules.
-- `op-author` (planned with the first op thread): stages 1 to 3.
+- `op-author`: stages 1 to 3.

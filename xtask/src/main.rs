@@ -1,18 +1,22 @@
-//! `cargo xtask check [SKILL…]`: validates Agent Skills against the spec and this repo's rules,
-//! evaluates each product skill's code-mode entrypoint and runs its test cases as dry runs.
+//! Repository tasks, in Rust:
 //!
-//! `UPDATE_GOLDEN=1 cargo xtask check` rewrites the expected reports instead of comparing them.
-//!
-//! `cargo xtask smoke-wasm`: builds `rdx` for `wasm32-wasip2` and runs the `plan-smoke-test`
-//! skill with it under `wasmtime`, so the core is exercised as WebAssembly, not only natively.
-//!
-//! `cargo xtask check-wit`: the host capabilities in `wit/rdx.wit` (world `core`) match the ones
-//! `rdx-host` implements (`rdx_host::WIT_CAPABILITIES`).
+//! - `cargo xtask check [SKILL…]`: validates Agent Skills against the spec and this repo's rules,
+//!   evaluates each product skill's code-mode entrypoint and runs its test cases as dry runs.
+//!   `UPDATE_GOLDEN=1 cargo xtask check` rewrites the expected reports instead of comparing them.
+//! - `cargo xtask check-wit`: the host capabilities in `wit/rdx.wit` (world `core`) match the
+//!   ones `rdx-host` implements (`rdx_host::WIT_CAPABILITIES`).
+//! - `cargo xtask smoke-wasm`: builds `rdx` for `wasm32-wasip2` and runs the `plan-smoke-test`
+//!   skill with it under `wasmtime`, so the core is exercised as WebAssembly, not only natively.
+//! - `cargo xtask doctor`: checks that the shell has the toolchain, wasm targets and tools.
+//! - `cargo xtask ci`: everything CI runs, in the same order, so a local run predicts CI.
 
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
+
+mod ci;
+mod doctor;
 
 use rdx_host::Host;
 use rdx_plan::{PlanSource, Registry, execute};
@@ -25,8 +29,16 @@ fn main() -> ExitCode {
         Some("check") => run_check(&args[1..]),
         Some("check-wit") => run_check_wit(),
         Some("smoke-wasm") => run_smoke_wasm(),
+        Some("doctor") => {
+            if doctor::run(&root()) {
+                ExitCode::SUCCESS
+            } else {
+                ExitCode::FAILURE
+            }
+        }
+        Some("ci") => ci::run(&root()),
         _ => {
-            eprintln!("usage: cargo xtask check [SKILL…] | check-wit | smoke-wasm");
+            eprintln!("usage: cargo xtask <check [SKILL…] | check-wit | smoke-wasm | doctor | ci>");
             ExitCode::from(2)
         }
     }
