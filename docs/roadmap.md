@@ -9,7 +9,7 @@ green.
 | :-- | :-- | :-- | :-- | :-- |
 | 1 | **Dev environment and CI** | `flake.nix` dev shell (Rust with both wasm targets, wasmtime, wasm-bindgen-cli, Nickel, Typst), a matching template in nix-dev-environment-templates, CI for tests, wasm builds and skill checks | `op-author` (dev) | – |
 | 2 | **Host layer and `rdx` CLI** | `rdx-host` capability traits mirrored in `wit/rdx.wit` (blob store, kv, clock, random, mail-out), a local host, `rdx run <skill> --input k=v [--execute]` as the code-mode entrypoint, run reports to an audit log | `plan-smoke-test` runs through `rdx` | – |
-| 3 | **Domain model and fixtures** | `rdx-model`: money in minor units with currency, statements, lines, balances, receipts, supporters, digests; a synthetic statement and receipt generator for tests | – | – |
+| 3 | **Domain model and fixtures** | `rdx-model`: money in minor units with currency, statements, lines, balances, receipts, supporters, digests; a synthetic statement and receipt generator for tests. Receipts carry an optional fiscal id (CFDI UUID, issuer and receiver RFC, payment form) and supporters a kind (employee, volunteer, contractor), so piece 15 doesn't reshape the model | – | – |
 | 4 | **Statement parsing** | PDF text-layer extraction in Rust, the `statement-parser` extension point, CSV and OFX parsers, one PDF layout, balance checks (opening + lines = closing) | `ingest-statement` | 2, 3 |
 | 5 | **Receipt and bill extraction** | Amount, date, merchant and reference from PDF, HTML and email bodies; the `receipt-extractor` extension point | `ingest-receipt` | 2, 3 |
 | 6 | **Matching engine** | Candidate generation and scoring, tolerances (amount, date window, merchant similarity) as Nickel policy, split and partial payments flagged for review | `reconcile-statement` (dry run: proposed matches) | 3 (fixtures from 4 and 5 help) |
@@ -21,6 +21,8 @@ green.
 | 12 | **Audit trail and grants** | Append-only audit log linking ledger entries and viewable rows to receipts and encrypted originals; uploader-granted access to an original for an accountant | `grant-original`, `audit-trail` | 7, 9 |
 | 13 | **Email intake on Cloudflare** | Allowlist and SPF/DKIM/DMARC checks, encrypt-on-arrival to sender keys, quarantine key with expiry, one rate-limited verification reply, expiry cleanup; a `workers-rs` host with R2 and KV. Email Routing hands the message to the Worker in memory, so plaintext never rests anywhere. (A hosted inbox such as AgentMail was considered: it stores messages in plaintext by default, which breaks "plaintext discarded"; it could be a later `intake-adapter` if deletion is shown to purge attachments.) | `triage-quarantine` | 2, 8 |
 | 14 | **PWA** | Leptos client-side app in Rust: passkey unlock, OPFS storage, upload folder, match review, publishing, accountant view; installable and offline | – (people use it; agents use skills) | 2, 8; integrates 4 to 10 |
+| 15 | **Fiscal proof and reimbursement claims** | [Compliance](compliance.md) R1 to R10: CFDI 4.0 XML capture and parsing, receptor checks against the organization's fiscal profile, SAT status and art. 69-B checks as a host capability (re-run at month close and before the annual return), CFDI ↔ statement line ↔ reimbursement transfer matching, cash and fuel flags, fiscal ledger metadata, claims with approval and deadlines, viáticos export for payroll, a US accountable-plan profile; thresholds as Nickel jurisdiction policy per fiscal year | `verify-cfdi`, `claim-reimbursement` | 3, 5, 6, 9 |
+| 16 | **Supporter data rights and retention** | [Compliance](compliance.md) R11 to R15: privacy notice and recorded consent (LFPDPPP), ARCO requests (export, correct, delete, object) from the PWA, partial and pre-redacted statement uploads, retention per document class with legal hold (delete originals, keep digests and redacted envelopes), worker-classification signals | `retention-sweep`, `handle-data-request` | 7, 8, 12 |
 
 ## Later (not scheduled)
 
@@ -49,8 +51,12 @@ generator.
 wave 1 (now, in parallel):   1   2   3
 wave 2:                      4   5   6   7
 wave 3:                      8   9   10  11
-wave 4:                      12  13  14
+wave 4:                      12  13  14  15
+wave 5:                      16
 ```
+
+Piece 15 is what makes a reimbursement hold up for tax (see [compliance](compliance.md)); the
+open questions listed there go to a contador before it ships.
 
 Pieces in a wave don't depend on each other. Within a wave, start with the piece most others wait
 on (2 before 4 and 5; 7 before 8 and 10).
