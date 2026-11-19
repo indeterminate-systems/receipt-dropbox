@@ -1,5 +1,5 @@
-// Receipt Dropbox interfaces. Draft: piece 2 of docs/roadmap.md turns this into the `rdx-host`
-// crate, and `cargo xtask check-wit` will keep the Rust traits and this file in step (ADR-0001).
+// Receipt Dropbox interfaces. Host capabilities mirror the traits in the `rdx-host` crate, and
+// `cargo xtask check-wit` keeps the two in step (ADR-0001): change both together.
 //
 // Host capabilities are imported by the core; extension interfaces are exported by extensions.
 // Values that cross the boundary as structured data use JSON text, matching plan arguments, until
@@ -42,6 +42,14 @@ interface mail-out {
         text: string,
     }
     send: func(msg: message) -> result<_, capability-error>;
+}
+
+interface audit-log {
+    use types.{capability-error};
+    /// Appends one line (a run's audit entry, canonical JSON).
+    append: func(line: string) -> result<_, capability-error>;
+    /// The most recent line, which the next entry chains to.
+    last: func() -> result<option<string>, capability-error>;
 }
 
 // Clock and randomness come from WASI (wasi:clocks, wasi:random) on component hosts and from the
@@ -96,4 +104,5 @@ world core {
     import blob-store;
     import kv;
     import mail-out;
+    import audit-log;
 }
