@@ -5,7 +5,7 @@
       "plan smoke test on cloudflare-staging"
     ],
     "ok": true,
-    "plan_digest": "sha256:be8ee860d84bf0b69a3f57427fb7882eb0441ea338d7d23474b837538e353bc9",
+    "plan_digest": "sha256:1d24b4c1721dde7d780b666cb40546f43732a1ff437724c3632df13ebb33398a",
     "skill": "plan-smoke-test",
     "steps": [
       {
@@ -29,6 +29,36 @@
         "output": "sha256:26197f6822e467698623e08e3aaa2c92245f7f048f3b4884e9bcb86027e4ec14",
         "output_digest": "sha256:891cad8eb0db4b63f0355a37e843a7b0a71c04d404d3e34225cce4a43708ef79",
         "status": "done"
+      },
+      {
+        "id": "now",
+        "op": "clock.now",
+        "output": {
+          "unix_ms": 1767225600000
+        },
+        "output_digest": "sha256:3408cd27c993147f16d68b4b2442c8c21600167caf7add02f1720629ad3e45ca",
+        "status": "done"
+      },
+      {
+        "id": "previous",
+        "op": "kv.get",
+        "output": null,
+        "output_digest": "sha256:74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+        "status": "done"
+      },
+      {
+        "args": {
+          "key": "plan-smoke-test/last-run",
+          "value": {
+            "at": {
+              "unix_ms": 1767225600000
+            },
+            "label": "cloudflare-staging",
+            "previous": null
+          }
+        },
+        "op": "kv.put",
+        "status": "skipped"
       }
     ]
   },

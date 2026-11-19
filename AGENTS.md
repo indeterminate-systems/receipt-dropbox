@@ -24,9 +24,12 @@ elision. Read [docs/architecture.md](docs/architecture.md) before changing anyth
 | Command | What it does |
 | :-- | :-- |
 | `cargo test` | all unit and integration tests, natively |
+| `cargo run -p rdx-cli -- run <skill> [--input FIELD=VALUE] [--execute]` | runs a skill's plan on the local host (dry run unless `--execute`); see `rdx --help` |
 | `cargo check -p <crate> --target wasm32-unknown-unknown` (and `wasm32-wasip2`) | the WebAssembly builds CI requires |
 | `cargo xtask check [SKILL…]` | validates skills against the Agent Skills spec and repo rules, evaluates each product skill's `scripts/main.ncl` and compares its dry-run reports with `tests/*.json` |
 | `UPDATE_GOLDEN=1 cargo xtask check <skill>` | accepts new golden reports (review the diff) |
+| `cargo xtask check-wit` | the capability interfaces in `wit/rdx.wit` match the `rdx-host` traits |
+| `cargo xtask smoke-wasm` | builds `rdx` for `wasm32-wasip2` and runs `plan-smoke-test` with it under `wasmtime` |
 | `cargo fmt`, `cargo clippy --all-targets` | formatting and lints; CI runs both |
 
 The dev shell (`nix develop`, or `direnv allow`) provides the toolchain with both wasm targets.
@@ -35,7 +38,9 @@ The dev shell (`nix develop`, or `direnv allow`) provides the toolchain with bot
 
 | Path | Contents |
 | :-- | :-- |
-| `crates/rdx-plan` | plans (code-mode entrypoint): types, validation, executor, Nickel loading |
+| `crates/rdx-host` | host capability traits (blob store, kv, mail-out, clock, random, audit log), in-memory and local (directory) implementations |
+| `crates/rdx-plan` | plans (code-mode entrypoint): types, validation, executor, built-in ops, audit chain, Nickel loading |
+| `crates/rdx-cli` | `rdx`, the local host: `rdx run <skill>`, `rdx audit verify` |
 | `nickel/rdx/api.ncl` | plan contracts and op constructors agents write against |
 | `wit/rdx.wit` | capability and extension interfaces (mirrors the Rust traits) |
 | `.agents/skills/` | Agent Skills; `.claude/skills` links here |
@@ -44,10 +49,13 @@ The dev shell (`nix develop`, or `direnv allow`) provides the toolchain with bot
 
 ## Code mode
 
-Agents act on the system by running a skill's `scripts/main.ncl`, which evaluates to a plan. Don't
+Agents act on the system by running a skill's `scripts/main.ncl`, which evaluates to a plan, with
+`rdx run <skill>`. Don't
 add one-off tools or scripts that bypass plans: add an op (Rust `Op` + constructor in `api.ncl`)
-and use it from a skill. Plans are dry runs unless `dry_run = false`; show the person the dry-run
-report before running anything with effects.
+and use it from a skill. `rdx run` always dry-runs unless given `--execute`: show the person the
+dry-run report (skipped steps list the arguments they would use) before running anything with
+effects. An op that touches the outside world declares the capabilities it needs (`Op::needs`) and
+reaches them only through `RunContext::host`.
 
 ## Code style
 

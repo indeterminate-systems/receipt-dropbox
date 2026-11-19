@@ -58,5 +58,6 @@ dry run.
 
 1. [x] `rdx-plan`: plan types, reference checking, executor with dry run and plan digest.
 2. [x] `nickel/rdx/api.ncl`: `plan`, `Step`, reference contract and a `core.note` op.
-3. [ ] `rdx run` CLI as the local code-mode entrypoint.
+3. [x] `rdx run` CLI as the local code-mode entrypoint (`crates/rdx-cli`), with host capabilities
+   checked at validation and every run recorded in a hash-chained audit log.
 4. [ ] Structured diagnostics from `nickel-embed` surfaced in the run report.

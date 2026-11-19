@@ -34,6 +34,10 @@ Copy [`assets/template/`](assets/template/) to `.agents/skills/<name>/` and fill
 3. Write `scripts/main.ncl` until the plan evaluates, then read the report it prints. When it is
    what the goal needs, accept it with `UPDATE_GOLDEN=1 cargo xtask check <name>`.
 4. Review the golden diff like code: a changed `plan_digest` means the plan changed.
+5. Run it as an agent would: `cargo run -p rdx-cli -- run <name>` (dry run on the local host,
+   state in `.rdx/`). Golden cases run on an in-memory host with a fixed clock
+   (2026-01-01T00:00:00Z), seeded randomness and empty stores, so their reports never change
+   between machines.
 
 Add a case for each input that changes the plan's shape, and one per failure the `SKILL.md` body
 tells agents how to handle.

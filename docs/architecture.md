@@ -81,13 +81,17 @@ clock directly; those come through the capability traits in layer 2.
 
 ### 2. Capabilities (what a host provides)
 
-Defined once as Rust traits in `rdx-plan` (later `rdx-host`) and mirrored in [`wit/rdx.wit`](../wit/rdx.wit).
+Defined once as Rust traits in the `rdx-host` crate and mirrored in [`wit/rdx.wit`](../wit/rdx.wit);
+`cargo xtask check-wit` fails when the two drift apart. A host is an `rdx_host::Host`: one optional
+implementation per capability. Each op declares the capabilities it needs (`Op::needs`), so a plan
+that needs one the host lacks is rejected before any step runs. Every run is appended to the
+host's audit log as a hash chain (`rdx_plan::run`, `rdx audit verify`).
 
 | Capability | PWA | Cloudflare | Google | Local |
 | :-- | :-- | :-- | :-- | :-- |
 | `blob-store` | OPFS | R2 | Drive | directory |
 | `kv` | IndexedDB | Workers KV / D1 | Firestore | SQLite or directory |
-| `mail-out` | none | Email Workers send | Gmail API | SMTP or print |
+| `mail-out` | none | Email Workers send | Gmail API | outbox directory (never sent) |
 | `clock`, `random` | Web APIs | Workers runtime | WASI | WASI |
 | `secrets` | WebAuthn PRF unwrap | none (encrypt only) | none (encrypt only) | passkey or OS keychain |
 | `ocr` | Tesseract WASM | not offered | not offered | Tesseract WASM under wasmtime |
@@ -121,10 +125,13 @@ same names, so the crate can be built two ways:
 | PWA | Rust UI (Leptos, client-side rendering) + core, `wasm32-unknown-unknown` via `wasm-bindgen` | WebAuthn PRF through `web-sys`; OPFS storage; Typst and Tesseract run in the page. The service worker is generated, not hand-written. |
 | Cloudflare | `worker` crate (`workers-rs`) | Email Routing hands mail to the Worker; encrypt on arrival to the sender's public keys from KV, store in R2, discard plaintext. |
 | Google (later) | Cloud Run service embedding wasmtime | Gmail push notifications through Pub/Sub; Drive folders as intake and blob store. Not scheduled; see the roadmap. |
-| Local | `rdx` binary embedding wasmtime | Runs plans from the command line; the agents' code-mode entrypoint. |
+| Local | `rdx` (crate `rdx-cli`), built natively and as `rdx.wasm`, a WASI command that `wasmtime run` executes | Runs plans from the command line; the agents' code-mode entrypoint. State (blobs, kv, outbox, `audit.jsonl`) lives in `.rdx/`. `cargo xtask smoke-wasm` runs the smoke-test skill through `rdx.wasm` in CI. |
 
-The native host binaries (`rdx`, the Cloud Run service) are thin Rust shells around wasmtime: they
-contain no domain logic, so the behaviour under test is always the WebAssembly core.
+The local host is itself a WebAssembly program: `rdx` compiles to `wasm32-wasip2` and runs under
+stock `wasmtime`, with its state directory as a WASI preopen, so the behaviour under test is the
+WebAssembly core. The native build of the same source is a development convenience. A host that
+embeds wasmtime as a library (the Cloud Run service, or `rdx` once it loads component extensions)
+is added with the first extension built as a component; until then, nothing needs it.
 
 ## Code mode: plans
 
