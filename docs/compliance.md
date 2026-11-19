@@ -45,6 +45,26 @@ changes.
 Every figure in this table (the $2,000 threshold, the 5% cap, regime rules) is to be confirmed by
 a contador for the fiscal year, and lives in Nickel policy rather than code.
 
+Notes on `individual`, including an owner with employees:
+
+- A persona física who runs business activity and has employees is still `individual`: the
+  "business" is legally that person (*persona física con actividad empresarial*), and no separate
+  entity is needed. The app keeps the business as its own set of books (its own ledger and
+  accounts) under the owner's RFC, apart from the owner's personal spending.
+- **Employees are supporters,** like volunteers: they pay, upload and are reimbursed the same way.
+  A CFDI for an employee's expense must name the owner's RFC, not the employee's, or the owner
+  can't deduct it. Reimbursements must match real expenses one for one; regular or round amounts
+  without CFDIs look like hidden salary (R15).
+- Having employees brings employer obligations (IMSS registration, CFDI de nómina, ISR withholding,
+  INFONAVIT, the state payroll tax). **Payroll is out of scope:** the app only exports viáticos data
+  for whoever runs payroll (R8).
+- The policy carries a **`sat-registered`** flag. When the owner is not registered with the SAT
+  for the activity, the app behaves like `informal-group` day to day (the receipt is the proof,
+  nothing is filed) and shows a standing warning that CFDIs to the owner's RFC aren't possible
+  yet and that unregistered business activity with employees is a compliance risk for the owner.
+  Turning the flag on switches the owner to full `individual` rules from that fiscal year on.
+  This case in particular needs a contador (open question 10).
+
 Notes on `informal-group`:
 
 - A supporter who is a taxpayer may want the CFDI in their own name for their own records; the
@@ -189,7 +209,9 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
   - `donataria-autorizada`: as `nonprofit`, plus donation receipts, the administration/mission
     `class` as required metadata with the cap tracked, and data for the transparency report.
   - `individual`: all of them, checked against the person's RFC and regime; claims from the owner
-    to themself are skipped (there is no one to reimburse).
+    to themself are skipped (there is no one to reimburse), employees' claims go through as
+    supporters'. With `sat-registered = false` it applies the `informal-group` rules below and
+    raises the unregistered-activity warning on every run.
   - `informal-group`: R1 and R2 become optional (a CFDI is accepted and whose RFC it names is
     recorded, never required), R3 runs only on CFDIs that are present, and R4 and R6 key on the
     receipt instead of the CFDI.
@@ -265,6 +287,9 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
    name, and how are the sponsor's and the group's records kept apart?
 9. For an **individual** acting as the organization: which of their regime's rules (RESICO or
    *actividad empresarial*) limit what supporters' reimbursed expenses can be deducted?
+10. For a persona física with **employees who is not registered** with the SAT for that activity:
+    what must they do to regularize (RFC activity, IMSS, payroll), and can expenses from before
+    registration be supported retroactively?
 
 ## Sources
 
