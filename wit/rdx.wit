@@ -1,0 +1,99 @@
+// Receipt Dropbox interfaces. Draft: piece 2 of docs/roadmap.md turns this into the `rdx-host`
+// crate, and `cargo xtask check-wit` will keep the Rust traits and this file in step (ADR-0001).
+//
+// Host capabilities are imported by the core; extension interfaces are exported by extensions.
+// Values that cross the boundary as structured data use JSON text, matching plan arguments, until
+// the domain model (piece 3) settles.
+package rdx:core@0.1.0;
+
+interface types {
+    /// `sha256:<hex>`
+    type digest = string;
+    /// JSON text.
+    type json = string;
+
+    record capability-error {
+        message: string,
+    }
+}
+
+// ---- Host capabilities ----
+
+interface blob-store {
+    use types.{digest, capability-error};
+    /// Stores ciphertext; returns its digest, which is also its address.
+    put: func(bytes: list<u8>) -> result<digest, capability-error>;
+    get: func(id: digest) -> result<option<list<u8>>, capability-error>;
+    delete: func(id: digest) -> result<_, capability-error>;
+}
+
+interface kv {
+    use types.{capability-error};
+    get: func(key: string) -> result<option<list<u8>>, capability-error>;
+    put: func(key: string, value: list<u8>) -> result<_, capability-error>;
+    delete: func(key: string) -> result<_, capability-error>;
+}
+
+interface mail-out {
+    use types.{capability-error};
+    record message {
+        to: string,
+        subject: string,
+        text: string,
+    }
+    send: func(msg: message) -> result<_, capability-error>;
+}
+
+// Clock and randomness come from WASI (wasi:clocks, wasi:random) on component hosts and from the
+// host runtime on statically linked builds.
+
+// ---- Extension interfaces ----
+
+interface statement-parser {
+    use types.{json, capability-error};
+    /// Whether this parser recognises the document (by text and file name).
+    detect: func(text: string, file-name: string) -> bool;
+    /// Statement as JSON: lines, opening and closing balances, period, currency.
+    parse: func(text: string) -> result<json, capability-error>;
+}
+
+interface receipt-extractor {
+    use types.{json, capability-error};
+    detect: func(text: string, media-type: string) -> bool;
+    extract: func(text: string, media-type: string) -> result<json, capability-error>;
+}
+
+interface match-strategy {
+    use types.{json, capability-error};
+    /// Proposed matches for statement lines and receipts under a policy, all as JSON.
+    propose: func(lines: json, receipts: json, policy: json) -> result<json, capability-error>;
+}
+
+interface ledger-writer {
+    use types.{json, capability-error};
+    /// Ledger text for matched transactions, with audit metadata.
+    write: func(matches: json) -> result<string, capability-error>;
+}
+
+world statement-parser-ext {
+    export statement-parser;
+}
+
+world receipt-extractor-ext {
+    export receipt-extractor;
+}
+
+world match-strategy-ext {
+    export match-strategy;
+}
+
+world ledger-writer-ext {
+    export ledger-writer;
+}
+
+/// The core as a component: imports host capabilities.
+world core {
+    import blob-store;
+    import kv;
+    import mail-out;
+}

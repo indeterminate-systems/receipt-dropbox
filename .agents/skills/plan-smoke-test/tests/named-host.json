@@ -1,0 +1,38 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [
+      "plan smoke test on cloudflare-staging"
+    ],
+    "ok": true,
+    "plan_digest": "sha256:be8ee860d84bf0b69a3f57427fb7882eb0441ea338d7d23474b837538e353bc9",
+    "skill": "plan-smoke-test",
+    "steps": [
+      {
+        "id": "hello",
+        "op": "core.note",
+        "output": {
+          "message": "plan smoke test on cloudflare-staging"
+        },
+        "output_digest": "sha256:521cc857736f0035c17a116e800912e961da91a7387a1fd1798a6adc3045d879",
+        "status": "done"
+      },
+      {
+        "id": "linked",
+        "op": "core.digest",
+        "output": "sha256:521cc857736f0035c17a116e800912e961da91a7387a1fd1798a6adc3045d879",
+        "output_digest": "sha256:95a87a5f23deca445b33c182aa7c1a1d719df1ecb5530bc7f5ba2a058ae39451",
+        "status": "done"
+      },
+      {
+        "op": "core.digest",
+        "output": "sha256:26197f6822e467698623e08e3aaa2c92245f7f048f3b4884e9bcb86027e4ec14",
+        "output_digest": "sha256:891cad8eb0db4b63f0355a37e843a7b0a71c04d404d3e34225cce4a43708ef79",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "host": "\"cloudflare-staging\""
+  }
+}

@@ -1,0 +1,13 @@
+[package]
+name = "xtask"
+version = "0.0.0"
+description = "Repository checks, written in Rust: `cargo xtask check`"
+publish = false
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+rdx-plan = { path = "../crates/rdx-plan" }
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml = "0.9"
