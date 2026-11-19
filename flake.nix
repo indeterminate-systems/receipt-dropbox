@@ -64,8 +64,11 @@
               wasmtime
               wasm-tools
               wasm-bindgen-cli
-              # Nickel CLI for trying plans by hand; the core embeds its own via nickel-embed.
+              # Nickel CLI and language server for writing plans and contracts; the core embeds
+              # its own interpreter through nickel-embed.
               nickel
+              nls
+              # Renders viewable statements (piece 10); the core will embed it as a crate.
               typst
               self.formatter.${system}
             ];
@@ -76,5 +79,18 @@
       );
 
       formatter = forEachSupportedSystem ({ pkgs, ... }: pkgs.nixfmt);
+
+      # `nix flake check`: the dev shell builds, and the Nix is formatted. Cargo's checks run
+      # inside the shell (`cargo xtask ci`), where they can reach crates.io and git.
+      checks = forEachSupportedSystem (
+        { pkgs, system }:
+        {
+          devShell = self.devShells.${system}.default;
+          formatting = pkgs.runCommand "nixfmt-check" { } ''
+            ${pkgs.nixfmt}/bin/nixfmt --check ${./flake.nix}
+            touch $out
+          '';
+        }
+      );
     };
 }
