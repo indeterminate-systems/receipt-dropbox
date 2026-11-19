@@ -11,8 +11,10 @@ what it means for the product, and the other legal points raised alongside it.
 
 ## The short answer
 
-- **Mexico:** the proof of an expense is a **CFDI issued to the organization's RFC**, not a receipt
-  and not a bank statement line. The supporter's statement line is evidence that the payment
+- **It depends on the organization.** A group with no RFC can't receive CFDIs, so what counts as
+  proof is a per-organization **proof policy** (five kinds, [below](#it-depends-on-what-kind-of-organization-it-is)).
+- **Mexico, organization with an RFC:** the proof of an expense is a **CFDI issued to the
+  organization's RFC**, not a receipt and not a bank statement line. The supporter's statement line is evidence that the payment
   happened and how; the CFDI is what makes it a valid expense. Payments over $2,000 MXN must be made
   by bank transfer, nominative cheque, card or e-wallet, never cash (fuel: never cash at any
   amount). The reimbursement to the supporter should go by transfer from the organization's own
@@ -22,6 +24,47 @@ what it means for the product, and the other legal points raised alongside it.
 - **US:** reimbursements are tax-free to the payee only under an **accountable plan**: business
   connection, substantiation within a reasonable time (amount, date, place, business purpose, with
   receipts for lodging and anything $75 or more) and return of any excess.
+
+## It depends on what kind of organization it is
+
+Everything about CFDIs below assumes the organization has its own RFC, because a CFDI can only be
+issued to a taxpayer that exists. Not every group that reimburses supporters does. So the
+organization's **proof policy** is a setting, chosen at setup and changeable per fiscal year, and
+it decides what counts as proof of an expense. Matching, redaction, the ledger and the audit trail
+are the same under every policy; only what a matched expense needs before it is "supported"
+changes.
+
+| Proof policy | Who it is for | Proof of an expense | What else applies |
+| :-- | :-- | :-- | :-- |
+| `company` | A for-profit company with its own RFC (S.A., S. de R.L., S.A.S.) | A CFDI issued to the company's RFC with the right *UsoCFDI* (sections 1 to 7). A receipt alone is not deductible | LISR art. 27 fr. III payment rules (over $2,000 MXN by card or transfer, never cash); electronic accounting, monthly and annual returns |
+| `nonprofit` | A non-profit with legal standing (A.C., I.A.P.) that is not a donataria autorizada | As `company`: a CFDI to the organization's RFC | Electronic accounting and the annual informative return for non-profits; an unsupported expense, or one outside the organization's purpose, is *remanente distribuible* and taxed (section 5) |
+| `donataria-autorizada` | A non-profit authorized by the SAT to issue deductible donation receipts | As `nonprofit` | Everything in `nonprofit`, plus CFDI de donativos for donations received, the administration cap (about 5% of donations, to confirm) with administration and mission spending kept apart in the ledger, and the annual SAT transparency report (section 5) |
+| `individual` | A persona física acting as the organization: freelancer, sole trader, RESICO | A CFDI issued to that person's RFC | The person's own regime decides what is deductible (RESICO, for example, deducts little or nothing; to confirm). "Personal" versus "organization" spending is the owner's choice, not a legal boundary, so redaction protects privacy rather than separating two taxpayers. Supporters other than the owner are reimbursed against CFDIs to the owner's RFC |
+| `informal-group` | A collective, club or volunteer team with no RFC of its own | The receipt or bill itself; or a CFDI issued to the supporter's own RFC or to *público en general* (RFC XAXX010101000) | No SAT deductibility, no CFDI de donativos and no SAT filings by the group. The ledger is for internal accountability to members and funders, so the redacted, verifiable statements carry more of the weight |
+
+Every figure in this table (the $2,000 threshold, the 5% cap, regime rules) is to be confirmed by
+a contador for the fiscal year, and lives in Nickel policy rather than code.
+
+Notes on `informal-group`:
+
+- A supporter who is a taxpayer may want the CFDI in their own name for their own records; the
+  app accepts it as proof but records whose RFC it names, so nobody later mistakes it for an
+  organization expense.
+- With no CFDI to key on, matching relies on the receipt's amount, date and merchant (pieces 5 and
+  6), and the statement line becomes the main evidence that the supporter paid. Statements are
+  therefore less optional than under the other policies (compare R13).
+- Retention is the group's own rule (and any funder's), not CFF art. 30. Five years is a sensible
+  default.
+- If the group later incorporates and gets an RFC, it switches policy from that fiscal year on;
+  earlier years keep the policy they were booked under.
+- A funder or grant may impose its own proof rules on an informal group (for example, CFDIs to a
+  fiscal sponsor's RFC). That is a fiscal sponsor arrangement: the sponsor's RFC goes in the
+  organization's fiscal profile and the sponsor's policy (usually `nonprofit` or
+  `donataria-autorizada`) applies to those expenses (open
+  question 8).
+
+The rest of the Mexico section applies to `company`, `nonprofit` and `donataria-autorizada`, and to
+`individual` with the person's RFC in place of the organization's.
 
 ## Mexico
 
@@ -138,6 +181,19 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
 
 ### Fiscal proof (piece 15)
 
+- **R0.** A per-organization **proof policy** (`company`, `nonprofit`, `donataria-autorizada`,
+  `individual`, `informal-group`; see [above](#it-depends-on-what-kind-of-organization-it-is)) in
+  Nickel, per fiscal year. It selects which of R1 to R10 apply:
+  - `company`, `nonprofit`: all of them; `nonprofit` adds the purpose check (an expense outside the
+    organization's purpose is flagged as *remanente distribuible*).
+  - `donataria-autorizada`: as `nonprofit`, plus donation receipts, the administration/mission
+    `class` as required metadata with the cap tracked, and data for the transparency report.
+  - `individual`: all of them, checked against the person's RFC and regime; claims from the owner
+    to themself are skipped (there is no one to reimburse).
+  - `informal-group`: R1 and R2 become optional (a CFDI is accepted and whose RFC it names is
+    recorded, never required), R3 runs only on CFDIs that are present, and R4 and R6 key on the
+    receipt instead of the CFDI.
+  R5 and R7 apply to every policy.
 - **R1.** Capture CFDI **XML** (from upload, email or a supporter's SAT download), not only the PDF:
   the XML is the legal document. Parse CFDI 4.0, including the Pagos and *erogaciones a través de
   terceros* complements.
@@ -193,8 +249,9 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
 1. When a supporter pays an organization expense over $2,000 with their **personal card** and the
    CFDI names the organization, is it deductible (or, for a donataria, not *remanente
    distribuible*), given LISR art. 27 fr. III?
-2. Is the organization a **donataria autorizada**, and which regime and *UsoCFDI* should supporters
-   ask for at the till?
+2. Which **proof policy** fits the organization: does it have its own RFC, is it a **donataria
+   autorizada**, and which regime and *UsoCFDI* should supporters ask for at the till? If it has
+   no RFC, is a receipt or a CFDI to *público en general* enough for its funders?
 3. Can a supporter's **waived reimbursement** be receipted as a donation, or must it be paid and
    donated back?
 4. Do **volunteers'** reimbursements need any CFDI or contract beyond the expense CFDIs?
@@ -204,6 +261,10 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
    processing agreement with whoever hosts the Cloudflare deployment?
 7. For a **US** entity or US supporters: which plan method (fixed date or periodic statement) and
    which forms apply to contractors' reimbursements?
+8. For an **informal group** funded through a grant: does a fiscal sponsor need the CFDIs in its
+   name, and how are the sponsor's and the group's records kept apart?
+9. For an **individual** acting as the organization: which of their regime's rules (RESICO or
+   *actividad empresarial*) limit what supporters' reimbursed expenses can be deducted?
 
 ## Sources
 
