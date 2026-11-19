@@ -31,6 +31,7 @@ jobs:
             cargo check -p rdx-plan --target "$target" --no-default-features
             cargo check -p rdx-host --target "$target" --all-features
             cargo check -p rdx-cli --target "$target"
+            cargo check -p rdx-model --target "$target"
           done
       - name: Skills
         run: cargo xtask check
