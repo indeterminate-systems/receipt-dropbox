@@ -44,7 +44,10 @@ change both together.
 | Path | Contents |
 | :-- | :-- |
 | `crates/rdx-plan` | plans (code-mode entrypoint): types, validation, executor, Nickel loading |
+| `crates/rdx-model` | domain model (money, dates, statements, receipts, matches, ledger entries) and the synthetic data generator (`rdx_model::synth`) |
 | `nickel/rdx/api.ncl` | plan contracts and op constructors agents write against |
+| `nickel/rdx/model.ncl` | contracts for the domain model's JSON, for op contracts to reuse |
+| `fixtures/synthetic/` | generated fixtures; `UPDATE_GOLDEN=1 cargo test -p rdx-model --test fixtures` rewrites them |
 | `wit/rdx.wit` | capability and extension interfaces (mirrors the Rust traits) |
 | `.agents/skills/` | Agent Skills; `.claude/skills` links here |
 | `xtask/` | repo checks |
