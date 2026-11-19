@@ -62,6 +62,10 @@ let Server = {
   `std.contract.any_of [String, Number]` are handy built-ins.
 - Prefer `from_predicate` (yes/no) and `from_validator` (custom messages); `std.contract.custom`
   only for delayed or higher-order contracts.
+- `std.contract.Sequence [A, B]` is one contract that applies `A` then `B`, for a shape check
+  followed by a cross-field check (`nickel/rdx/model.ncl` uses it for balanced statements).
+- Records are recursive: in `let Money = {…} in { Money = Money }` the field refers to itself
+  (infinite recursion). Bind with another name (`MoneyC`) and export as `{ Money = MoneyC }`.
 - Errors report the blamed value's source location; `nickel-embed` exposes them as
   `Error::diagnostics()` (file, line, column, message), which `rdx-plan` passes through.
 
@@ -104,5 +108,13 @@ records such as `{ ref = "x" }`, as `api.ncl` does.
 ## In this repo
 
 - `nickel/rdx/api.ncl`: plan contracts and op constructors (the code-mode API).
+- `nickel/rdx/model.ncl`: contracts for the domain model's JSON (`Money`, `Statement`, `Receipt`,
+  `Match`, `Scenario`, …), for op constructors in `api.ncl` to reuse.
+- **Known bug (nickel-lang-core 0.19):** a record contract on data that came from
+  `import "x.json"` or `std.deserialize 'Json`, when the record has a nested record or array field,
+  panics (`value.is_constant()` in `eval/fixpoint.rs`). Repro:
+  `(std.deserialize 'Json m%"{"a":{"b":1}}"%) | { a }`. Until nickel-embed moves past it, pass
+  JSON data to Nickel as a Nickel literal (see `to_nickel` in
+  `crates/rdx-model/tests/fixtures.rs`) or through `PlanSource::input`.
 - `rdx_plan::PlanSource`: evaluates a skill's `scripts/main.ncl` with `nickel/` on the import path,
   sets inputs with `.input("field", "<nickel expr>")`, and returns a checked `Plan`.

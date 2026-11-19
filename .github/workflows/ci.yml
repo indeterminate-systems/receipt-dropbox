@@ -29,6 +29,7 @@ jobs:
           for target in wasm32-unknown-unknown wasm32-wasip2; do
             cargo check -p rdx-plan --target "$target"
             cargo check -p rdx-plan --target "$target" --no-default-features
+            cargo check -p rdx-model --target "$target"
           done
       - name: Skills
         run: cargo xtask check
