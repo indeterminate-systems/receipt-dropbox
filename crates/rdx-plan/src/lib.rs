@@ -7,6 +7,7 @@
 //! arrive as JSON.
 //!
 //! ```
+//! use rdx_host::Host;
 //! use rdx_plan::{Plan, Registry, execute};
 //!
 //! let plan: Plan = serde_json::from_str(r#"{
@@ -16,10 +17,11 @@
 //!     { "op": "core.digest", "args": { "value": { "ref": "hello" } } }
 //!   ]
 //! }"#).unwrap();
-//! let report = execute(&plan, &Registry::with_core()).unwrap();
+//! let report = execute(&plan, &Registry::with_core(), &mut Host::new()).unwrap();
 //! assert_eq!(report.steps.len(), 2);
 //! ```
 
+pub mod audit;
 mod canonical;
 mod exec;
 #[cfg(feature = "nickel")]
@@ -27,8 +29,11 @@ mod load;
 mod ops;
 mod plan;
 
+pub use audit::{AuditError, RunError, RunOutcome, run};
 pub use canonical::{canonical_json, digest};
 pub use exec::{Op, OpError, Registry, RunContext, RunReport, StepReport, StepStatus, execute};
 #[cfg(feature = "nickel")]
 pub use load::{LoadError, PlanSource};
 pub use plan::{Plan, PlanError, Step};
+/// Host capabilities, re-exported so ops and hosts agree on one version.
+pub use rdx_host;
