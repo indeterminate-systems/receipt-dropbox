@@ -1,0 +1,861 @@
+{
+  "config": {
+    "seed": 1,
+    "supporters": 2,
+    "months": 1,
+    "start": "2026-03-01",
+    "currency": "USD"
+  },
+  "supporters": [
+    {
+      "id": "s-0001",
+      "display_name": "Test Supporter 1"
+    },
+    {
+      "id": "s-0002",
+      "display_name": "Test Supporter 2"
+    }
+  ],
+  "statements": [
+    {
+      "id": "st-2026-03.s-0001",
+      "supporter": "s-0001",
+      "account": {
+        "institution": "Example Bank",
+        "mask": "0001"
+      },
+      "currency": "USD",
+      "period": {
+        "start": "2026-03-01",
+        "end": "2026-03-31"
+      },
+      "opening": {
+        "minor": 74455,
+        "currency": "USD"
+      },
+      "closing": {
+        "minor": 122128,
+        "currency": "USD"
+      },
+      "lines": [
+        {
+          "id": "l01",
+          "date": "2026-03-03",
+          "description": "LANTERN CAFE CATERING #7435",
+          "amount": {
+            "minor": -28974,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l02",
+          "date": "2026-03-11",
+          "description": "PAPERLEAF SUPPLY #4159",
+          "amount": {
+            "minor": -27989,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l03",
+          "date": "2026-03-13",
+          "description": "PAPERLEAF SUPPLY REFUND",
+          "amount": {
+            "minor": 25085,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l04",
+          "date": "2026-03-13",
+          "description": "BEANERY COFFEE #6892",
+          "amount": {
+            "minor": -1423,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l05",
+          "date": "2026-03-13",
+          "description": "STREAMVIEW SUBSCRIPTION #1537",
+          "amount": {
+            "minor": -3439,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l06",
+          "date": "2026-03-16",
+          "description": "METRO RIDESHARE TRIP #2030",
+          "amount": {
+            "minor": -2494,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l07",
+          "date": "2026-03-17",
+          "description": "CLEARWAVE TELECOM INV-920207",
+          "amount": {
+            "minor": -6209,
+            "currency": "USD"
+          },
+          "reference": "INV-920207"
+        },
+        {
+          "id": "l08",
+          "date": "2026-03-22",
+          "description": "FUEL STOP #7586",
+          "amount": {
+            "minor": -367,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l09",
+          "date": "2026-03-23",
+          "description": "METRO RIDESHARE TRIP #8927",
+          "amount": {
+            "minor": -23553,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l10",
+          "date": "2026-03-24",
+          "description": "CITY TRANSIT FARE #3279",
+          "amount": {
+            "minor": -10821,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l11",
+          "date": "2026-03-28",
+          "description": "CORNER GROCERY #8677",
+          "amount": {
+            "minor": -2429,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l12",
+          "date": "2026-03-28",
+          "description": "TRANSFER IN",
+          "amount": {
+            "minor": 130286,
+            "currency": "USD"
+          }
+        }
+      ],
+      "original": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86"
+    },
+    {
+      "id": "st-2026-03.s-0002",
+      "supporter": "s-0002",
+      "account": {
+        "institution": "Example Bank",
+        "mask": "0002"
+      },
+      "currency": "USD",
+      "period": {
+        "start": "2026-03-01",
+        "end": "2026-03-31"
+      },
+      "opening": {
+        "minor": 292536,
+        "currency": "USD"
+      },
+      "closing": {
+        "minor": 289470,
+        "currency": "USD"
+      },
+      "lines": [
+        {
+          "id": "l01",
+          "date": "2026-03-04",
+          "description": "CORNER GROCERY #4133",
+          "amount": {
+            "minor": -8582,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l02",
+          "date": "2026-03-05",
+          "description": "CINEMA PLAZA #2659",
+          "amount": {
+            "minor": -1357,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l03",
+          "date": "2026-03-08",
+          "description": "LANTERN CAFE CATERING #7019",
+          "amount": {
+            "minor": -9958,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l04",
+          "date": "2026-03-11",
+          "description": "CLEARWAVE TELECOM INV-004932",
+          "amount": {
+            "minor": -6020,
+            "currency": "USD"
+          },
+          "reference": "INV-004932"
+        },
+        {
+          "id": "l05",
+          "date": "2026-03-11",
+          "description": "TRANSFER IN",
+          "amount": {
+            "minor": 92967,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l06",
+          "date": "2026-03-16",
+          "description": "CINEMA PLAZA #3109",
+          "amount": {
+            "minor": -8203,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l07",
+          "date": "2026-03-19",
+          "description": "BRIGHTLINE PRINT #8286",
+          "amount": {
+            "minor": -26604,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l08",
+          "date": "2026-03-19",
+          "description": "METRO RIDESHARE TRIP #6439",
+          "amount": {
+            "minor": -2976,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l09",
+          "date": "2026-03-21",
+          "description": "METRO RIDESHARE TRIP #9055",
+          "amount": {
+            "minor": -28444,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l10",
+          "date": "2026-03-24",
+          "description": "METRO RIDESHARE TRIP REFUND",
+          "amount": {
+            "minor": 6607,
+            "currency": "USD"
+          }
+        },
+        {
+          "id": "l11",
+          "date": "2026-03-28",
+          "description": "CITY TRANSIT FARE #3403",
+          "amount": {
+            "minor": -10496,
+            "currency": "USD"
+          }
+        }
+      ],
+      "original": "sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c"
+    }
+  ],
+  "receipts": [
+    {
+      "id": "r-2026-03.s-0001.01",
+      "supporter": "s-0001",
+      "kind": "receipt",
+      "merchant": "Paperleaf Supply",
+      "date": "2026-03-10",
+      "total": {
+        "minor": 27989,
+        "currency": "USD"
+      },
+      "items": [
+        {
+          "description": "Items",
+          "amount": {
+            "minor": 25916,
+            "currency": "USD"
+          }
+        },
+        {
+          "description": "Sales tax",
+          "amount": {
+            "minor": 2073,
+            "currency": "USD"
+          }
+        }
+      ],
+      "source": "sha256:96a89262dba3fde56ec76923ba4d8ce22c0bb5dbc862c33935b334ca79e03edf"
+    },
+    {
+      "id": "r-2026-03.s-0001.02",
+      "supporter": "s-0001",
+      "kind": "receipt",
+      "merchant": "Metro Rideshare",
+      "date": "2026-03-21",
+      "total": {
+        "minor": 23553,
+        "currency": "USD"
+      },
+      "items": [
+        {
+          "description": "Items",
+          "amount": {
+            "minor": 21809,
+            "currency": "USD"
+          }
+        },
+        {
+          "description": "Sales tax",
+          "amount": {
+            "minor": 1744,
+            "currency": "USD"
+          }
+        }
+      ],
+      "source": "sha256:9e073a4e398ce697338b1e7fd32c36106a8805dc97b36cd49cf5cb09da868928"
+    },
+    {
+      "id": "r-2026-03.s-0001.03",
+      "supporter": "s-0001",
+      "kind": "receipt",
+      "merchant": "Lantern Cafe Catering",
+      "date": "2026-03-03",
+      "total": {
+        "minor": 28974,
+        "currency": "USD"
+      },
+      "items": [
+        {
+          "description": "Items",
+          "amount": {
+            "minor": 26828,
+            "currency": "USD"
+          }
+        },
+        {
+          "description": "Sales tax",
+          "amount": {
+            "minor": 2146,
+            "currency": "USD"
+          }
+        }
+      ],
+      "source": "sha256:545e8a660e04effac6192000501745f760d3e9f6cca918ae792c5025164d21f4"
+    },
+    {
+      "id": "r-2026-03.s-0001.04",
+      "supporter": "s-0001",
+      "kind": "bill",
+      "merchant": "Clearwave Telecom",
+      "date": "2026-03-07",
+      "total": {
+        "minor": 6209,
+        "currency": "USD"
+      },
+      "reference": "INV-920207",
+      "source": "sha256:3f9c48f461d8a787d84ded77915461b09d3c25da033abf99e1f065feef427d7f"
+    },
+    {
+      "id": "r-2026-03.s-0001.05",
+      "supporter": "s-0001",
+      "kind": "refund",
+      "merchant": "Paperleaf Supply",
+      "date": "2026-03-13",
+      "total": {
+        "minor": 25085,
+        "currency": "USD"
+      },
+      "source": "sha256:05f02af6ad4f9d8d82551c1ced8a40be5b643821ceb4b8689919e59df28c9c4b"
+    },
+    {
+      "id": "r-2026-03.s-0001.06",
+      "supporter": "s-0001",
+      "kind": "receipt",
+      "merchant": "Brightline Print Shop",
+      "date": "2026-03-08",
+      "total": {
+        "minor": 5627,
+        "currency": "USD"
+      },
+      "items": [
+        {
+          "description": "Items",
+          "amount": {
+            "minor": 5211,
+            "currency": "USD"
+          }
+        },
+        {
+          "description": "Sales tax",
+          "amount": {
+            "minor": 416,
+            "currency": "USD"
+          }
+        }
+      ],
+      "source": "sha256:44f7a4c44584a593c5a28421c78bb0d386bdaefcbb716f95f97907e3e601c553"
+    },
+    {
+      "id": "r-2026-03.s-0002.07",
+      "supporter": "s-0002",
+      "kind": "receipt",
+      "merchant": "Metro Rideshare",
+      "date": "2026-03-19",
+      "total": {
+        "minor": 28444,
+        "currency": "USD"
+      },
+      "items": [
+        {
+          "description": "Items",
+          "amount": {
+            "minor": 26338,
+            "currency": "USD"
+          }
+        },
+        {
+          "description": "Sales tax",
+          "amount": {
+            "minor": 2106,
+            "currency": "USD"
+          }
+        }
+      ],
+      "source": "sha256:fdc6328d173130b975a21863cf64590163e6f352a8b7affc329c240098895e59"
+    },
+    {
+      "id": "r-2026-03.s-0002.08",
+      "supporter": "s-0002",
+      "kind": "receipt",
+      "merchant": "Lantern Cafe Catering",
+      "date": "2026-03-05",
+      "total": {
+        "minor": 9958,
+        "currency": "USD"
+      },
+      "items": [
+        {
+          "description": "Items",
+          "amount": {
+            "minor": 9221,
+            "currency": "USD"
+          }
+        },
+        {
+          "description": "Sales tax",
+          "amount": {
+            "minor": 737,
+            "currency": "USD"
+          }
+        }
+      ],
+      "source": "sha256:ddfb32c72024bc14762804c3d886f2a671a8977b6da1ac144bb1221326330bad"
+    },
+    {
+      "id": "r-2026-03.s-0002.09",
+      "supporter": "s-0002",
+      "kind": "receipt",
+      "merchant": "Brightline Print Shop",
+      "date": "2026-03-18",
+      "total": {
+        "minor": 26604,
+        "currency": "USD"
+      },
+      "items": [
+        {
+          "description": "Items",
+          "amount": {
+            "minor": 24634,
+            "currency": "USD"
+          }
+        },
+        {
+          "description": "Sales tax",
+          "amount": {
+            "minor": 1970,
+            "currency": "USD"
+          }
+        }
+      ],
+      "source": "sha256:0baa634f0f9d26c539b003a4a722b5a708f9f967517e073422753362ea0f79f1"
+    },
+    {
+      "id": "r-2026-03.s-0002.10",
+      "supporter": "s-0002",
+      "kind": "bill",
+      "merchant": "Clearwave Telecom",
+      "date": "2026-03-03",
+      "total": {
+        "minor": 6020,
+        "currency": "USD"
+      },
+      "reference": "INV-004932",
+      "source": "sha256:5334b0a5fb64f95c8996476c038e83857ffa439efd28fd0cfd5aa84e2a5f60ba"
+    },
+    {
+      "id": "r-2026-03.s-0002.11",
+      "supporter": "s-0002",
+      "kind": "refund",
+      "merchant": "Metro Rideshare",
+      "date": "2026-03-24",
+      "total": {
+        "minor": 6607,
+        "currency": "USD"
+      },
+      "source": "sha256:668dca60634770912dd860e5de3f798173bf243d31b0f7d3d48568d2976fcdbb"
+    },
+    {
+      "id": "r-2026-03.s-0002.12",
+      "supporter": "s-0002",
+      "kind": "receipt",
+      "merchant": "Lantern Cafe Catering",
+      "date": "2026-03-05",
+      "total": {
+        "minor": 5485,
+        "currency": "USD"
+      },
+      "items": [
+        {
+          "description": "Items",
+          "amount": {
+            "minor": 5079,
+            "currency": "USD"
+          }
+        },
+        {
+          "description": "Sales tax",
+          "amount": {
+            "minor": 406,
+            "currency": "USD"
+          }
+        }
+      ],
+      "source": "sha256:77e71e8580d100ef0fac82be4fa2206d2685761216e4d0551bf7a3f34e9a42fb"
+    }
+  ],
+  "matches": [
+    {
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l01"
+      },
+      "receipt": "r-2026-03.s-0001.03",
+      "amount": {
+        "minor": 28974,
+        "currency": "USD"
+      },
+      "status": "confirmed"
+    },
+    {
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l02"
+      },
+      "receipt": "r-2026-03.s-0001.01",
+      "amount": {
+        "minor": 27989,
+        "currency": "USD"
+      },
+      "status": "confirmed"
+    },
+    {
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l03"
+      },
+      "receipt": "r-2026-03.s-0001.05",
+      "amount": {
+        "minor": 25085,
+        "currency": "USD"
+      },
+      "status": "confirmed"
+    },
+    {
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l07"
+      },
+      "receipt": "r-2026-03.s-0001.04",
+      "amount": {
+        "minor": 6209,
+        "currency": "USD"
+      },
+      "status": "confirmed"
+    },
+    {
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l09"
+      },
+      "receipt": "r-2026-03.s-0001.02",
+      "amount": {
+        "minor": 23553,
+        "currency": "USD"
+      },
+      "status": "confirmed"
+    },
+    {
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l03"
+      },
+      "receipt": "r-2026-03.s-0002.08",
+      "amount": {
+        "minor": 9958,
+        "currency": "USD"
+      },
+      "status": "confirmed"
+    },
+    {
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l04"
+      },
+      "receipt": "r-2026-03.s-0002.10",
+      "amount": {
+        "minor": 6020,
+        "currency": "USD"
+      },
+      "status": "confirmed"
+    },
+    {
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l07"
+      },
+      "receipt": "r-2026-03.s-0002.09",
+      "amount": {
+        "minor": 26604,
+        "currency": "USD"
+      },
+      "status": "confirmed"
+    },
+    {
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l09"
+      },
+      "receipt": "r-2026-03.s-0002.07",
+      "amount": {
+        "minor": 28444,
+        "currency": "USD"
+      },
+      "status": "confirmed"
+    },
+    {
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l10"
+      },
+      "receipt": "r-2026-03.s-0002.11",
+      "amount": {
+        "minor": 6607,
+        "currency": "USD"
+      },
+      "status": "confirmed"
+    }
+  ],
+  "accounts": {
+    "r-2026-03.s-0001.01": "Expenses:Office:Supplies",
+    "r-2026-03.s-0001.02": "Expenses:Travel:Local",
+    "r-2026-03.s-0001.03": "Expenses:Events:Catering",
+    "r-2026-03.s-0001.04": "Expenses:Utilities:Phone",
+    "r-2026-03.s-0001.05": "Expenses:Office:Supplies",
+    "r-2026-03.s-0002.07": "Expenses:Travel:Local",
+    "r-2026-03.s-0002.08": "Expenses:Events:Catering",
+    "r-2026-03.s-0002.09": "Expenses:Office:Printing",
+    "r-2026-03.s-0002.10": "Expenses:Utilities:Phone",
+    "r-2026-03.s-0002.11": "Expenses:Travel:Local"
+  },
+  "cases": [
+    {
+      "kind": "orphan_receipt",
+      "receipt": "r-2026-03.s-0001.06"
+    },
+    {
+      "kind": "date_lag",
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l02"
+      },
+      "receipt": "r-2026-03.s-0001.01"
+    },
+    {
+      "kind": "refund",
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l03"
+      },
+      "receipt": "r-2026-03.s-0001.05"
+    },
+    {
+      "kind": "personal",
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l04"
+      }
+    },
+    {
+      "kind": "personal",
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l05"
+      }
+    },
+    {
+      "kind": "missing_receipt",
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l06"
+      }
+    },
+    {
+      "kind": "bill_reference",
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l07"
+      },
+      "receipt": "r-2026-03.s-0001.04"
+    },
+    {
+      "kind": "personal",
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l08"
+      }
+    },
+    {
+      "kind": "date_lag",
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l09"
+      },
+      "receipt": "r-2026-03.s-0001.02"
+    },
+    {
+      "kind": "personal",
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l10"
+      }
+    },
+    {
+      "kind": "personal",
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l11"
+      }
+    },
+    {
+      "kind": "personal",
+      "line": {
+        "statement": "st-2026-03.s-0001",
+        "line": "l12"
+      }
+    },
+    {
+      "kind": "orphan_receipt",
+      "receipt": "r-2026-03.s-0002.12"
+    },
+    {
+      "kind": "personal",
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l01"
+      }
+    },
+    {
+      "kind": "personal",
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l02"
+      }
+    },
+    {
+      "kind": "date_lag",
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l03"
+      },
+      "receipt": "r-2026-03.s-0002.08"
+    },
+    {
+      "kind": "bill_reference",
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l04"
+      },
+      "receipt": "r-2026-03.s-0002.10"
+    },
+    {
+      "kind": "personal",
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l05"
+      }
+    },
+    {
+      "kind": "personal",
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l06"
+      }
+    },
+    {
+      "kind": "date_lag",
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l07"
+      },
+      "receipt": "r-2026-03.s-0002.09"
+    },
+    {
+      "kind": "missing_receipt",
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l08"
+      }
+    },
+    {
+      "kind": "date_lag",
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l09"
+      },
+      "receipt": "r-2026-03.s-0002.07"
+    },
+    {
+      "kind": "refund",
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l10"
+      },
+      "receipt": "r-2026-03.s-0002.11"
+    },
+    {
+      "kind": "personal",
+      "line": {
+        "statement": "st-2026-03.s-0002",
+        "line": "l11"
+      }
+    }
+  ]
+}

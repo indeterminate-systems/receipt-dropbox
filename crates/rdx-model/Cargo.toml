@@ -1,0 +1,18 @@
+[package]
+name = "rdx-model"
+version = "0.1.0"
+description = "Receipt Dropbox domain model: money, statements, receipts, matches, ledger entries, and a synthetic data generator"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+# Only for `digest`/`canonical_json`; plan loading (Nickel) isn't needed here.
+rdx-plan = { path = "../rdx-plan", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+nickel-embed.workspace = true
