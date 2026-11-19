@@ -2,12 +2,19 @@
 //! evaluates each product skill's code-mode entrypoint and runs its test cases as dry runs.
 //!
 //! `UPDATE_GOLDEN=1 cargo xtask check` rewrites the expected reports instead of comparing them.
+//!
+//! `cargo xtask smoke-wasm`: builds `rdx` for `wasm32-wasip2` and runs the `plan-smoke-test`
+//! skill with it under `wasmtime`, so the core is exercised as WebAssembly, not only natively.
+//!
+//! `cargo xtask check-wit`: the host capabilities in `wit/rdx.wit` (world `core`) match the ones
+//! `rdx-host` implements (`rdx_host::WIT_CAPABILITIES`).
 
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+use rdx_host::Host;
 use rdx_plan::{PlanSource, Registry, execute};
 use serde::Deserialize;
 use serde_json::Value;
@@ -16,8 +23,10 @@ fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
         Some("check") => run_check(&args[1..]),
+        Some("check-wit") => run_check_wit(),
+        Some("smoke-wasm") => run_smoke_wasm(),
         _ => {
-            eprintln!("usage: cargo xtask check [SKILL…]");
+            eprintln!("usage: cargo xtask check [SKILL…] | check-wit | smoke-wasm");
             ExitCode::from(2)
         }
     }
@@ -231,7 +240,9 @@ fn check_product_skill(root: &Path, dir: &Path, name: &str, report: &mut impl Fn
             fail("test cases must be dry runs".into());
             continue;
         }
-        let run = match execute(&plan, &Registry::with_core()) {
+        // A fresh in-memory host per case: fixed clock, seeded randomness, empty stores, so
+        // golden reports are reproducible and cases don't see each other's writes.
+        let run = match execute(&plan, &Registry::with_core(), &mut Host::memory()) {
             Ok(r) => serde_json::to_value(r).expect("reports serialize"),
             Err(e) => {
                 fail(e.to_string());
@@ -251,6 +262,161 @@ fn check_product_skill(root: &Path, dir: &Path, name: &str, report: &mut impl Fn
             ));
         }
     }
+}
+
+fn run_smoke_wasm() -> ExitCode {
+    use std::process::Command;
+
+    let root = root();
+    let cargo = std::env::var("CARGO").unwrap_or_else(|_| "cargo".into());
+    let built = Command::new(cargo)
+        .current_dir(&root)
+        .args([
+            "build",
+            "--release",
+            "-p",
+            "rdx-cli",
+            "--target",
+            "wasm32-wasip2",
+        ])
+        .status();
+    if !built.is_ok_and(|s| s.success()) {
+        eprintln!("FAIL building rdx for wasm32-wasip2");
+        return ExitCode::FAILURE;
+    }
+    let wasm = root.join("target/wasm32-wasip2/release/rdx.wasm");
+    let state = std::env::temp_dir().join(format!("rdx-smoke-wasm-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&state);
+    if let Err(e) = fs::create_dir_all(&state) {
+        eprintln!("FAIL {}: {e}", state.display());
+        return ExitCode::FAILURE;
+    }
+    let mut ok = true;
+    for execute in [false, true] {
+        let mut cmd = Command::new("wasmtime");
+        cmd.arg("run")
+            .arg("--dir")
+            .arg(format!("{}::/repo", root.display()))
+            .arg("--dir")
+            .arg(format!("{}::/state", state.display()))
+            .arg(&wasm)
+            .args([
+                "run",
+                "plan-smoke-test",
+                "--root",
+                "/repo",
+                "--state",
+                "/state",
+            ])
+            .args(["--input", r#"host="wasmtime""#]);
+        if execute {
+            cmd.arg("--execute");
+        }
+        let label = if execute { "execute" } else { "dry run" };
+        let out = match cmd.output() {
+            Ok(out) => out,
+            Err(e) => {
+                eprintln!("FAIL running wasmtime (is it installed?): {e}");
+                return ExitCode::FAILURE;
+            }
+        };
+        let report: Option<Value> = serde_json::from_slice(&out.stdout).ok();
+        let report_ok = report
+            .as_ref()
+            .is_some_and(|r| r["ok"] == true && r["dry_run"] == !execute);
+        if out.status.success() && report_ok {
+            println!("ok   rdx.wasm plan-smoke-test ({label})");
+        } else {
+            ok = false;
+            eprintln!(
+                "FAIL rdx.wasm plan-smoke-test ({label}): {}\n{}{}",
+                out.status,
+                String::from_utf8_lossy(&out.stdout),
+                String::from_utf8_lossy(&out.stderr)
+            );
+        }
+    }
+    let _ = fs::remove_dir_all(&state);
+    if ok {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::FAILURE
+    }
+}
+
+fn run_check_wit() -> ExitCode {
+    let path = root().join("wit/rdx.wit");
+    match wit_capabilities(&path) {
+        Err(e) => {
+            eprintln!("FAIL {}: {e}", path.display());
+            ExitCode::FAILURE
+        }
+        Ok(found) => {
+            let problems = compare_wit(&found, rdx_host::WIT_CAPABILITIES);
+            if problems.is_empty() {
+                println!("ok   wit/rdx.wit matches rdx-host");
+                ExitCode::SUCCESS
+            } else {
+                for p in problems {
+                    eprintln!("FAIL {p}");
+                }
+                ExitCode::FAILURE
+            }
+        }
+    }
+}
+
+/// Interfaces imported by world `core` that declare functions, with their function names.
+fn wit_capabilities(path: &Path) -> Result<BTreeMap<String, Vec<String>>, String> {
+    let mut resolve = wit_parser::Resolve::default();
+    resolve.push_file(path).map_err(|e| format!("{e:#}"))?;
+    let (_, world) = resolve
+        .worlds
+        .iter()
+        .find(|(_, w)| w.name == "core")
+        .ok_or("no world `core`")?;
+    let mut out = BTreeMap::new();
+    for item in world.imports.values() {
+        if let wit_parser::WorldItem::Interface { id, .. } = item {
+            let iface = &resolve.interfaces[*id];
+            if iface.functions.is_empty() {
+                continue;
+            }
+            let name = iface
+                .name
+                .clone()
+                .ok_or("inline interface in world `core`")?;
+            let mut funcs: Vec<String> = iface.functions.keys().cloned().collect();
+            funcs.sort();
+            out.insert(name, funcs);
+        }
+    }
+    Ok(out)
+}
+
+fn compare_wit(found: &BTreeMap<String, Vec<String>>, rust: &[(&str, &[&str])]) -> Vec<String> {
+    let mut problems = Vec::new();
+    for (iface, funcs) in rust {
+        let mut expected: Vec<String> = funcs.iter().map(|f| f.to_string()).collect();
+        expected.sort();
+        match found.get(*iface) {
+            None => problems.push(format!(
+                "rdx-host has `{iface}`, but world `core` in wit/rdx.wit does not import it"
+            )),
+            Some(actual) if *actual != expected => problems.push(format!(
+                "`{iface}`: wit/rdx.wit has {actual:?}, rdx-host has {expected:?}"
+            )),
+            Some(_) => {}
+        }
+    }
+    for iface in found.keys() {
+        if !rust.iter().any(|(name, _)| name == iface) {
+            problems.push(format!(
+                "world `core` imports `{iface}`, which rdx-host::WIT_CAPABILITIES does not list"
+            ));
+        }
+    }
+    problems
 }
 
 #[cfg(test)]
@@ -287,6 +453,28 @@ mod tests {
     #[test]
     fn name_must_match_directory() {
         assert!(!spec_problems(&fm("one"), "two", 10).is_empty());
+    }
+
+    #[test]
+    fn the_repo_wit_matches_rdx_host() {
+        let found = wit_capabilities(&root().join("wit/rdx.wit")).unwrap();
+        assert_eq!(
+            compare_wit(&found, rdx_host::WIT_CAPABILITIES),
+            Vec::<String>::new()
+        );
+    }
+
+    #[test]
+    fn wit_drift_is_reported() {
+        let found = BTreeMap::from([
+            ("kv".to_owned(), vec!["get".to_owned(), "put".to_owned()]),
+            ("extra".to_owned(), vec!["f".to_owned()]),
+        ]);
+        let problems = compare_wit(
+            &found,
+            &[("kv", &["get", "put", "delete"]), ("gone", &["x"])],
+        );
+        assert_eq!(problems.len(), 3, "{problems:?}");
     }
 
     #[test]

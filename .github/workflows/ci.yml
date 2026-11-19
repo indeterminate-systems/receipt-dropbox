@@ -29,6 +29,13 @@ jobs:
           for target in wasm32-unknown-unknown wasm32-wasip2; do
             cargo check -p rdx-plan --target "$target"
             cargo check -p rdx-plan --target "$target" --no-default-features
+            cargo check -p rdx-host --target "$target" --all-features
+            cargo check -p rdx-cli --target "$target"
           done
       - name: Skills
         run: cargo xtask check
+      - name: WIT matches rdx-host
+        run: cargo xtask check-wit
+      - uses: bytecodealliance/actions/wasmtime/setup@v1
+      - name: rdx as WebAssembly under wasmtime
+        run: cargo xtask smoke-wasm
