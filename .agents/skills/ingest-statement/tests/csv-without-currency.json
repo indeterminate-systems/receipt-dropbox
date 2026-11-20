@@ -1,0 +1,24 @@
+{
+  "documents": [
+    "fixtures/synthetic/small/statements/st-2026-03.s-0001.csv"
+  ],
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": false,
+    "plan_digest": "sha256:4300d2c57021e26d74483d721903fce230d572bbc624197879aea13fea60f1a7",
+    "skill": "ingest-statement",
+    "steps": [
+      {
+        "error": "sha256:fcf4210740ea00845954dc2e3f6fafa9e48c312c2d5492718c9e1e3112746dfd: currency is missing: the document doesn't say; pass `currency`, such as \"USD\"",
+        "id": "statement",
+        "op": "statement.parse",
+        "status": "failed"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "\"sha256:fcf4210740ea00845954dc2e3f6fafa9e48c312c2d5492718c9e1e3112746dfd\"",
+    "supporter": "\"s-0001\""
+  }
+}

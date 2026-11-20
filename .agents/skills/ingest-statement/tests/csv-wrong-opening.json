@@ -1,0 +1,25 @@
+{
+  "documents": [
+    "fixtures/synthetic/small/statements/st-2026-03.s-0001.csv"
+  ],
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": false,
+    "plan_digest": "sha256:cb1b9a8739a15b1d3dccee8f5b8225685071c455e4ca6d69cbee0d4e680711b1",
+    "skill": "ingest-statement",
+    "steps": [
+      {
+        "error": "sha256:fcf4210740ea00845954dc2e3f6fafa9e48c312c2d5492718c9e1e3112746dfd: row 2: printed balance 454.81 but the lines so far add up to 410.26; an amount or sign was misread, or a line is missing",
+        "id": "statement",
+        "op": "statement.parse",
+        "status": "failed"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "\"sha256:fcf4210740ea00845954dc2e3f6fafa9e48c312c2d5492718c9e1e3112746dfd\"",
+    "hints": "{ currency = \"USD\", account = { institution = \"Example Bank\", mask = \"0001\" }, opening = \"700.00\" }",
+    "supporter": "\"s-0001\""
+  }
+}

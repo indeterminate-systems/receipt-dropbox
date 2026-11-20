@@ -1,0 +1,133 @@
+{
+  "id": "st-2026-03.s-0001",
+  "supporter": "s-0001",
+  "account": {
+    "institution": "Example Bank",
+    "mask": "0001"
+  },
+  "currency": "USD",
+  "period": {
+    "start": "2026-03-01",
+    "end": "2026-03-31"
+  },
+  "opening": {
+    "minor": 74455,
+    "currency": "USD"
+  },
+  "closing": {
+    "minor": 122128,
+    "currency": "USD"
+  },
+  "lines": [
+    {
+      "id": "l01",
+      "date": "2026-03-03",
+      "description": "LANTERN CAFE CATERING #7435",
+      "amount": {
+        "minor": -28974,
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "l02",
+      "date": "2026-03-11",
+      "description": "PAPERLEAF SUPPLY #4159",
+      "amount": {
+        "minor": -27989,
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "l03",
+      "date": "2026-03-13",
+      "description": "PAPERLEAF SUPPLY REFUND",
+      "amount": {
+        "minor": 25085,
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "l04",
+      "date": "2026-03-13",
+      "description": "BEANERY COFFEE #6892",
+      "amount": {
+        "minor": -1423,
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "l05",
+      "date": "2026-03-13",
+      "description": "STREAMVIEW SUBSCRIPTION #1537",
+      "amount": {
+        "minor": -3439,
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "l06",
+      "date": "2026-03-16",
+      "description": "METRO RIDESHARE TRIP #2030",
+      "amount": {
+        "minor": -2494,
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "l07",
+      "date": "2026-03-17",
+      "description": "CLEARWAVE TELECOM INV-920207",
+      "amount": {
+        "minor": -6209,
+        "currency": "USD"
+      },
+      "reference": "INV-920207"
+    },
+    {
+      "id": "l08",
+      "date": "2026-03-22",
+      "description": "FUEL STOP #7586",
+      "amount": {
+        "minor": -367,
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "l09",
+      "date": "2026-03-23",
+      "description": "METRO RIDESHARE TRIP #8927",
+      "amount": {
+        "minor": -23553,
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "l10",
+      "date": "2026-03-24",
+      "description": "CITY TRANSIT FARE #3279",
+      "amount": {
+        "minor": -10821,
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "l11",
+      "date": "2026-03-28",
+      "description": "CORNER GROCERY #8677",
+      "amount": {
+        "minor": -2429,
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "l12",
+      "date": "2026-03-28",
+      "description": "TRANSFER IN",
+      "amount": {
+        "minor": 130286,
+        "currency": "USD"
+      }
+    }
+  ],
+  "original": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86"
+}
