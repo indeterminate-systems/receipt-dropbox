@@ -1454,9 +1454,9 @@ dependencies = [
 name = "xtask"
 version = "0.0.0"
 dependencies = [
+ "rdx-cli",
  "rdx-host",
  "rdx-plan",
- "rdx-receipt",
  "serde",
  "serde_json",
  "serde_yaml",

@@ -34,11 +34,12 @@ Exit status: 0 ok, 1 a step or the audit check failed, 2 the plan or command was
 before anything ran, 3 the run finished but could not be recorded.
 ";
 
-/// The ops this host offers: the built-in ones and each domain crate's.
+/// Every op this host offers: the built-in ones and each domain crate's. `cargo xtask check` runs
+/// skill tests with the same registry, so register a new domain's ops here once.
 pub fn registry() -> Registry {
-    let mut r = Registry::with_core();
-    rdx_receipt::register(&mut r);
-    r
+    let mut registry = Registry::with_core();
+    rdx_receipt::register(&mut registry);
+    registry
 }
 
 /// Runs the command line and returns the exit status.
