@@ -57,12 +57,16 @@ interface audit-log {
 
 // ---- Extension interfaces ----
 
+// A statement parser sees the document as JSON: `{ "text": "…" }` for CSV and OFX, or
+// `{ "pages": [...] }` with the lines and spans of a PDF's text layer (`rdx_pdf::Text`).
 interface statement-parser {
     use types.{json, capability-error};
-    /// Whether this parser recognises the document (by text and file name).
-    detect: func(text: string, file-name: string) -> bool;
-    /// Statement as JSON: lines, opening and closing balances, period, currency.
-    parse: func(text: string) -> result<json, capability-error>;
+    /// Whether this parser recognises the document.
+    detect: func(document: json) -> bool;
+    /// What the document states, as JSON (`rdx_statement::Parsed`): account, currency, period,
+    /// balances and totals where printed, and lines with decimal-text amounts. `hints` carries
+    /// what the caller knows (currency, CSV options). The core checks and numbers the result.
+    parse: func(document: json, hints: json) -> result<json, capability-error>;
 }
 
 interface receipt-extractor {

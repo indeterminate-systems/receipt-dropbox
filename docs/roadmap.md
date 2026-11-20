@@ -29,6 +29,9 @@ green.
 | Piece | Delivers | Depends on |
 | :-- | :-- | :-- |
 | **Matching strategies as extensions** | The `match-strategy` extension point (architecture §3) as a trait and WIT interface, so an organization can add a strategy (for example per-merchant rules) without changing `rdx-match`; piece 6 built the strategies in. | 6 |
+| **Real bank layouts** | A `statement-parser` per bank the organization's supporters use, written against anonymized samples (never committed: synthetic look-alikes go in `fixtures/`), starting with the Mexican banks. Found by piece 4, which ships one synthetic layout (`example-bank`) | 4 |
+| **Encrypted PDFs** | Read PDFs with an owner password and an empty user password (RC4, AES-128/256), which many bank downloads are; `rdx-pdf` refuses them today ([ADR-0006](adr/0006-pdf-text-layer-reader.md)). Found by piece 4 | 4 |
+| **Fuzzing the PDF reader** | `cargo fuzz` targets for `rdx_pdf::text` and the statement parsers, before the PWA takes uploads from the public. Found by piece 4 | 4, 14 |
 | **Google deployment** | Cloud Run service embedding wasmtime, Gmail push through Pub/Sub, Drive folders as intake and blob store. Deferred: no Google Cloud account yet. The host layer (piece 2) keeps it possible. | 13 |
 
 ## Test corpora
@@ -56,7 +59,7 @@ wave 4:                      12  13  14  15
 wave 5:                      16
 ```
 
-Done: piece 1 (#9), piece 2 (#10) and piece 3 (#4, #8), merged by 2026-11-20; piece 6 (#17) when
+Done: piece 1 (#9), piece 2 (#10) and piece 3 (#4, #8), merged by 2026-11-20; piece 4 (#20); piece 6 (#17) when
 its PR merges: crate `rdx-match`, op `matching.propose`, policy in `nickel/rdx/matching.ncl`,
 skill `reconcile-statement` (proposals only; piece 9 adds booking). The compliance
 research behind pieces 15 and 16 is in (#11, #12, #15); their code is not.
