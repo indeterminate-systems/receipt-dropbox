@@ -32,6 +32,7 @@ green.
 | **Real bank layouts** | A `statement-parser` per bank the organization's supporters use, written against anonymized samples (never committed: synthetic look-alikes go in `fixtures/`), starting with the Mexican banks. Found by piece 4, which ships one synthetic layout (`example-bank`) | 4 |
 | **Encrypted PDFs** | Read PDFs with an owner password and an empty user password (RC4, AES-128/256), which many bank downloads are; `rdx-pdf` refuses them today ([ADR-0006](adr/0006-pdf-text-layer-reader.md)). Found by piece 4 | 4 |
 | **Fuzzing the PDF reader** | `cargo fuzz` targets for `rdx_pdf::text` and the statement parsers, before the PWA takes uploads from the public. Found by piece 4 | 4, 14 |
+| **Receipt extraction follow-ups** | Line items on receipts (`items` is empty today); scoring `receipt.extract` against the invoice benchmark below at a pinned revision, to tune its keywords | 5 |
 | **Google deployment** | Cloud Run service embedding wasmtime, Gmail push through Pub/Sub, Drive folders as intake and blob store. Deferred: no Google Cloud account yet. The host layer (piece 2) keeps it possible. | 13 |
 
 ## Test corpora
@@ -61,10 +62,9 @@ wave 5:                      16
 
 Done: piece 1 (#9), piece 2 (#10) and piece 3 (#4, #8), merged by 2026-11-20; piece 4 (#20);
 piece 6 (#17): crate `rdx-match`, op `matching.propose`, policy in `nickel/rdx/matching.ncl`,
-skill `reconcile-statement` (proposals only; piece 9 adds booking). Piece 5's extraction from
-emails, PDFs (through piece 4's `pdf.text`), HTML, text and CFDI XML is in review (#18); still to
-do for piece 5: line items, and scoring extraction against the invoice benchmark below. The
-compliance research behind pieces 15 and 16 is in (#11, #12, #15); their code is not.
+skill `reconcile-statement` (proposals only; piece 9 adds booking); piece 5 (#18): crate
+`rdx-receipt`, op `receipt.extract`, skill `ingest-receipt`, reading emails, PDFs (through piece
+4's `pdf.text`), HTML, text and CFDI XML. The compliance research behind pieces 15 and 16 is in (#11, #12, #15); their code is not.
 
 Piece 15 is what makes a reimbursement hold up for tax (see [compliance](compliance.md)). Its
 proof policy is per organization, so a group with no RFC still gets matching, redaction and the
