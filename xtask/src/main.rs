@@ -19,7 +19,7 @@ mod ci;
 mod doctor;
 
 use rdx_host::Host;
-use rdx_plan::{PlanSource, Registry, execute};
+use rdx_plan::{PlanSource, execute};
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -192,6 +192,10 @@ struct Case {
     /// Top-level fields of `scripts/main.ncl` to override, as Nickel expressions.
     #[serde(default)]
     inputs: BTreeMap<String, String>,
+    /// Files (paths from the repository root) put in the host's blob store before the run, so
+    /// inputs can name them by digest, as `document` arguments do.
+    #[serde(default)]
+    documents: Vec<String>,
     /// The expected dry-run report.
     #[serde(default)]
     expect: Value,
@@ -252,9 +256,15 @@ fn check_product_skill(root: &Path, dir: &Path, name: &str, report: &mut impl Fn
             fail("test cases must be dry runs".into());
             continue;
         }
-        // A fresh in-memory host per case: fixed clock, seeded randomness, empty stores, so
-        // golden reports are reproducible and cases don't see each other's writes.
-        let run = match execute(&plan, &Registry::with_core(), &mut Host::memory()) {
+        // A fresh in-memory host per case: fixed clock, seeded randomness, empty stores except
+        // the case's documents, so golden reports are reproducible and cases don't see each
+        // other's writes.
+        let mut host = Host::memory();
+        if let Err(e) = put_documents(root, &case.documents, &mut host) {
+            fail(e);
+            continue;
+        }
+        let run = match execute(&plan, &rdx_cli::registry(), &mut host) {
             Ok(r) => serde_json::to_value(r).expect("reports serialize"),
             Err(e) => {
                 fail(e.to_string());
@@ -262,7 +272,10 @@ fn check_product_skill(root: &Path, dir: &Path, name: &str, report: &mut impl Fn
             }
         };
         if update {
-            let updated = serde_json::json!({ "inputs": case.inputs, "expect": run });
+            let mut updated = serde_json::json!({ "inputs": case.inputs, "expect": run });
+            if !case.documents.is_empty() {
+                updated["documents"] = serde_json::json!(case.documents);
+            }
             let text = serde_json::to_string_pretty(&updated).unwrap() + "\n";
             if let Err(e) = fs::write(&case_path, text) {
                 fail(e.to_string());
@@ -274,6 +287,18 @@ fn check_product_skill(root: &Path, dir: &Path, name: &str, report: &mut impl Fn
             ));
         }
     }
+}
+
+fn put_documents(root: &Path, documents: &[String], host: &mut Host) -> Result<(), String> {
+    let store = host
+        .blob_store
+        .as_mut()
+        .expect("the memory host has a blob store");
+    for doc in documents {
+        let bytes = fs::read(root.join(doc)).map_err(|e| format!("document {doc}: {e}"))?;
+        store.put(&bytes).map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 fn run_smoke_wasm() -> ExitCode {

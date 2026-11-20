@@ -169,3 +169,39 @@ fn help_and_usage() {
     assert!(String::from_utf8_lossy(&help.stdout).contains("rdx run"));
     assert_eq!(rdx(state.path(), &["frobnicate"]).status.code(), Some(2));
 }
+
+#[test]
+fn blob_put_then_ingest_a_statement() {
+    let state = tempfile::tempdir().unwrap();
+    let out = rdx(
+        state.path(),
+        &[
+            "blob",
+            "put",
+            "fixtures/synthetic/small/statements/st-2026-03.s-0001.pdf",
+        ],
+    );
+    assert_eq!(out.status.code(), Some(0), "{}", stderr(&out));
+    let digest = String::from_utf8(out.stdout).unwrap().trim().to_owned();
+    assert!(digest.starts_with("sha256:"), "{digest}");
+
+    let doc = format!("document=\"{digest}\"");
+    let out = rdx(
+        state.path(),
+        &[
+            "run",
+            "ingest-statement",
+            "--input",
+            &doc,
+            "--input",
+            r#"supporter="s-0001""#,
+        ],
+    );
+    assert_eq!(out.status.code(), Some(0), "{}", stderr(&out));
+    let report = stdout_json(&out);
+    assert_eq!(report["steps"][0]["output"]["parser"], "example-bank");
+    assert_eq!(
+        report["steps"][0]["output"]["statement"]["original"],
+        digest.as_str()
+    );
+}
