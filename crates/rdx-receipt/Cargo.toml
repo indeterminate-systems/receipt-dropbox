@@ -15,5 +15,7 @@ serde_json.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
+# Writes and reads the synthetic PDF receipt fixture.
+rdx-pdf = { path = "../rdx-pdf", features = ["write"] }
 rdx-host = { path = "../rdx-host" }
 rdx-plan = { path = "../rdx-plan" }

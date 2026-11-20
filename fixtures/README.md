@@ -57,3 +57,4 @@ and the `ingest-receipt` skill's golden cases). Merchants, people, RFCs and foli
 | `cfdi-ingreso.xml` | CFDI 4.0 ingreso with a TimbreFiscalDigital |
 | `refund-forwarded.eml` | refund forwarded by a supporter: base64 HTML, euro decimal comma, a PDF attachment |
 | `no-total.txt` | order confirmation without a total: needs review |
+| `receipt-pdf.pdf` | PDF receipt with a text layer, written by `crates/rdx-receipt/tests/pdf.rs` (`UPDATE_GOLDEN=1 cargo test -p rdx-receipt --test pdf`) |

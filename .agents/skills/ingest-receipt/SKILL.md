@@ -1,6 +1,6 @@
 ---
 name: ingest-receipt
-description: Reads a receipt, emailed bill, refund note or CFDI a supporter sent (an .eml, HTML, plain text or CFDI XML) and turns it into a receipt record with merchant, date, total, reference and kind, or says what is missing. Use when a supporter forwards or uploads proof of an org expense, or when asked to read, parse or extract a receipt or bill.
+description: Reads a receipt, emailed bill, refund note or CFDI a supporter sent (an .eml, PDF, HTML, plain text or CFDI XML) and turns it into a receipt record with merchant, date, total, reference and kind, or says what is missing. Use when a supporter forwards or uploads proof of an org expense, or when asked to read, parse or extract a receipt or bill.
 metadata:
   rdx-kind: product
 ---
@@ -17,8 +17,8 @@ use, without guessing anything the document doesn't say.
 | Input | Meaning | Default |
 | :-- | :-- | :-- |
 | `supporter` | id of the supporter who sent it, such as `"s-0001"` | required |
-| `document` | the document's text: `import "/path/to/bill.eml" as 'Text` | required |
-| `media_type` | `"message/rfc822"`, `"text/html"`, `"text/plain"` or `"application/xml"` (CFDI) | `"message/rfc822"` |
+| `document` | the document's text: `import "/path/to/bill.eml" as 'Text`; for a PDF, its blob digest | required |
+| `media_type` | `"message/rfc822"`, `"text/html"`, `"text/plain"`, `"application/xml"` (CFDI) or `"application/pdf"` | `"message/rfc822"` |
 | `hints` | `{ currency = "MXN", date_order = "dmy", merchant = "…" }`, any subset | `{}` |
 
 ```sh
@@ -32,8 +32,17 @@ In this repository `rdx` is `cargo run -p rdx-cli --`. The step has no effects, 
 is the whole run. Use an absolute path in `import`; a relative one is looked up from the
 current directory and the repository's `nickel/` directory.
 
-For a PDF receipt, the text layer comes from `pdf.text` (piece 4): pass that step's output as
-`document` (`document = rdx.ref "pdf"`) and the receipt's `source` is the PDF's digest.
+For a PDF receipt, put the file in the blob store and pass its digest with
+`media_type = "application/pdf"`. The plan then reads the text layer with `pdf.text` before
+extracting, and the receipt's `source` is the PDF's digest:
+
+```sh
+rdx run ingest-receipt --input supporter='"s-0001"' \
+  --input document="\"$(rdx blob put receipt.pdf)\"" --input media_type='"application/pdf"'
+```
+
+A scanned PDF has no text layer: the `pdf` step's `text` is empty and the extraction misses
+everything. OCR (piece 11) will cover that.
 
 Hints come from the organization's settings, not from the person's guess: an organization in
 Mexico uses `currency = "MXN", date_order = "dmy"`. Hints never override what the document says.
