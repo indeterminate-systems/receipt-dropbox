@@ -72,7 +72,7 @@ clock directly; those come through the capability traits in layer 2.
 | `rdx-statement` | PDF text-layer extraction and statement line parsing; OCR fallback through the `ocr` capability |
 | `rdx-receipt` | Receipt and emailed-bill extraction (amount, date, merchant, reference) |
 | `rdx-match` | Candidate generation and scoring between statement lines and receipts, with tolerances from policy |
-| `rdx-envelope` | Gordian Envelope: one salted assertion per transaction, signing, elision of unmatched lines, encryption to recipients (`bc-envelope`, `bc-components`) |
+| `rdx-envelope` | Gordian Envelope: one salted assertion per transaction, signing, elision of unmatched lines, verification (`bc-envelope`, `bc-components`); encryption to recipients comes with `rdx-keys`. See [ADR-0005](adr/0005-statement-envelopes.md) |
 | `rdx-keys` | Key hierarchy: passkey PRF to seed, device keys, SSKR recovery shares (`sskr`), rotation and revocation records |
 | `rdx-ledger` | Beancount writer and reader, with audit metadata on every entry. See [ADR-0003](adr/0003-beancount-ledger.md) |
 | `rdx-render` | Typst rendering of elided envelope data, including the root digest and a UR/QR of the envelope |
