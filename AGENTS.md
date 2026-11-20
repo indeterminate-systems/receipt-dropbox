@@ -23,13 +23,21 @@ elision. Read [docs/architecture.md](docs/architecture.md) before changing anyth
 
 | Command | What it does |
 | :-- | :-- |
+| `cargo xtask doctor` | checks the shell: Rust version, both wasm targets, wasmtime, wasm-bindgen (matching `Cargo.lock`), Nickel, Typst |
+| `cargo xtask ci` | everything CI runs, in CI's order; run it before pushing |
 | `cargo test` | all unit and integration tests, natively |
+| `cargo test -p <crate> --target wasm32-wasip2` | the same tests as WebAssembly, under wasmtime (runner in `.cargo/config.toml`) |
 | `cargo check -p <crate> --target wasm32-unknown-unknown` (and `wasm32-wasip2`) | the WebAssembly builds CI requires |
 | `cargo xtask check [SKILL…]` | validates skills against the Agent Skills spec and repo rules, evaluates each product skill's `scripts/main.ncl` and compares its dry-run reports with `tests/*.json` |
 | `UPDATE_GOLDEN=1 cargo xtask check <skill>` | accepts new golden reports (review the diff) |
 | `cargo fmt`, `cargo clippy --all-targets` | formatting and lints; CI runs both |
 
-The dev shell (`nix develop`, or `direnv allow`) provides the toolchain with both wasm targets.
+The dev shell (`nix develop`, or `direnv allow`) provides the toolchain with both wasm targets and
+every tool above; CI runs `nix develop --command cargo xtask ci`, so a green local run predicts a
+green CI. `nix flake check` builds the dev shell and checks the Nix formatting. The same shell is
+the `rust-wasm-nickel` template in
+[nix-dev-environment-templates](https://github.com/bahiamovementcenter/nix-dev-environment-templates);
+change both together.
 
 ## Layout
 
@@ -67,6 +75,28 @@ report before running anything with effects.
 - Work on a branch and open a pull request against `main`.
 - Commit subjects start with the area: `plan: …`, `skills: …`, `docs: …`, `CI: …`.
 - Record decisions with real alternatives as ADRs in `docs/adr/`.
+- PR titles start with the roadmap piece, `[P01]` to `[P16]` (`[P15/P16]` for one that spans
+  two), then the area: `[P02] host: …`. Work outside the roadmap uses the area alone.
+- **PR numbers ascend in merge order.** Open PRs in the order they should merge. If that order
+  changes, close the affected PRs with a "Superseded by #N" comment and reopen them in the new
+  order; don't swap branches between PR numbers, which strands their comments next to the wrong
+  code.
+- A PR that depends on another says `Merge after #N` in its first line. Stack it on the other's
+  branch only while that one is open, and retarget it to `main` as soon as that one merges.
+
+## Maintenance and housekeeping
+
+- Resolve conflicts by merging `main` into the branch, never by rebasing or force-pushing a
+  branch others have pushed to; a PR's diff must show only its own changes once the PRs before
+  it have merged.
+- After a merge, delete the merged branch (GitHub then retargets PRs stacked on it to `main`)
+  and check the next PR in order still merges cleanly and is green.
+- When a PR number, crate, command or path changes, update every reference to it in `docs/`,
+  `AGENTS.md`, skills and project memory in the same PR.
+- Keep `docs/roadmap.md` current: when a piece merges, mark it done there; when a thread finds
+  new work, add it as a piece rather than leaving it in a PR description.
+- Pins and toolchains move deliberately: `nix flake update`, `nickel-embed`'s `rev` and
+  `cargo update` each go in their own PR, with `cargo xtask ci` green.
 
 ## Reference
 

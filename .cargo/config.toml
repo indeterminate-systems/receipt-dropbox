@@ -1,2 +1,8 @@
 [alias]
 xtask = "run --quiet --package xtask --"
+
+# `cargo test --target wasm32-wasip2` runs the test binaries under wasmtime, so the core is tested
+# as WebAssembly and not only type-checked for it. `--dir /` lets tests read the repo's Nickel
+# files at the same absolute paths as natively (CARGO_MANIFEST_DIR).
+[target.wasm32-wasip2]
+runner = "wasmtime run --dir /"

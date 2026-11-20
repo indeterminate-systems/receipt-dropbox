@@ -18,6 +18,8 @@ entrypoint.
 
 ```sh
 nix develop            # or: direnv allow
+cargo xtask doctor     # is the shell complete?
+cargo xtask ci         # what CI runs
 cargo test
 cargo xtask check      # validate and dry-run every skill
 ```

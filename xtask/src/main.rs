@@ -1,12 +1,18 @@
-//! `cargo xtask check [SKILL…]`: validates Agent Skills against the spec and this repo's rules,
-//! evaluates each product skill's code-mode entrypoint and runs its test cases as dry runs.
+//! Repository tasks, in Rust:
 //!
-//! `UPDATE_GOLDEN=1 cargo xtask check` rewrites the expected reports instead of comparing them.
+//! - `cargo xtask check [SKILL…]`: validates Agent Skills against the spec and this repo's rules,
+//!   evaluates each product skill's code-mode entrypoint and runs its test cases as dry runs.
+//!   `UPDATE_GOLDEN=1 cargo xtask check` rewrites the expected reports instead of comparing them.
+//! - `cargo xtask doctor`: checks that the shell has the toolchain, wasm targets and tools.
+//! - `cargo xtask ci`: everything CI runs, in the same order, so a local run predicts CI.
 
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
+
+mod ci;
+mod doctor;
 
 use rdx_plan::{PlanSource, Registry, execute};
 use serde::Deserialize;
@@ -16,8 +22,16 @@ fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
         Some("check") => run_check(&args[1..]),
+        Some("doctor") => {
+            if doctor::run(&root()) {
+                ExitCode::SUCCESS
+            } else {
+                ExitCode::FAILURE
+            }
+        }
+        Some("ci") => ci::run(&root()),
         _ => {
-            eprintln!("usage: cargo xtask check [SKILL…]");
+            eprintln!("usage: cargo xtask <check [SKILL…] | doctor | ci>");
             ExitCode::from(2)
         }
     }
