@@ -6,3 +6,11 @@ xtask = "run --quiet --package xtask --"
 # files at the same absolute paths as natively (CARGO_MANIFEST_DIR).
 [target.wasm32-wasip2]
 runner = "wasmtime run --dir /"
+
+# getrandom 0.3 (reached through bc-envelope's crypto crates) refuses to build for the browser
+# target unless a backend is chosen. The core takes randomness from the host's `random`
+# capability, never from getrandom, so pick the backend that fails at run time: an accidental call
+# errors instead of silently reaching for the platform. The PWA (roadmap piece 14) can switch to
+# `wasm_js` if a dependency it needs insists on getrandom.
+[target.wasm32-unknown-unknown]
+rustflags = ["--cfg", 'getrandom_backend="unsupported"']

@@ -52,6 +52,7 @@ change both together.
 | `crates/rdx-pdf` | PDF text layer (lines, spans, positions) and the `pdf.text` op; a fixture writer behind feature `write` |
 | `crates/rdx-statement` | statement parsers (CSV, OFX, the `example-bank` PDF layout), balance checks, the `statement.parse` op |
 | `crates/rdx-model` | domain model (money, dates, statements, receipts, matches, ledger entries) and the synthetic data generator (`rdx_model::synth`) |
+| `crates/rdx-envelope` | statements as signed Gordian Envelopes: seal, redact (elide unmatched lines), verify; `envelope.*` ops |
 | `crates/rdx-receipt` | receipt and bill extraction (emails, PDFs via `pdf.text`, HTML, text, CFDI XML), the `receipt-extractor` trait and the `receipt.extract` op |
 | `crates/rdx-match` | matching: proposes line ↔ receipt matches (exact, tolerance, other currency, split, instalments, partial) under a policy; op `matching.propose` |
 | `nickel/rdx/api.ncl` | plan contracts and op constructors agents write against |
@@ -62,6 +63,7 @@ change both together.
 | `wit/rdx.wit` | capability and extension interfaces (mirrors the Rust traits) |
 | `.agents/skills/` | Agent Skills; `.claude/skills` links here |
 | `xtask/` | repo checks |
+| `vendor/` | crates patched in with the smallest change that keeps C out of the wasm builds; see `vendor/README.md` |
 | `docs/` | architecture, workflow, roadmap, ADRs, references |
 
 ## Code mode

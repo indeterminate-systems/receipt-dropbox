@@ -1,6 +1,8 @@
 [workspace]
 resolver = "3"
 members = ["crates/*", "xtask"]
+# Vendored crates are patched-in dependencies, not ours to lint or format.
+exclude = ["vendor"]
 
 [workspace.package]
 edition = "2024"
@@ -15,3 +17,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
 thiserror = "2"
+
+[patch.crates-io]
+# See vendor/README.md: keeps C (secp256k1-sys) out of the WebAssembly builds.
+bc-shamir = { path = "vendor/bc-shamir" }

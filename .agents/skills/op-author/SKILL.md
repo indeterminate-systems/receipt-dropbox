@@ -43,7 +43,9 @@ Implement `rdx_plan::Op` (`crates/rdx-plan/src/exec.rs`):
 - Do no I/O directly: storage, mail, time and randomness come from host capabilities
   (`wit/rdx.wit`). Money is integer minor units plus a currency; never floats.
 
-Register it with the crate's `Registry` and add the constructor under `ops` in `api.ncl`:
+Give the crate a `register(&mut Registry)` for its ops (as `rdx_envelope::register` does), call
+it from `rdx_cli::registry()` (the local host, and what `cargo xtask check` runs skills with),
+and add the constructor under `ops` in `api.ncl`:
 
 ```nickel
 statement = {

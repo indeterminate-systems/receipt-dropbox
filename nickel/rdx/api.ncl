@@ -139,6 +139,18 @@ let NoArgs =
   )
 in
 
+let UrOf = fun kind =>
+  std.contract.from_validator (fun s =>
+    if std.is_string s && std.string.is_match "^\\s*ur:%{kind}/[a-z]+\\s*$" s then
+      'Ok
+    else
+      'Error {
+        message = "expected a `ur:%{kind}/…` string",
+        notes = ["URs are lowercase letters after the type, like `ur:%{kind}/lfaohdcx…`."],
+      }
+  )
+in
+
 let model = import "model.ncl" in
 
 # A document in the host's blob store: its digest, or a reference to a step that produced one.
@@ -260,6 +272,36 @@ in
           Use it to record what a step produced in the audit trail. No effects.
         "%
         = step "core.digest" { value | ValueOrRef },
+    },
+
+    envelope = {
+      redact
+        | doc m%"
+          Elides every line of a sealed statement envelope that confirmed matches don't fully
+          cover. The root digest and signature stay valid. Returns `{ envelope, root, shown,
+          redacted, review }`; `review` lists lines that matches cover only in part. `envelope`
+          is a `ur:envelope/…` string or the output of an earlier `envelope.*` step. No effects.
+        "%
+        = step "envelope.redact" {
+          envelope | ValueOrRef,
+          matches
+            | ValueOrRef
+            | doc "Matches as in `model.ncl`; only confirmed ones count."
+            | default
+            = [],
+        },
+
+      verify
+        | doc m%"
+          Checks a statement envelope's signature against the supporter's public key and returns
+          what the viewable statement shows: header, shown lines, `redacted_rows` and
+          `summary` (`opening + shown + redacted = closing`), and the envelope's `root` digest.
+          Fails if the envelope was changed or someone else signed it. No effects.
+        "%
+        = step "envelope.verify" {
+          envelope | ValueOrRef,
+          signer | UrOf "signing-public-key",
+        },
     },
 
     # `match` is a Nickel keyword, hence `matching`.

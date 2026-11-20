@@ -1,0 +1,29 @@
+[package]
+name = "rdx-envelope"
+version = "0.1.0"
+description = "Receipt Dropbox statements as signed Gordian Envelopes: salted lines, elision of unmatched lines, verification"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+# Only what statements need: salted assertions and Ed25519 signatures. Encryption to recipients
+# comes with keys (roadmap piece 8). The default features add secp256k1 (C) and post-quantum
+# signatures, neither of which the core uses.
+bc-envelope = { version = "0.43", default-features = false, features = ["salt", "signature", "ed25519", "known_value"] }
+bc-components = { version = "0.31", default-features = false, features = ["ed25519"] }
+bc-rand = "0.5"
+rdx-model = { path = "../rdx-model" }
+# Ops and their registry only; plan loading (Nickel) is the host's business.
+rdx-plan = { path = "../rdx-plan", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+# getrandom 0.2 (through rand_core 0.6) has no browser backend unless one is chosen. The core never
+# asks it for randomness (see src/no_system_rng.rs), so it gets a custom one that always fails.
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+getrandom = { version = "0.2", features = ["custom"] }
+
+[dev-dependencies]
+rdx-host = { path = "../rdx-host" }

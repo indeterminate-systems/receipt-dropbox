@@ -1,0 +1,165 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:6e770cde899464d0673392917470b5e9cef192f86e16945891ad824beb99b719",
+    "skill": "verify-statement",
+    "steps": [
+      {
+        "id": "view",
+        "op": "envelope.verify",
+        "output": {
+          "account": {
+            "institution": "Example Bank",
+            "mask": "0001"
+          },
+          "currency": "USD",
+          "lines": [
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -28974
+              },
+              "date": "2026-03-03",
+              "description": "LANTERN CAFE CATERING #7435",
+              "id": "l01"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -27989
+              },
+              "date": "2026-03-11",
+              "description": "PAPERLEAF SUPPLY #4159",
+              "id": "l02"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": 25085
+              },
+              "date": "2026-03-13",
+              "description": "PAPERLEAF SUPPLY REFUND",
+              "id": "l03"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -1423
+              },
+              "date": "2026-03-13",
+              "description": "BEANERY COFFEE #6892",
+              "id": "l04"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -3439
+              },
+              "date": "2026-03-13",
+              "description": "STREAMVIEW SUBSCRIPTION #1537",
+              "id": "l05"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -2494
+              },
+              "date": "2026-03-16",
+              "description": "METRO RIDESHARE TRIP #2030",
+              "id": "l06"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -6209
+              },
+              "date": "2026-03-17",
+              "description": "CLEARWAVE TELECOM INV-920207",
+              "id": "l07",
+              "reference": "INV-920207"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -367
+              },
+              "date": "2026-03-22",
+              "description": "FUEL STOP #7586",
+              "id": "l08"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -23553
+              },
+              "date": "2026-03-23",
+              "description": "METRO RIDESHARE TRIP #8927",
+              "id": "l09"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -10821
+              },
+              "date": "2026-03-24",
+              "description": "CITY TRANSIT FARE #3279",
+              "id": "l10"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -2429
+              },
+              "date": "2026-03-28",
+              "description": "CORNER GROCERY #8677",
+              "id": "l11"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": 130286
+              },
+              "date": "2026-03-28",
+              "description": "TRANSFER IN",
+              "id": "l12"
+            }
+          ],
+          "original": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+          "period": {
+            "end": "2026-03-31",
+            "start": "2026-03-01"
+          },
+          "redacted_rows": 0,
+          "root": "sha256:ad3a1ae003416b9d3c95f5bb7a1f8f81c4a05f585b4e64a6330d6faee3c47b9b",
+          "statement": "st-2026-03.s-0001",
+          "summary": {
+            "closing": {
+              "currency": "USD",
+              "minor": 122128
+            },
+            "opening": {
+              "currency": "USD",
+              "minor": 74455
+            },
+            "redacted": {
+              "currency": "USD",
+              "minor": 0
+            },
+            "shown": {
+              "currency": "USD",
+              "minor": 47673
+            }
+          },
+          "supporter": "s-0001"
+        },
+        "output_digest": "sha256:1e59db0012b8ec47a358b170a2572133cdd6522a2834e16d4ea0392d0973c417",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "envelope": "import \"../fixtures/synthetic/small/envelopes/st-2026-03.s-0001.full.ur\" as 'Text"
+  }
+}

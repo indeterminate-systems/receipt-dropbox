@@ -19,6 +19,7 @@ and review the diff.
 | :-- | :-- |
 | `synthetic/small/scenario.json` | `Config::small()`: 2 supporters, 1 month. Supporters, statements, receipts, the correct matches, the expense account each matched receipt books to, and `cases`, which point at each hard case |
 | `synthetic/small/statements/*.csv` | the same statements as `date,description,amount,balance` CSV, for statement parsers |
+| `synthetic/small/envelopes/` | each statement sealed as a Gordian Envelope (`*.full.ur`) and redacted with the scenario's matches (`*.redacted.ur`), signed with the published synthetic key in `signer.ur` (`rdx_envelope::synth`, which proves nothing). Written by `crates/rdx-envelope/tests/fixtures.rs`: `UPDATE_GOLDEN=1 cargo test -p rdx-envelope --test fixtures` |
 | `synthetic/small/statements/*.ofx` | the same statements as OFX 1.02 downloads (`rdx_statement::render::ofx`) |
 | `synthetic/small/statements/*.pdf` | the same statements as PDFs in the `example-bank` layout, two pages each (`rdx_statement::render::example_bank_pdf`); `UPDATE_GOLDEN=1 cargo test -p rdx-statement --test parse` rewrites them and the OFX files |
 | `synthetic/small/statements/*.typst.pdf` | the first statement in the same layout made by Typst, so the PDF reader is tested on another producer's output (subset fonts, ToUnicode maps, object streams); made from `layouts/example-bank.typ` with the command in that file |

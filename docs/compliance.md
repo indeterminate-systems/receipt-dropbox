@@ -237,7 +237,23 @@ supplier abroad, an online platform):
 These requirements feed roadmap pieces 15 and 16 (see [roadmap](roadmap.md)). Thresholds, caps and
 deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never constants in code.
 
-### Fiscal proof (piece 15)
+### Redacted statements (piece 7)
+
+What a verified redacted statement proves, and what it doesn't
+([ADR-0005](adr/0005-statement-envelopes.md)):
+
+- **It proves** that the shown lines, the opening and closing balances and the number of
+  redacted rows are what the supporter's key signed, unchanged since, and that the shown lines
+  plus one "total redacted" figure reconcile the balances. The root digest is the same as the
+  full statement's, so ledger entries and the encrypted original stay linked to it.
+- **It doesn't prove** that the bank issued the statement: the supporter signs what was parsed
+  from it. That rests on the encrypted original, which an accountant sees only when the uploader
+  grants it (piece 12), and on matching against CFDIs, which stand on their own (R1).
+- **Elided lines reveal nothing**: not their amount, date, counterparty or position. Each is
+  salted, so a guess at a line can't be confirmed against its digest (R13).
+- Partly matched lines are redacted and flagged for review, so the shown lines are always fully
+  backed by receipts.
+
 
 - **R0.** A per-organization **proof policy** (`company`, `nonprofit`, `donataria-autorizada`,
   `individual`, `informal-group`; see [above](#it-depends-on-what-kind-of-organization-it-is)) in
@@ -355,6 +371,9 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
 13. For **foreign vendors**: what must a foreign invoice show, when does the organization owe IVA
     on an imported service or withhold ISR, and how are SAT-registered digital platforms'
     receipts handled?
+14. Will the SAT or an auditor accept a **redacted statement** whose figures verify against a
+    digest, with the original shown on request, as supporting evidence for a reimbursement? Or
+    must the full statement be kept and produced, which bears on question 5?
 
 ## Sources
 

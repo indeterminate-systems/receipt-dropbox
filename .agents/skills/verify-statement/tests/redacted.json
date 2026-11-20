@@ -1,0 +1,100 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:9bc520a6e26060a690854eeb64a4f0e8de42289eaa419eca7a6307ba40624a1a",
+    "skill": "verify-statement",
+    "steps": [
+      {
+        "id": "view",
+        "op": "envelope.verify",
+        "output": {
+          "account": {
+            "institution": "Example Bank",
+            "mask": "0001"
+          },
+          "currency": "USD",
+          "lines": [
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -28974
+              },
+              "date": "2026-03-03",
+              "description": "LANTERN CAFE CATERING #7435",
+              "id": "l01"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -27989
+              },
+              "date": "2026-03-11",
+              "description": "PAPERLEAF SUPPLY #4159",
+              "id": "l02"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": 25085
+              },
+              "date": "2026-03-13",
+              "description": "PAPERLEAF SUPPLY REFUND",
+              "id": "l03"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -6209
+              },
+              "date": "2026-03-17",
+              "description": "CLEARWAVE TELECOM INV-920207",
+              "id": "l07",
+              "reference": "INV-920207"
+            },
+            {
+              "amount": {
+                "currency": "USD",
+                "minor": -23553
+              },
+              "date": "2026-03-23",
+              "description": "METRO RIDESHARE TRIP #8927",
+              "id": "l09"
+            }
+          ],
+          "original": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+          "period": {
+            "end": "2026-03-31",
+            "start": "2026-03-01"
+          },
+          "redacted_rows": 7,
+          "root": "sha256:ad3a1ae003416b9d3c95f5bb7a1f8f81c4a05f585b4e64a6330d6faee3c47b9b",
+          "statement": "st-2026-03.s-0001",
+          "summary": {
+            "closing": {
+              "currency": "USD",
+              "minor": 122128
+            },
+            "opening": {
+              "currency": "USD",
+              "minor": 74455
+            },
+            "redacted": {
+              "currency": "USD",
+              "minor": 109313
+            },
+            "shown": {
+              "currency": "USD",
+              "minor": -61640
+            }
+          },
+          "supporter": "s-0001"
+        },
+        "output_digest": "sha256:9d3b475646d01b6c2ae894b0cdf4819127c90428cefbb02616ceb10382046a84",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {}
+}
