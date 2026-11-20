@@ -34,6 +34,13 @@ Exit status: 0 ok, 1 a step or the audit check failed, 2 the plan or command was
 before anything ran, 3 the run finished but could not be recorded.
 ";
 
+/// Every op the local host offers. `cargo xtask check` runs skills' test cases with the same set.
+pub fn registry() -> Registry {
+    let mut r = Registry::with_core();
+    rdx_envelope::register(&mut r);
+    r
+}
+
 /// Runs the command line and returns the exit status.
 pub fn main(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> u8 {
     match parse(args) {
@@ -218,7 +225,7 @@ fn run(
 
     let state = state_dir(&root, dirs.state);
     let mut host = local::host(&state).map_err(rejected)?;
-    let outcome = match rdx_plan::run(&plan, &Registry::with_core(), &mut host) {
+    let outcome = match rdx_plan::run(&plan, &registry(), &mut host) {
         Ok(outcome) => outcome,
         Err(RunError::Plan(e)) => return Err(rejected(e)),
         Err(e @ RunError::Audit(_)) => return Err(Failure(3, e.to_string())),

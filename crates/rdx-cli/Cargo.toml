@@ -11,6 +11,7 @@ name = "rdx"
 path = "src/main.rs"
 
 [dependencies]
+rdx-envelope = { path = "../rdx-envelope" }
 rdx-host = { path = "../rdx-host", features = ["local"] }
 rdx-plan = { path = "../rdx-plan" }
 serde_json.workspace = true

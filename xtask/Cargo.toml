@@ -7,6 +7,8 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+# Skills' test cases run with the local host's ops (`rdx_cli::registry`).
+rdx-cli = { path = "../crates/rdx-cli" }
 rdx-host = { path = "../crates/rdx-host" }
 rdx-plan = { path = "../crates/rdx-plan" }
 serde.workspace = true
