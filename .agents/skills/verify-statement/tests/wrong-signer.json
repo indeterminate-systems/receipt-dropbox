@@ -1,0 +1,20 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": false,
+    "plan_digest": "sha256:3f3569c927afb07708f2b3fef64c04a13f225ace486112a8ab8d8a05052f8cfd",
+    "skill": "verify-statement",
+    "steps": [
+      {
+        "error": "envelope.verify: the signature does not verify with this key: the envelope was changed, or someone else signed it",
+        "id": "view",
+        "op": "envelope.verify",
+        "status": "failed"
+      }
+    ]
+  },
+  "inputs": {
+    "signer": "\"ur:signing-public-key/lfaohdcxbbsabemewzoxlpldosbzfsgsdmlbhtndryfwpddlhyqdvtrprfldpksaisropkzmlacttbol\""
+  }
+}
