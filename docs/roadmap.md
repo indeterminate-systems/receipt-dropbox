@@ -58,7 +58,7 @@ wave 4:                      12  13  14  15
 wave 5:                      16
 ```
 
-Done: piece 1 (#9), piece 2 (#10) and piece 3 (#4, #8), merged by 2026-11-20. The compliance
+Done: piece 1 (#9), piece 2 (#10), piece 3 (#4, #8) and piece 4 (#20), merged by 2026-11-20. The compliance
 research behind pieces 15 and 16 is in (#11, #12, #15); their code is not.
 
 Piece 15 is what makes a reimbursement hold up for tax (see [compliance](compliance.md)). Its
