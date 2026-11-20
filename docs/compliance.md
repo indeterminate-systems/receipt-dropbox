@@ -293,6 +293,9 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
   the DOF, or the card network's rate) and the tolerance are Nickel policy. Store both amounts,
   the rate and its date; book foreign-transaction fees and exchange differences to their own
   accounts. The redacted statement shows the original currency and the booked pesos.
+  *Status:* matching at a policy rate (`fx.rates`, `fx.tolerance_bps` in
+  `nickel/rdx/matching.ncl`) with both amounts, the rate, its date and source recorded on the
+  proposal is in piece 6; booking fees and exchange differences is piece 9.
 - **R17. Foreign invoices** (piece 15). Accept a foreign vendor's invoice as proof when the
   vendor is not a Mexican taxpayer, check it for the RMF's minimum details, and flag it for the
   contador: possible IVA self-assessment on imported services, possible withholding, and whether

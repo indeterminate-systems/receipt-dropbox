@@ -1,0 +1,206 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:58be5c1be06e1515c9120e43c877458ffd0a3aea63a0408aceabccd360151b3b",
+    "skill": "reconcile-statement",
+    "steps": [
+      {
+        "id": "proposals",
+        "op": "matching.propose",
+        "output": {
+          "notes": [
+            "6 receipt(s) from other supporters were not considered: a receipt only matches its own supporter's statements"
+          ],
+          "proposals": [
+            {
+              "evidence": [
+                {
+                  "days": 0,
+                  "difference": {
+                    "currency": "USD",
+                    "minor": 0
+                  },
+                  "line": "l01",
+                  "merchant_similarity": 100,
+                  "receipt": "r-2026-03.s-0001.03",
+                  "reference": false
+                }
+              ],
+              "kind": "exact",
+              "matches": [
+                {
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 28974
+                  },
+                  "line": {
+                    "line": "l01",
+                    "statement": "st-2026-03.s-0001"
+                  },
+                  "receipt": "r-2026-03.s-0001.03",
+                  "status": "proposed"
+                }
+              ],
+              "reasons": [],
+              "review": false
+            },
+            {
+              "evidence": [
+                {
+                  "days": 1,
+                  "difference": {
+                    "currency": "USD",
+                    "minor": 0
+                  },
+                  "line": "l02",
+                  "merchant_similarity": 100,
+                  "receipt": "r-2026-03.s-0001.01",
+                  "reference": false
+                }
+              ],
+              "kind": "exact",
+              "matches": [
+                {
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 27989
+                  },
+                  "line": {
+                    "line": "l02",
+                    "statement": "st-2026-03.s-0001"
+                  },
+                  "receipt": "r-2026-03.s-0001.01",
+                  "status": "proposed"
+                }
+              ],
+              "reasons": [],
+              "review": false
+            },
+            {
+              "evidence": [
+                {
+                  "days": 0,
+                  "difference": {
+                    "currency": "USD",
+                    "minor": 0
+                  },
+                  "line": "l03",
+                  "merchant_similarity": 100,
+                  "receipt": "r-2026-03.s-0001.05",
+                  "reference": false
+                }
+              ],
+              "kind": "exact",
+              "matches": [
+                {
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 25085
+                  },
+                  "line": {
+                    "line": "l03",
+                    "statement": "st-2026-03.s-0001"
+                  },
+                  "receipt": "r-2026-03.s-0001.05",
+                  "status": "proposed"
+                }
+              ],
+              "reasons": [],
+              "review": false
+            },
+            {
+              "evidence": [
+                {
+                  "days": 10,
+                  "difference": {
+                    "currency": "USD",
+                    "minor": 0
+                  },
+                  "line": "l07",
+                  "merchant_similarity": 100,
+                  "receipt": "r-2026-03.s-0001.04",
+                  "reference": true
+                }
+              ],
+              "kind": "exact",
+              "matches": [
+                {
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 6209
+                  },
+                  "line": {
+                    "line": "l07",
+                    "statement": "st-2026-03.s-0001"
+                  },
+                  "receipt": "r-2026-03.s-0001.04",
+                  "status": "proposed"
+                }
+              ],
+              "reasons": [],
+              "review": false
+            },
+            {
+              "evidence": [
+                {
+                  "days": 2,
+                  "difference": {
+                    "currency": "USD",
+                    "minor": 0
+                  },
+                  "line": "l09",
+                  "merchant_similarity": 100,
+                  "receipt": "r-2026-03.s-0001.02",
+                  "reference": false
+                }
+              ],
+              "kind": "exact",
+              "matches": [
+                {
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 23553
+                  },
+                  "line": {
+                    "line": "l09",
+                    "statement": "st-2026-03.s-0001"
+                  },
+                  "receipt": "r-2026-03.s-0001.02",
+                  "status": "proposed"
+                }
+              ],
+              "reasons": [],
+              "review": false
+            }
+          ],
+          "statement": "st-2026-03.s-0001",
+          "summary": {
+            "decided_lines": 0,
+            "lines": 12,
+            "proposed_lines": 5,
+            "to_review": 0,
+            "unmatched_lines": 7,
+            "unmatched_receipts": 1
+          },
+          "unmatched_lines": [
+            "l04",
+            "l05",
+            "l06",
+            "l08",
+            "l10",
+            "l11",
+            "l12"
+          ],
+          "unmatched_receipts": [
+            "r-2026-03.s-0001.06"
+          ]
+        },
+        "output_digest": "sha256:040a4b2699faca8cd9c341bf350dcc03eda5d44a784b83a49edbf38576637f01",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {}
+}

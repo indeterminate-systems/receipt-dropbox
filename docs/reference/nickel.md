@@ -116,5 +116,16 @@ records such as `{ ref = "x" }`, as `api.ncl` does.
   `(std.deserialize 'Json m%"{"a":{"b":1}}"%) | { a }`. Until nickel-embed moves past it, pass
   JSON data to Nickel as a Nickel literal (see `to_nickel` in
   `crates/rdx-model/tests/fixtures.rs`) or through `PlanSource::input`.
+- `nickel/rdx/matching.ncl`: the matching `Policy` contract and its defaults (`{} | Policy`).
+- **Nested defaults:** a sub-record given as one `| default = { a = 1, b = 2 }` is replaced
+  whole when a caller sets only `a`, and the contract then reports `b` missing. Give each nested
+  field its own `| default` (as `window` in `matching.ncl` does) so callers override one field.
+- **Recursive records in skills:** inside `rdx.ops.x.y { statement = statement }` the right-hand
+  `statement` is the field being defined, not the skill's input: infinite recursion. Pass inputs
+  through a function's parameters (see `reconcile-statement/scripts/main.ncl`) or use another
+  field name.
+- **Refs and model contracts:** an argument that may be `rdx.ref "step"` can't carry a model
+  contract such as `Statement` (the ref is `{ ref = … }` until the executor resolves it), so such
+  arguments are `ValueOrRef` and the op checks them in Rust.
 - `rdx_plan::PlanSource`: evaluates a skill's `scripts/main.ncl` with `nickel/` on the import path,
   sets inputs with `.input("field", "<nickel expr>")`, and returns a checked `Plan`.
