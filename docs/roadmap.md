@@ -56,7 +56,7 @@ wave 4:                      12  13  14  15
 wave 5:                      16
 ```
 
-Done: piece 1 (#9), piece 2 (#10) and piece 3 (#4, #8), merged by 2026-11-20; piece 6 (#PR) when
+Done: piece 1 (#9), piece 2 (#10) and piece 3 (#4, #8), merged by 2026-11-20; piece 6 (#17) when
 its PR merges: crate `rdx-match`, op `matching.propose`, policy in `nickel/rdx/matching.ncl`,
 skill `reconcile-statement` (proposals only; piece 9 adds booking). The compliance
 research behind pieces 15 and 16 is in (#11, #12, #15); their code is not.
