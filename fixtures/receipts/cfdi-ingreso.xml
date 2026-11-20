@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="4.0" Serie="A" Folio="1187" Fecha="2026-03-12T11:05:33" FormaPago="04" SubTotal="1000.00" Moneda="MXN" Total="1160.00" TipoDeComprobante="I" Exportacion="01" MetodoPago="PUE" LugarExpedicion="06000">
+  <cfdi:Emisor Rfc="EKU9003173C9" Nombre="PAPELERÍA EJEMPLO" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="XIA190128J61" Nombre="ORGANIZACIÓN DE PRUEBA" DomicilioFiscalReceptor="06000" RegimenFiscalReceptor="603" UsoCFDI="G03"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="14111500" Cantidad="10" ClaveUnidad="H87" Descripcion="Papel bond carta" ValorUnitario="100.00" Importe="1000.00" ObjetoImp="02"/>
+  </cfdi:Conceptos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="6F1E2D3C-4B5A-4978-8899-AABBCCDDEEFF" FechaTimbrado="2026-03-12T11:06:01" RfcProvCertif="SPR190613I52" SelloCFD="synthetic" NoCertificadoSAT="00000000000000000000" SelloSAT="synthetic"/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

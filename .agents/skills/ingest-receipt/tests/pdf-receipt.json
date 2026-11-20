@@ -1,0 +1,146 @@
+{
+  "documents": [
+    "fixtures/receipts/receipt-pdf.pdf"
+  ],
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:cd95821990fa05f7f5a1a3f575022ea9f95c385d396f8aa97df90c8e14237e3f",
+    "skill": "ingest-receipt",
+    "steps": [
+      {
+        "id": "pdf",
+        "op": "pdf.text",
+        "output": {
+          "document": "sha256:676185a6fbca717d484e63c81e02b51b029cca1c183e9878c02fad03864c90b7",
+          "pages": [
+            {
+              "lines": [
+                {
+                  "spans": [
+                    {
+                      "text": "Brightline Print Shop",
+                      "x": 72.0,
+                      "x_end": 217.8
+                    }
+                  ],
+                  "y": 720.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Receipt no: BP-7741",
+                      "x": 72.0,
+                      "x_end": 173.5
+                    }
+                  ],
+                  "y": 690.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Date: 2026-03-14",
+                      "x": 72.0,
+                      "x_end": 157.6
+                    }
+                  ],
+                  "y": 672.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Poster printing, 20 copies",
+                      "x": 72.0,
+                      "x_end": 196.1
+                    },
+                    {
+                      "text": "48.00",
+                      "x": 372.5,
+                      "x_end": 400.0
+                    }
+                  ],
+                  "y": 654.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Sales tax",
+                      "x": 72.0,
+                      "x_end": 117.2
+                    },
+                    {
+                      "text": "3.84",
+                      "x": 378.6,
+                      "x_end": 400.0
+                    }
+                  ],
+                  "y": 636.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Total paid",
+                      "x": 72.0,
+                      "x_end": 120.3
+                    },
+                    {
+                      "text": "USD 51.84",
+                      "x": 346.2,
+                      "x_end": 400.0
+                    }
+                  ],
+                  "y": 618.0
+                }
+              ]
+            }
+          ],
+          "text": "Brightline Print Shop\nReceipt no: BP-7741\nDate: 2026-03-14\nPoster printing, 20 copies  48.00\nSales tax  3.84\nTotal paid  USD 51.84\n"
+        },
+        "output_digest": "sha256:f33d5ceba0e9090c017e77f9ddf8c226e91742c6654d31c648f281cc6b4a11ec",
+        "status": "done"
+      },
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "extractor": "text",
+          "fields": {
+            "date": "2026-03-14",
+            "kind": "receipt",
+            "merchant": "Brightline Print Shop",
+            "reference": "BP-7741",
+            "total": {
+              "currency": "USD",
+              "minor": 5184
+            }
+          },
+          "missing": [],
+          "receipt": {
+            "date": "2026-03-14",
+            "id": "r-676185a6fbca717d",
+            "kind": "receipt",
+            "merchant": "Brightline Print Shop",
+            "reference": "BP-7741",
+            "source": "sha256:676185a6fbca717d484e63c81e02b51b029cca1c183e9878c02fad03864c90b7",
+            "supporter": "s-0001",
+            "total": {
+              "currency": "USD",
+              "minor": 5184
+            }
+          },
+          "source": "sha256:676185a6fbca717d484e63c81e02b51b029cca1c183e9878c02fad03864c90b7",
+          "status": "complete",
+          "warnings": []
+        },
+        "output_digest": "sha256:61b341eb7d95baf8dec33fd7f8a51f72f583c2e0de4a4ad394faddf058faa92d",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "\"sha256:676185a6fbca717d484e63c81e02b51b029cca1c183e9878c02fad03864c90b7\"",
+    "media_type": "\"application/pdf\"",
+    "supporter": "\"s-0001\""
+  }
+}

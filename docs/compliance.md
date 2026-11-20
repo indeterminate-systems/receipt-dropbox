@@ -257,6 +257,10 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
 - **R1.** Capture CFDI **XML** (from upload, email or a supporter's SAT download), not only the PDF:
   the XML is the legal document. Parse CFDI 4.0, including the Pagos and *erogaciones a través de
   terceros* complements.
+  *Status (piece 5):* `receipt.extract` reads CFDI 4.0 XML, uploaded or attached to an email, into
+  the receipt (issuer, date, total, serie-folio) plus its folio fiscal, issuer and receiver RFC,
+  payment form and method. A Pagos CFDI (tipo P) is recognised and flagged, not parsed; the
+  *erogaciones* complement, the seal and SAT status are not checked yet (piece 15).
 - **R2.** Check the receptor against the organization's fiscal profile (RFC, name, postcode,
   regime, UsoCFDI). A CFDI issued to the supporter's RFC is flagged with how to fix it, never
   silently accepted.

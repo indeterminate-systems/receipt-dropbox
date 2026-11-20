@@ -15,6 +15,7 @@ rdx-host = { path = "../rdx-host", features = ["local"] }
 rdx-match = { path = "../rdx-match" }
 rdx-pdf = { path = "../rdx-pdf" }
 rdx-plan = { path = "../rdx-plan" }
+rdx-receipt = { path = "../rdx-receipt" }
 rdx-statement = { path = "../rdx-statement" }
 serde_json.workspace = true
 

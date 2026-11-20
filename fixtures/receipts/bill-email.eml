@@ -1,0 +1,35 @@
+Return-Path: <billing@paperleaf.example>
+From: "Paperleaf Supply" <billing@paperleaf.example>
+To: Test Supporter 1 <supporter1@example.org>
+Subject: Your invoice INV-20417 from Paperleaf Supply
+Date: Tue, 10 Mar 2026 09:14:02 -0600
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="b1_paperleaf"
+
+--b1_paperleaf
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hello Test Supporter 1,
+
+Thank you for your order. Here is your invoice.
+
+Invoice number: INV-20417
+Invoice date: March 10, 2026
+
+Printer paper, 10 reams          $259.16
+Sales tax                         $20.73
+Total due                        $279.89
+
+Questions? Reply to this email. Paperleaf Supply, 100 Example Way, Spring=
+field.
+
+--b1_paperleaf
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+<html><body><p>Hello Test Supporter 1,</p>
+<table><tr><td>Invoice number</td><td>INV-20417</td></tr>
+<tr><td>Total due</td><td>$279.89</td></tr></table></body></html>
+
+--b1_paperleaf--

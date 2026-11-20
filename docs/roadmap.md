@@ -59,10 +59,12 @@ wave 4:                      12  13  14  15
 wave 5:                      16
 ```
 
-Done: piece 1 (#9), piece 2 (#10) and piece 3 (#4, #8), merged by 2026-11-20; piece 4 (#20); piece 6 (#17) when
-its PR merges: crate `rdx-match`, op `matching.propose`, policy in `nickel/rdx/matching.ncl`,
-skill `reconcile-statement` (proposals only; piece 9 adds booking). The compliance
-research behind pieces 15 and 16 is in (#11, #12, #15); their code is not.
+Done: piece 1 (#9), piece 2 (#10) and piece 3 (#4, #8), merged by 2026-11-20; piece 4 (#20);
+piece 6 (#17): crate `rdx-match`, op `matching.propose`, policy in `nickel/rdx/matching.ncl`,
+skill `reconcile-statement` (proposals only; piece 9 adds booking). Piece 5's extraction from
+emails, PDFs (through piece 4's `pdf.text`), HTML, text and CFDI XML is in review (#18); still to
+do for piece 5: line items, and scoring extraction against the invoice benchmark below. The
+compliance research behind pieces 15 and 16 is in (#11, #12, #15); their code is not.
 
 Piece 15 is what makes a reimbursement hold up for tax (see [compliance](compliance.md)). Its
 proof policy is per organization, so a group with no RFC still gets matching, redaction and the

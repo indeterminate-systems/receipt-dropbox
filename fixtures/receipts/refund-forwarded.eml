@@ -1,0 +1,34 @@
+From: Test Supporter 2 <supporter2@example.org>
+To: receipts@example.org
+Subject: Fwd: Your refund from Lantern Cafe Catering
+Date: Thu, 19 Mar 2026 08:00:00 +0100
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="outer"
+
+--outer
+Content-Type: text/plain; charset=us-ascii
+
+Forwarding the refund for the catering order.
+
+---------- Forwarded message ---------
+From: Lantern Cafe Catering <orders@lantern.example>
+Date: Wed, 18 Mar 2026 at 17:20
+Subject: Your refund from Lantern Cafe Catering
+
+--outer
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: base64
+
+PGh0bWw+PGJvZHk+PGRpdj5MYW50ZXJuIENhZmUgQ2F0ZXJpbmc8L2Rpdj48ZGl2PlJlZnVuZCBy
+ZWNlaXB0PC9kaXY+CjxwPk9yZGVyIG51bWJlcjogTEMtNTUyMTwvcD48cD5SZWZ1bmQgZGF0ZTog
+MjAyNi0wMy0xODwvcD4KPHA+QW1vdW50IHJlZnVuZGVkOiAmZXVybzs0Miw1MDwvcD48L2JvZHk+
+PC9odG1sPg==
+
+--outer
+Content-Type: application/pdf; name="refund-LC-5521.pdf"
+Content-Disposition: attachment; filename="refund-LC-5521.pdf"
+Content-Transfer-Encoding: base64
+
+JVBERi0xLjQKJSBzeW50aGV0aWMgcGxhY2Vob2xkZXIKJSVFT0YK
+
+--outer--

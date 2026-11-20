@@ -1,0 +1,53 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:619c7d10916c75c26da625fcb3db3d74fbd7fb044840cd97bd4b3f0c591282a4",
+    "skill": "ingest-receipt",
+    "steps": [
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "extractor": "text",
+          "fields": {
+            "date": "2026-03-21",
+            "kind": "receipt",
+            "merchant": "Metro Rideshare",
+            "reference": "MR-88213",
+            "total": {
+              "currency": "USD",
+              "minor": 23553
+            }
+          },
+          "missing": [],
+          "receipt": {
+            "date": "2026-03-21",
+            "id": "r-b9b26041a9298f74",
+            "kind": "receipt",
+            "merchant": "Metro Rideshare",
+            "reference": "MR-88213",
+            "source": "sha256:b9b26041a9298f745156ba7e3d03cb00303dfa55eda498d5e2cfb907e6353a72",
+            "supporter": "s-0001",
+            "total": {
+              "currency": "USD",
+              "minor": 23553
+            }
+          },
+          "source": "sha256:b9b26041a9298f745156ba7e3d03cb00303dfa55eda498d5e2cfb907e6353a72",
+          "status": "complete",
+          "warnings": []
+        },
+        "output_digest": "sha256:788ab8eb581350e54324f605b4ebe4e5f4043e1b848e1e24678830133d79e103",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "import \"../fixtures/receipts/receipt-html.html\" as 'Text",
+    "hints": "{ currency = \"USD\" }",
+    "media_type": "\"text/html\"",
+    "supporter": "\"s-0001\""
+  }
+}

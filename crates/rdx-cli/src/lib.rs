@@ -45,6 +45,7 @@ pub fn registry() -> Registry {
     rdx_match::register(&mut registry);
     rdx_pdf::register(&mut registry);
     rdx_statement::register(&mut registry);
+    rdx_receipt::register(&mut registry);
     registry
 }
 
