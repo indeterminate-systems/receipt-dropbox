@@ -48,9 +48,11 @@ change both together.
 | :-- | :-- |
 | `crates/rdx-host` | host capability traits (blob store, kv, mail-out, clock, random, audit log), in-memory and local (directory) implementations |
 | `crates/rdx-plan` | plans (code-mode entrypoint): types, validation, executor, built-in ops, audit chain, Nickel loading |
-| `crates/rdx-cli` | `rdx`, the local host: `rdx run <skill>`, `rdx audit verify` |
+| `crates/rdx-cli` | `rdx`, the local host: `rdx run <skill>`, `rdx audit verify`; `rdx_cli::registry()` is where domain crates register their ops (skill tests use it too) |
 | `crates/rdx-model` | domain model (money, dates, statements, receipts, matches, ledger entries) and the synthetic data generator (`rdx_model::synth`) |
+| `crates/rdx-match` | matching: proposes line ↔ receipt matches (exact, tolerance, other currency, split, instalments, partial) under a policy; op `matching.propose` |
 | `nickel/rdx/api.ncl` | plan contracts and op constructors agents write against |
+| `nickel/rdx/matching.ncl` | the matching policy contract (tolerances, date windows, exchange rates) and its defaults |
 | `nickel/rdx/model.ncl` | contracts for the domain model's JSON, for op contracts to reuse |
 | `fixtures/synthetic/` | generated fixtures; `UPDATE_GOLDEN=1 cargo test -p rdx-model --test fixtures` rewrites them |
 | `wit/rdx.wit` | capability and extension interfaces (mirrors the Rust traits) |

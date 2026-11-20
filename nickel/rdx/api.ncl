@@ -6,6 +6,7 @@
 # plans can also arrive as JSON.
 #
 # Each op has a constructor under `ops`. Adding an op: see docs/workflow.md.
+let matching_policy = import "rdx/matching.ncl" in
 let StepId =
   std.contract.from_validator (fun id =>
     if std.is_string id && std.string.is_match "^[a-z][a-z0-9_-]*$" id then
@@ -174,6 +175,29 @@ in
           Use it to record what a step produced in the audit trail. No effects.
         "%
         = step "core.digest" { value | ValueOrRef },
+    },
+
+    # `match` is a Nickel keyword, hence `matching`.
+    matching = {
+      propose
+        | doc m%"
+          Proposes matches between one statement's lines and its supporter's receipts and bills,
+          under a matching `policy` (rdx/matching.ncl; omit it for the defaults, or override only
+          the tolerances you tune). `decided` lists earlier matches: confirmed lines and receipts
+          are left alone and rejected pairs are not proposed again. Output: `proposals` (each
+          with `kind`, `review`, `reasons`, `matches`, `evidence`), `unmatched_lines`,
+          `unmatched_receipts`, `notes` and a `summary`. Every match is `proposed`, never
+          confirmed. No effects.
+        "%
+        = step "matching.propose" {
+          # Usually earlier steps' outputs (`rdx.ref`), so not checked against rdx/model.ncl
+          # here; the op checks them in Rust. (Applying those contracts to imported JSON also
+          # trips a nickel-lang-core 0.19 panic: see docs/reference/nickel.md.)
+          statement | ValueOrRef,
+          receipts | ValueOrRef,
+          decided | ValueOrRef | default = [],
+          policy | matching_policy.Policy | default = {},
+        },
     },
 
     # Ops below need host capabilities; a host without one rejects the plan before it runs.

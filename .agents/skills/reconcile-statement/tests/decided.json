@@ -1,0 +1,146 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:fc5f5069713f8e0a598bf77b049fc0fcb0b29bcdfd04629553547f770189e13b",
+    "skill": "reconcile-statement",
+    "steps": [
+      {
+        "id": "proposals",
+        "op": "matching.propose",
+        "output": {
+          "notes": [
+            "6 receipt(s) from other supporters were not considered: a receipt only matches its own supporter's statements"
+          ],
+          "proposals": [
+            {
+              "evidence": [
+                {
+                  "days": 0,
+                  "difference": {
+                    "currency": "USD",
+                    "minor": 0
+                  },
+                  "line": "l03",
+                  "merchant_similarity": 100,
+                  "receipt": "r-2026-03.s-0001.05",
+                  "reference": false
+                }
+              ],
+              "kind": "exact",
+              "matches": [
+                {
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 25085
+                  },
+                  "line": {
+                    "line": "l03",
+                    "statement": "st-2026-03.s-0001"
+                  },
+                  "receipt": "r-2026-03.s-0001.05",
+                  "status": "proposed"
+                }
+              ],
+              "reasons": [],
+              "review": false
+            },
+            {
+              "evidence": [
+                {
+                  "days": 10,
+                  "difference": {
+                    "currency": "USD",
+                    "minor": 0
+                  },
+                  "line": "l07",
+                  "merchant_similarity": 100,
+                  "receipt": "r-2026-03.s-0001.04",
+                  "reference": true
+                }
+              ],
+              "kind": "exact",
+              "matches": [
+                {
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 6209
+                  },
+                  "line": {
+                    "line": "l07",
+                    "statement": "st-2026-03.s-0001"
+                  },
+                  "receipt": "r-2026-03.s-0001.04",
+                  "status": "proposed"
+                }
+              ],
+              "reasons": [],
+              "review": false
+            },
+            {
+              "evidence": [
+                {
+                  "days": 2,
+                  "difference": {
+                    "currency": "USD",
+                    "minor": 0
+                  },
+                  "line": "l09",
+                  "merchant_similarity": 100,
+                  "receipt": "r-2026-03.s-0001.02",
+                  "reference": false
+                }
+              ],
+              "kind": "exact",
+              "matches": [
+                {
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 23553
+                  },
+                  "line": {
+                    "line": "l09",
+                    "statement": "st-2026-03.s-0001"
+                  },
+                  "receipt": "r-2026-03.s-0001.02",
+                  "status": "proposed"
+                }
+              ],
+              "reasons": [],
+              "review": false
+            }
+          ],
+          "statement": "st-2026-03.s-0001",
+          "summary": {
+            "decided_lines": 1,
+            "lines": 12,
+            "proposed_lines": 3,
+            "to_review": 0,
+            "unmatched_lines": 8,
+            "unmatched_receipts": 2
+          },
+          "unmatched_lines": [
+            "l02",
+            "l04",
+            "l05",
+            "l06",
+            "l08",
+            "l10",
+            "l11",
+            "l12"
+          ],
+          "unmatched_receipts": [
+            "r-2026-03.s-0001.01",
+            "r-2026-03.s-0001.06"
+          ]
+        },
+        "output_digest": "sha256:dbe36032f0bdc26ad1ca8eeb49bc03542c2af4354c254f34c465dca2a6e24ee7",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "decided": "[{ line = { statement = \"st-2026-03.s-0001\", line = \"l01\" }, receipt = \"r-2026-03.s-0001.03\", amount = { minor = 28974, currency = \"USD\" }, status = \"confirmed\" }, { line = { statement = \"st-2026-03.s-0001\", line = \"l02\" }, receipt = \"r-2026-03.s-0001.01\", amount = { minor = 27989, currency = \"USD\" }, status = \"rejected\" }]"
+  }
+}
