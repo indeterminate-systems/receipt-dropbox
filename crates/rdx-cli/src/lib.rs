@@ -15,6 +15,7 @@ rdx: run Receipt Dropbox skills (code mode)
 
 Usage:
   rdx run <SKILL> [--input FIELD=VALUE]... [--execute]
+  rdx blob put FILE
   rdx audit verify
   rdx --help
 
@@ -26,6 +27,9 @@ Runs are dry runs: ops with effects are skipped and the report shows what they w
 
 The report is JSON on stdout. Every run is appended to the audit log in the state directory.
 
+`blob put` stores a file (a statement or receipt) in the local blob store and prints its
+digest, which skills take as `document`: --input document='\"sha256:...\"'.
+
 Options:
   --root DIR    repository root (default: the nearest directory above with nickel/rdx/api.ncl)
   --state DIR   where the local host keeps blobs, kv, outbox and audit.jsonl (default: ROOT/.rdx)
@@ -34,11 +38,15 @@ Exit status: 0 ok, 1 a step or the audit check failed, 2 the plan or command was
 before anything ran, 3 the run finished but could not be recorded.
 ";
 
-/// Every op the local host offers. `cargo xtask check` runs skills' test cases with the same set.
+/// Every op this host offers: the built-in ones and each domain crate's. `cargo xtask check` runs
+/// skill tests with the same registry, so register a new domain's ops here once.
 pub fn registry() -> Registry {
-    let mut r = Registry::with_core();
-    rdx_envelope::register(&mut r);
-    r
+    let mut registry = Registry::with_core();
+    rdx_envelope::register(&mut registry);
+    rdx_match::register(&mut registry);
+    rdx_pdf::register(&mut registry);
+    rdx_statement::register(&mut registry);
+    registry
 }
 
 /// Runs the command line and returns the exit status.
@@ -77,6 +85,10 @@ enum Command {
         dirs: Dirs,
     },
     AuditVerify {
+        dirs: Dirs,
+    },
+    BlobPut {
+        file: PathBuf,
         dirs: Dirs,
     },
 }
@@ -125,6 +137,11 @@ fn parse(args: &[String]) -> Result<Command, String> {
         }),
         ["run"] => Err("run needs a skill".into()),
         ["audit", "verify"] => Ok(Command::AuditVerify { dirs }),
+        ["blob", "put", file] => Ok(Command::BlobPut {
+            file: file.into(),
+            dirs,
+        }),
+        ["blob", "put"] => Err("blob put needs a FILE".into()),
         [] => Err("no command".into()),
         other => Err(format!("unknown command `{}`", other.join(" "))),
     }
@@ -200,6 +217,7 @@ fn dispatch(cmd: Command, out: &mut dyn Write, err: &mut dyn Write) -> Result<u8
             dirs,
         } => run(&skill, inputs, execute, dirs, out, err),
         Command::AuditVerify { dirs } => audit_verify(dirs, out, err),
+        Command::BlobPut { file, dirs } => blob_put(&file, dirs, out),
     }
 }
 
@@ -283,4 +301,18 @@ fn audit_verify(dirs: Dirs, out: &mut dyn Write, err: &mut dyn Write) -> Result<
             Ok(1)
         }
     }
+}
+
+fn blob_put(file: &Path, dirs: Dirs, out: &mut dyn Write) -> Result<u8, Failure> {
+    let root = find_root(dirs.root)?;
+    let bytes = std::fs::read(file)
+        .map_err(|e| rejected(format!("cannot read {}: {e}", file.display())))?;
+    let mut host = local::host(&state_dir(&root, dirs.state)).map_err(rejected)?;
+    let store = host
+        .blob_store
+        .as_mut()
+        .ok_or_else(|| rejected("the local host has no blob store"))?;
+    let digest = store.put(&bytes).map_err(rejected)?;
+    let _ = writeln!(out, "{digest}");
+    Ok(0)
 }

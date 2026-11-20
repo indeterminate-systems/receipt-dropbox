@@ -48,12 +48,16 @@ change both together.
 | :-- | :-- |
 | `crates/rdx-host` | host capability traits (blob store, kv, mail-out, clock, random, audit log), in-memory and local (directory) implementations |
 | `crates/rdx-plan` | plans (code-mode entrypoint): types, validation, executor, built-in ops, audit chain, Nickel loading |
-| `crates/rdx-cli` | `rdx`, the local host: `rdx run <skill>`, `rdx audit verify` |
+| `crates/rdx-cli` | `rdx`, the local host: `rdx run <skill>`, `rdx blob put FILE`, `rdx audit verify`; `rdx_cli::registry()` lists every op |
+| `crates/rdx-pdf` | PDF text layer (lines, spans, positions) and the `pdf.text` op; a fixture writer behind feature `write` |
+| `crates/rdx-statement` | statement parsers (CSV, OFX, the `example-bank` PDF layout), balance checks, the `statement.parse` op |
 | `crates/rdx-model` | domain model (money, dates, statements, receipts, matches, ledger entries) and the synthetic data generator (`rdx_model::synth`) |
 | `crates/rdx-envelope` | statements as signed Gordian Envelopes: seal, redact (elide unmatched lines), verify; `envelope.*` ops |
+| `crates/rdx-match` | matching: proposes line ↔ receipt matches (exact, tolerance, other currency, split, instalments, partial) under a policy; op `matching.propose` |
 | `nickel/rdx/api.ncl` | plan contracts and op constructors agents write against |
+| `nickel/rdx/matching.ncl` | the matching policy contract (tolerances, date windows, exchange rates) and its defaults |
 | `nickel/rdx/model.ncl` | contracts for the domain model's JSON, for op contracts to reuse |
-| `fixtures/synthetic/` | generated fixtures; `UPDATE_GOLDEN=1 cargo test -p rdx-model --test fixtures` rewrites them |
+| `fixtures/synthetic/` | generated fixtures; `UPDATE_GOLDEN=1 cargo test -p rdx-model --test fixtures` rewrites them, and `UPDATE_GOLDEN=1 cargo test -p rdx-statement --test parse` the OFX and PDF statements |
 | `wit/rdx.wit` | capability and extension interfaces (mirrors the Rust traits) |
 | `.agents/skills/` | Agent Skills; `.claude/skills` links here |
 | `xtask/` | repo checks |

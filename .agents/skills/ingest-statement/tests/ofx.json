@@ -1,0 +1,163 @@
+{
+  "documents": [
+    "fixtures/synthetic/small/statements/st-2026-03.s-0002.ofx"
+  ],
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:d194f941c3169480a3cfd8379070aa00c35437ecdde493b3f7a17a36a1808059",
+    "skill": "ingest-statement",
+    "steps": [
+      {
+        "id": "statement",
+        "op": "statement.parse",
+        "output": {
+          "checks": {
+            "closing": "printed",
+            "opening": "derived",
+            "running_balances": 0,
+            "totals": false
+          },
+          "parser": "ofx",
+          "statement": {
+            "account": {
+              "institution": "Example Bank",
+              "mask": "0002"
+            },
+            "closing": {
+              "currency": "USD",
+              "minor": 289470
+            },
+            "currency": "USD",
+            "id": "st-2026-03.s-0002",
+            "lines": [
+              {
+                "amount": {
+                  "currency": "USD",
+                  "minor": -8582
+                },
+                "date": "2026-03-04",
+                "description": "CORNER GROCERY #4133",
+                "id": "l01"
+              },
+              {
+                "amount": {
+                  "currency": "USD",
+                  "minor": -1357
+                },
+                "date": "2026-03-05",
+                "description": "CINEMA PLAZA #2659",
+                "id": "l02"
+              },
+              {
+                "amount": {
+                  "currency": "USD",
+                  "minor": -9958
+                },
+                "date": "2026-03-08",
+                "description": "LANTERN CAFE CATERING #7019",
+                "id": "l03"
+              },
+              {
+                "amount": {
+                  "currency": "USD",
+                  "minor": -6020
+                },
+                "date": "2026-03-11",
+                "description": "CLEARWAVE TELECOM INV-004932",
+                "id": "l04",
+                "reference": "INV-004932"
+              },
+              {
+                "amount": {
+                  "currency": "USD",
+                  "minor": 92967
+                },
+                "date": "2026-03-11",
+                "description": "TRANSFER IN",
+                "id": "l05"
+              },
+              {
+                "amount": {
+                  "currency": "USD",
+                  "minor": -8203
+                },
+                "date": "2026-03-16",
+                "description": "CINEMA PLAZA #3109",
+                "id": "l06"
+              },
+              {
+                "amount": {
+                  "currency": "USD",
+                  "minor": -26604
+                },
+                "date": "2026-03-19",
+                "description": "BRIGHTLINE PRINT #8286",
+                "id": "l07"
+              },
+              {
+                "amount": {
+                  "currency": "USD",
+                  "minor": -2976
+                },
+                "date": "2026-03-19",
+                "description": "METRO RIDESHARE TRIP #6439",
+                "id": "l08"
+              },
+              {
+                "amount": {
+                  "currency": "USD",
+                  "minor": -28444
+                },
+                "date": "2026-03-21",
+                "description": "METRO RIDESHARE TRIP #9055",
+                "id": "l09"
+              },
+              {
+                "amount": {
+                  "currency": "USD",
+                  "minor": 6607
+                },
+                "date": "2026-03-24",
+                "description": "METRO RIDESHARE TRIP REFUND",
+                "id": "l10"
+              },
+              {
+                "amount": {
+                  "currency": "USD",
+                  "minor": -10496
+                },
+                "date": "2026-03-28",
+                "description": "CITY TRANSIT FARE #3403",
+                "id": "l11"
+              }
+            ],
+            "opening": {
+              "currency": "USD",
+              "minor": 292536
+            },
+            "original": "sha256:385eb8c607c69ebabef47784b0b5fa4b9074d1e648e16a63db1cc07cf9457ed9",
+            "period": {
+              "end": "2026-03-31",
+              "start": "2026-03-01"
+            },
+            "supporter": "s-0002"
+          }
+        },
+        "output_digest": "sha256:a93f5a12329268ffd4393b2d0437ad0def4366defb3a2ea5aaa604e8d774ad78",
+        "status": "done"
+      },
+      {
+        "op": "core.digest",
+        "output": "sha256:a93f5a12329268ffd4393b2d0437ad0def4366defb3a2ea5aaa604e8d774ad78",
+        "output_digest": "sha256:9ab49e76bad69b91f0dd27d46c78f835265237ddee13ee3870c00449a2bab49e",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "\"sha256:385eb8c607c69ebabef47784b0b5fa4b9074d1e648e16a63db1cc07cf9457ed9\"",
+    "supporter": "\"s-0002\""
+  }
+}

@@ -69,7 +69,8 @@ clock directly; those come through the capability traits in layer 2.
 | `rdx-model` | Money (integer minor units plus currency), `Statement`, `StatementLine`, `Receipt`, `Match`, `Supporter`, identifiers and digests |
 | `rdx-plan` | Plan types, plan validation and the executor. **Scaffolded in this PR.** |
 | `rdx-config` | Loads Nickel configuration and policy through `nickel-embed`, against the contracts in `nickel/rdx/` |
-| `rdx-statement` | PDF text-layer extraction and statement line parsing; OCR fallback through the `ocr` capability |
+| `rdx-pdf` | PDF text layer: lines and spans with positions, in pure Rust. See [ADR-0006](adr/0006-pdf-text-layer-reader.md) |
+| `rdx-statement` | Statement parsing (CSV, OFX, PDF layouts) behind the `statement-parser` extension point, with balance checks; OCR fallback through the `ocr` capability (piece 11) |
 | `rdx-receipt` | Receipt and emailed-bill extraction (amount, date, merchant, reference) |
 | `rdx-match` | Candidate generation and scoring between statement lines and receipts, with tolerances from policy |
 | `rdx-envelope` | Gordian Envelope: one salted assertion per transaction, signing, elision of unmatched lines, verification (`bc-envelope`, `bc-components`); encryption to recipients comes with `rdx-keys`. See [ADR-0005](adr/0005-statement-envelopes.md) |
@@ -147,8 +148,8 @@ rdx.plan {
   steps = [
     rdx.ops.statement.parse { id = "stmt", input = "inbox/2026-03.pdf" },
     rdx.ops.receipt.collect { id = "rcpts", since = "2026-02-25" },
-    rdx.ops.match.run { id = "matches", statement = 'ref "stmt", receipts = 'ref "rcpts" },
-    rdx.ops.ledger.post { matches = 'ref "matches" },
+    rdx.ops.matching.propose { id = "matches", statement = rdx.ref "stmt", receipts = rdx.ref "rcpts" },
+    rdx.ops.ledger.post { matches = rdx.ref "matches" },
   ],
 }
 ```

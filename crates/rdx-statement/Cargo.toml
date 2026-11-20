@@ -1,0 +1,25 @@
+[package]
+name = "rdx-statement"
+version = "0.1.0"
+description = "Receipt Dropbox statement parsing: CSV, OFX and PDF layouts into the domain model, with balance checks"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[features]
+default = []
+# Renders statements as OFX and as the example-bank PDF layout, for synthetic fixtures.
+render = ["rdx-pdf/write"]
+
+[dependencies]
+rdx-model = { path = "../rdx-model" }
+rdx-pdf = { path = "../rdx-pdf" }
+rdx-plan = { path = "../rdx-plan", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+rdx-host = { path = "../rdx-host" }
+rdx-plan = { path = "../rdx-plan" }
+rdx-statement = { path = ".", features = ["render"] }

@@ -6,6 +6,7 @@
 # plans can also arrive as JSON.
 #
 # Each op has a constructor under `ops`. Adding an op: see docs/workflow.md.
+let matching_policy = import "rdx/matching.ncl" in
 let StepId =
   std.contract.from_validator (fun id =>
     if std.is_string id && std.string.is_match "^[a-z][a-z0-9_-]*$" id then
@@ -150,6 +151,47 @@ let UrOf = fun kind =>
   )
 in
 
+let model = import "model.ncl" in
+
+# A document in the host's blob store: its digest, or a reference to a step that produced one.
+let DocumentC =
+  std.contract.from_validator (fun d =>
+    if std.is_string d && std.string.is_match "^sha256:[0-9a-f]{64}$" d then
+      'Ok
+    else if std.is_record d && std.record.fields d == ["ref"] then
+      'Ok
+    else
+      'Error {
+        message = "expected a document digest like `sha256:<64 hex digits>`",
+        notes = ["Put the file in the blob store first; locally, `rdx blob put FILE` prints its digest."],
+      }
+  )
+in
+
+let DecimalText =
+  std.contract.from_validator (fun s =>
+    if std.is_string s && std.string.is_match "^-?[0-9]+([.][0-9]+)?$" s then
+      'Ok
+    else
+      'Error {
+        message = "expected an amount as decimal text, like \"744.55\" or \"-12.00\"",
+        notes = ["Amounts are text so they are never floating point."],
+      }
+  )
+in
+
+let StatementFormat =
+  std.contract.from_validator (fun f =>
+    if std.is_string f && std.array.elem f ["auto", "csv", "ofx", "example-bank"] then
+      'Ok
+    else
+      'Error {
+        message = "unknown statement format",
+        notes = ["Use auto (detect), csv, ofx or example-bank."],
+      }
+  )
+in
+
 # Deliberately loose: one `@` with text on both sides. The mail host does the real checking.
 let EmailAddress =
   std.contract.from_validator (fun s =>
@@ -218,6 +260,29 @@ in
         },
     },
 
+    # `match` is a Nickel keyword, hence `matching`.
+    matching = {
+      propose
+        | doc m%"
+          Proposes matches between one statement's lines and its supporter's receipts and bills,
+          under a matching `policy` (rdx/matching.ncl; omit it for the defaults, or override only
+          the tolerances you tune). `decided` lists earlier matches: confirmed lines and receipts
+          are left alone and rejected pairs are not proposed again. Output: `proposals` (each
+          with `kind`, `review`, `reasons`, `matches`, `evidence`), `unmatched_lines`,
+          `unmatched_receipts`, `notes` and a `summary`. Every match is `proposed`, never
+          confirmed. No effects.
+        "%
+        = step "matching.propose" {
+          # Usually earlier steps' outputs (`rdx.ref`), so not checked against rdx/model.ncl
+          # here; the op checks them in Rust. (Applying those contracts to imported JSON also
+          # trips a nickel-lang-core 0.19 panic: see docs/reference/nickel.md.)
+          statement | ValueOrRef,
+          receipts | ValueOrRef,
+          decided | ValueOrRef | default = [],
+          policy | matching_policy.Policy | default = {},
+        },
+    },
+
     # Ops below need host capabilities; a host without one rejects the plan before it runs.
 
     clock = {
@@ -249,6 +314,56 @@ in
           to | EmailAddress,
           subject | NonEmptyString,
           text | String,
+        },
+    },
+
+    pdf = {
+      text
+        | doc m%"
+          The text layer of a PDF in the blob store: `{ document, pages, text }`. `pages` holds
+          each line's spans (runs of words split at wide gaps, with left and right edges in
+          points); `text` is the same as plain lines. Empty `text` means no text layer (a scan).
+          Needs `blob-store`. No effects.
+        "%
+        = step "pdf.text" { document | DocumentC },
+    },
+
+    statement = {
+      parse
+        | doc m%"
+          Parses a bank statement (CSV, OFX, or a PDF in a known layout) from the blob store into
+          a checked statement: `{ statement, parser, checks }`. Fails, saying what to fix, if the
+          lines don't add up (running balances, printed totals, opening + lines = closing). Facts
+          the document doesn't state are passed here; facts it does state must agree. Needs
+          `blob-store`. No effects.
+        "%
+        = step "statement.parse" {
+          document | DocumentC | doc "The statement file's blob digest.",
+          supporter | model.Id | doc "Whose account this is.",
+          statement_id
+            | model.Id
+            | doc "Defaults to `st-<YYYY-MM of the period start>.<supporter>`."
+            | optional,
+          format
+            | StatementFormat
+            | doc "Parser to use; detected from the document when absent."
+            | optional,
+          currency | model.Currency | doc "Needed when the document doesn't say (CSV)." | optional,
+          period | model.Period | doc "Needed when the lines don't fix it." | optional,
+          account
+            | { institution | NonEmptyString, mask | String }
+            | doc "Bank and last digits of the account; needed for CSV."
+            | optional,
+          opening | DecimalText | doc "When the document prints no balances." | optional,
+          closing | DecimalText | doc "When the document prints no balances." | optional,
+          csv
+            | {
+              delimiter | String | optional,
+              date_order | [| 'ymd, 'mdy, 'dmy |] | optional,
+              decimal | [| 'auto, 'point, 'comma |] | optional,
+            }
+            | doc "How to read a CSV whose header and values don't settle it."
+            | optional,
         },
     },
   },

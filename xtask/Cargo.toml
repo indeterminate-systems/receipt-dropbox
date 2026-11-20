@@ -7,7 +7,7 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
-# Skills' test cases run with the local host's ops (`rdx_cli::registry`).
+# For `rdx_cli::registry()`: skill tests run with the same ops as `rdx`.
 rdx-cli = { path = "../crates/rdx-cli" }
 rdx-host = { path = "../crates/rdx-host" }
 rdx-plan = { path = "../crates/rdx-plan" }
