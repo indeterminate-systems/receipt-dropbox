@@ -1,0 +1,53 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:e717bf211abbfe4a619aab7b781f026e448d0e698b742bc4784e28fc6431504c",
+    "skill": "ingest-receipt",
+    "steps": [
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "extractor": "text",
+          "fields": {
+            "date": "2026-03-03",
+            "kind": "receipt",
+            "merchant": "CAFETERÍA LA LINTERNA",
+            "reference": "004512",
+            "total": {
+              "currency": "MXN",
+              "minor": 14500
+            }
+          },
+          "missing": [],
+          "receipt": {
+            "date": "2026-03-03",
+            "id": "r-3a663c83f26f933a",
+            "kind": "receipt",
+            "merchant": "CAFETERÍA LA LINTERNA",
+            "reference": "004512",
+            "source": "sha256:3a663c83f26f933aaa8911113b554ac5d66d9b64d4ee3b4f9d4550debdeea722",
+            "supporter": "s-0002",
+            "total": {
+              "currency": "MXN",
+              "minor": 14500
+            }
+          },
+          "source": "sha256:3a663c83f26f933aaa8911113b554ac5d66d9b64d4ee3b4f9d4550debdeea722",
+          "status": "complete",
+          "warnings": []
+        },
+        "output_digest": "sha256:28a945fddc8e800f007d7d0992c98c27431b7b8ca77fb2e3e13715b27e672767",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "import \"../fixtures/receipts/ticket-es.txt\" as 'Text",
+    "hints": "{ currency = \"MXN\", date_order = \"dmy\" }",
+    "media_type": "\"text/plain\"",
+    "supporter": "\"s-0002\""
+  }
+}

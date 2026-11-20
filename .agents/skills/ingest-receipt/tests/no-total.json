@@ -1,0 +1,39 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:f9bbaf3521f826d7ec69f4097d4ac8ae5fb884516290b5e0b92dddf06dab4ac5",
+    "skill": "ingest-receipt",
+    "steps": [
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "extractor": "text",
+          "fields": {
+            "date": "2026-03-05",
+            "kind": "receipt",
+            "merchant": "Northwind Hardware",
+            "reference": "NW-3301"
+          },
+          "missing": [
+            "total"
+          ],
+          "receipt": null,
+          "source": "sha256:5dccd6fe95015273caefb99f7e4a417a9c313bb61f9e2a4ce74afaa167209e7d",
+          "status": "needs_review",
+          "warnings": []
+        },
+        "output_digest": "sha256:db8a3b3acef06fa2c7876d72bd5acd88689acc6261e2b614a88a87c8d6bf71ed",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "import \"../fixtures/receipts/no-total.txt\" as 'Text",
+    "hints": "{ currency = \"USD\" }",
+    "media_type": "\"text/plain\"",
+    "supporter": "\"s-0001\""
+  }
+}

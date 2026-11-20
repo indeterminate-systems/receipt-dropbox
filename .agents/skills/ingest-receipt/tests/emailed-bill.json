@@ -1,0 +1,52 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:b0e485fdd153ab9985ebfbd77f9110a9b5596ff854f14d64b6a64f1998b0b64f",
+    "skill": "ingest-receipt",
+    "steps": [
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "extractor": "text",
+          "fields": {
+            "date": "2026-03-10",
+            "kind": "bill",
+            "merchant": "Paperleaf Supply",
+            "reference": "INV-20417",
+            "total": {
+              "currency": "USD",
+              "minor": 27989
+            }
+          },
+          "missing": [],
+          "receipt": {
+            "date": "2026-03-10",
+            "id": "r-ff001899447a2db6",
+            "kind": "bill",
+            "merchant": "Paperleaf Supply",
+            "reference": "INV-20417",
+            "source": "sha256:ff001899447a2db6f1e9aff262b94b0263a15e12de72aa92528e6bf2d379659d",
+            "supporter": "s-0001",
+            "total": {
+              "currency": "USD",
+              "minor": 27989
+            }
+          },
+          "source": "sha256:ff001899447a2db6f1e9aff262b94b0263a15e12de72aa92528e6bf2d379659d",
+          "status": "complete",
+          "warnings": []
+        },
+        "output_digest": "sha256:86a0ad82dfb9a7190877da7da911557d359f4246ff6f68b92defef2a20421d16",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "import \"../fixtures/receipts/bill-email.eml\" as 'Text",
+    "hints": "{ currency = \"USD\" }",
+    "supporter": "\"s-0001\""
+  }
+}

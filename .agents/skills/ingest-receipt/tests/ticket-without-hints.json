@@ -1,0 +1,40 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:974cc23f1d145316298c47b2112df5352549692008134bf10203c77af6324533",
+    "skill": "ingest-receipt",
+    "steps": [
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "extractor": "text",
+          "fields": {
+            "date": "2026-03-03",
+            "kind": "receipt",
+            "merchant": "CAFETERÍA LA LINTERNA",
+            "reference": "004512"
+          },
+          "missing": [
+            "currency"
+          ],
+          "receipt": null,
+          "source": "sha256:3a663c83f26f933aaa8911113b554ac5d66d9b64d4ee3b4f9d4550debdeea722",
+          "status": "needs_review",
+          "warnings": [
+            "found a total but not its currency (`$` alone could be dollars or pesos); set the `currency` hint"
+          ]
+        },
+        "output_digest": "sha256:82dcc1e1eb32cbdbd2e62cc264e5e7de81ba1104add53f736a99049c3a280a69",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "import \"../fixtures/receipts/ticket-es.txt\" as 'Text",
+    "media_type": "\"text/plain\"",
+    "supporter": "\"s-0002\""
+  }
+}

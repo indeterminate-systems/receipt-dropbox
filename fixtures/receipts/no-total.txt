@@ -1,0 +1,6 @@
+Northwind Hardware
+Order confirmation
+Order #: NW-3301
+Date: 2026-03-05
+
+We have received your order and will email a receipt once it ships.

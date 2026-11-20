@@ -1,0 +1,15 @@
+CAFETERÍA LA LINTERNA
+Av. Ejemplo 123, Col. Centro
+RFC: XAXX010101000
+
+Ticket: 004512
+Fecha: 03/03/2026  13:42
+
+2 Café americano            90.00
+1 Pan dulce                 35.00
+Subtotal                   125.00
+IVA 16%                     20.00
+TOTAL                    $ 145.00
+
+Pago con tarjeta
+¡Gracias por su visita!

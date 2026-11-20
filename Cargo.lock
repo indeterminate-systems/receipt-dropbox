@@ -1715,6 +1715,7 @@ dependencies = [
  "rdx-match",
  "rdx-pdf",
  "rdx-plan",
+ "rdx-receipt",
  "rdx-statement",
  "serde_json",
  "tempfile",
@@ -1793,6 +1794,19 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.9",
+ "thiserror",
+]
+
+[[package]]
+name = "rdx-receipt"
+version = "0.1.0"
+dependencies = [
+ "rdx-host",
+ "rdx-model",
+ "rdx-pdf",
+ "rdx-plan",
+ "serde",
+ "serde_json",
  "thiserror",
 ]
 
