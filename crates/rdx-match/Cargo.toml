@@ -1,0 +1,19 @@
+[package]
+name = "rdx-match"
+version = "0.1.0"
+description = "Receipt Dropbox matching: pairs statement lines with receipts and bills under a Nickel policy"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+rdx-model = { path = "../rdx-model" }
+# Only the `Op` trait and registry; plan loading (Nickel) is the host's business.
+rdx-plan = { path = "../rdx-plan", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+nickel-embed.workspace = true
+rdx-plan = { path = "../rdx-plan" }

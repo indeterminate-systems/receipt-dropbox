@@ -42,6 +42,7 @@ before anything ran, 3 the run finished but could not be recorded.
 /// skill tests with the same registry, so register a new domain's ops here once.
 pub fn registry() -> Registry {
     let mut registry = Registry::with_core();
+    rdx_match::register(&mut registry);
     rdx_pdf::register(&mut registry);
     rdx_statement::register(&mut registry);
     registry

@@ -148,8 +148,8 @@ rdx.plan {
   steps = [
     rdx.ops.statement.parse { id = "stmt", input = "inbox/2026-03.pdf" },
     rdx.ops.receipt.collect { id = "rcpts", since = "2026-02-25" },
-    rdx.ops.match.run { id = "matches", statement = 'ref "stmt", receipts = 'ref "rcpts" },
-    rdx.ops.ledger.post { matches = 'ref "matches" },
+    rdx.ops.matching.propose { id = "matches", statement = rdx.ref "stmt", receipts = rdx.ref "rcpts" },
+    rdx.ops.ledger.post { matches = rdx.ref "matches" },
   ],
 }
 ```

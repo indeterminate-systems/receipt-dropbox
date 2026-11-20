@@ -862,6 +862,7 @@ name = "rdx-cli"
 version = "0.1.0"
 dependencies = [
  "rdx-host",
+ "rdx-match",
  "rdx-pdf",
  "rdx-plan",
  "rdx-statement",
@@ -878,6 +879,18 @@ dependencies = [
  "serde_json",
  "sha2 0.10.9",
  "tempfile",
+ "thiserror",
+]
+
+[[package]]
+name = "rdx-match"
+version = "0.1.0"
+dependencies = [
+ "nickel-embed",
+ "rdx-model",
+ "rdx-plan",
+ "serde",
+ "serde_json",
  "thiserror",
 ]
 
