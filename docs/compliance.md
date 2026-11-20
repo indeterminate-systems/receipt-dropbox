@@ -263,7 +263,8 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
 - **R3.** Check status with the SAT verification service on intake, again at month close and before
   the annual return; check the issuer against the art. 69-B list. Store the result and the time
   of each check. (The SAT endpoint does not allow browser calls, so this is a host capability,
-  run by a Worker or the local host.)
+  run by a Worker or the local host. Status comes from the SAT `ConsultaCFDIService` SOAP service and the
+  69-B list from the SAT's open-data files; see [ADR-0004](adr/0004-community-mexican-tax-skills.md).)
 - **R4.** Match **CFDI ↔ statement line ↔ reimbursement transfer**: UUID-keyed, on total, date
   window and payment method (*FormaPago* 04/28 card, 03 transfer against the statement's line).
   A matched statement line with no CFDI is "payment evidence only" and is not posted as a
@@ -339,13 +340,19 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
 10. For a persona física with **employees who is not registered** with the SAT for that activity:
     what must they do to regularize (RFC activity, IMSS, payroll), and can expenses from before
     registration be supported retroactively?
-11. For **foreign-currency payments**: which exchange rate books the expense and the
+11. When a **contractor** supporter bills the organization for fees, which withholdings apply
+    (10% ISR and two thirds of IVA, or 1.25% ISR under RESICO, LISR art. 113-J), and does the app
+    need to track them or leave them to the organization's accounting?
+12. For **foreign-currency payments**: which exchange rate books the expense and the
     reimbursement, and does the organization reimburse the supporter's foreign transaction fees?
-12. For **foreign vendors**: what must a foreign invoice show, when does the organization owe IVA
+13. For **foreign vendors**: what must a foreign invoice show, when does the organization owe IVA
     on an imported service or withhold ISR, and how are SAT-registered digital platforms'
     receipts handled?
 
 ## Sources
+
+Community Agent Skills and MCP servers for Mexican tax were reviewed and not adopted; see
+[ADR-0004](adr/0004-community-mexican-tax-skills.md).
 
 Official texts (check the version in force): [CFF](https://www.diputados.gob.mx/LeyesBiblio/pdf/CFF.pdf),
 [LISR](https://www.diputados.gob.mx/LeyesBiblio/pdf/LISR.pdf), [SAT obligations of donatarias
