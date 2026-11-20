@@ -254,7 +254,9 @@ fn check_product_skill(root: &Path, dir: &Path, name: &str, report: &mut impl Fn
         }
         // A fresh in-memory host per case: fixed clock, seeded randomness, empty stores, so
         // golden reports are reproducible and cases don't see each other's writes.
-        let run = match execute(&plan, &Registry::with_core(), &mut Host::memory()) {
+        let mut registry = Registry::with_core();
+        rdx_receipt::register(&mut registry);
+        let run = match execute(&plan, &registry, &mut Host::memory()) {
             Ok(r) => serde_json::to_value(r).expect("reports serialize"),
             Err(e) => {
                 fail(e.to_string());

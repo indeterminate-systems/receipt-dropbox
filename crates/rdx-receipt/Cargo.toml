@@ -1,0 +1,19 @@
+[package]
+name = "rdx-receipt"
+version = "0.1.0"
+description = "Receipt Dropbox receipt and bill extraction: merchant, date, total and reference from emails, HTML, plain text and CFDI XML"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+rdx-model = { path = "../rdx-model" }
+# Only the `Op` trait and registry; plan loading (Nickel) isn't needed to extract.
+rdx-plan = { path = "../rdx-plan", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+rdx-host = { path = "../rdx-host" }
+rdx-plan = { path = "../rdx-plan" }

@@ -9,6 +9,7 @@ license.workspace = true
 [dependencies]
 rdx-host = { path = "../crates/rdx-host" }
 rdx-plan = { path = "../crates/rdx-plan" }
+rdx-receipt = { path = "../crates/rdx-receipt" }
 serde.workspace = true
 serde_json.workspace = true
 serde_yaml = "0.9"

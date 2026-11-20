@@ -34,3 +34,18 @@ Each statement contains:
 For larger runs, call `Scenario::generate` with another `Config` (seed, supporters, months) in the
 test itself rather than committing more files. Public datasets for parsing and extraction tests are
 listed in [the roadmap](../docs/roadmap.md#test-corpora); they are fetched, never committed.
+
+## `receipts/`
+
+Hand-written synthetic documents for receipt extraction (`crates/rdx-receipt/tests/extract.rs`
+and the `ingest-receipt` skill's golden cases). Merchants, people, RFCs and folios are made up;
+`EKU9003173C9` is SAT's published test RFC.
+
+| File | What it exercises |
+| :-- | :-- |
+| `bill-email.eml` | emailed bill, `multipart/alternative`, quoted-printable, merchant from the sender |
+| `receipt-html.html` | HTML receipt, values in table cells, entities |
+| `ticket-es.txt` | Spanish till ticket: `$` and `03/03/2026` need the currency and date-order hints |
+| `cfdi-ingreso.xml` | CFDI 4.0 ingreso with a TimbreFiscalDigital |
+| `refund-forwarded.eml` | refund forwarded by a supporter: base64 HTML, euro decimal comma, a PDF attachment |
+| `no-total.txt` | order confirmation without a total: needs review |

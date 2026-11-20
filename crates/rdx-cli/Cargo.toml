@@ -13,6 +13,7 @@ path = "src/main.rs"
 [dependencies]
 rdx-host = { path = "../rdx-host", features = ["local"] }
 rdx-plan = { path = "../rdx-plan" }
+rdx-receipt = { path = "../rdx-receipt" }
 serde_json.workspace = true
 
 [dev-dependencies]

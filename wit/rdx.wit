@@ -67,8 +67,11 @@ interface statement-parser {
 
 interface receipt-extractor {
     use types.{json, capability-error};
+    /// Whether this extractor reads the text (an email body, HTML, a PDF's text layer, XML).
     detect: func(text: string, media-type: string) -> bool;
-    extract: func(text: string, media-type: string) -> result<json, capability-error>;
+    /// Hints (currency, date order, merchant) and the result as JSON: the `Found` fields of
+    /// `rdx-receipt` (merchant, date, total, reference, kind, fiscal, warnings).
+    extract: func(text: string, media-type: string, hints: json) -> result<json, capability-error>;
 }
 
 interface match-strategy {

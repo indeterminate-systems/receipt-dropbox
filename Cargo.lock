@@ -848,6 +848,7 @@ version = "0.1.0"
 dependencies = [
  "rdx-host",
  "rdx-plan",
+ "rdx-receipt",
  "serde_json",
  "tempfile",
 ]
@@ -885,6 +886,18 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.9",
+ "thiserror",
+]
+
+[[package]]
+name = "rdx-receipt"
+version = "0.1.0"
+dependencies = [
+ "rdx-host",
+ "rdx-model",
+ "rdx-plan",
+ "serde",
+ "serde_json",
  "thiserror",
 ]
 
@@ -1443,6 +1456,7 @@ version = "0.0.0"
 dependencies = [
  "rdx-host",
  "rdx-plan",
+ "rdx-receipt",
  "serde",
  "serde_json",
  "serde_yaml",
