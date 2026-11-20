@@ -3,7 +3,7 @@
     "dry_run": true,
     "notes": [],
     "ok": false,
-    "plan_digest": "sha256:3f3569c927afb07708f2b3fef64c04a13f225ace486112a8ab8d8a05052f8cfd",
+    "plan_digest": "sha256:8b5e9fa741c42a9ff8cc37257444b1ed45b56f7aedb125d6cd97b38f2ae0e5d1",
     "skill": "verify-statement",
     "steps": [
       {

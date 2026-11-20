@@ -3,7 +3,7 @@
     "dry_run": true,
     "notes": [],
     "ok": true,
-    "plan_digest": "sha256:865cdfa202bf2f42ebfd18a1a051885a45044085b921812e30fba528b4fb8337",
+    "plan_digest": "sha256:9bc520a6e26060a690854eeb64a4f0e8de42289eaa419eca7a6307ba40624a1a",
     "skill": "verify-statement",
     "steps": [
       {
@@ -69,7 +69,7 @@
             "start": "2026-03-01"
           },
           "redacted_rows": 7,
-          "root": "sha256:9eb4cd9ba500e142ebde9a960f29d1a121778a445ea58bce465c792bda574025",
+          "root": "sha256:ad3a1ae003416b9d3c95f5bb7a1f8f81c4a05f585b4e64a6330d6faee3c47b9b",
           "statement": "st-2026-03.s-0001",
           "summary": {
             "closing": {
@@ -91,7 +91,7 @@
           },
           "supporter": "s-0001"
         },
-        "output_digest": "sha256:6331d3a5ce670f34f2408b7aa0a34d62d7c1e604ba5d79f198d2290c1a24e8d8",
+        "output_digest": "sha256:9d3b475646d01b6c2ae894b0cdf4819127c90428cefbb02616ceb10382046a84",
         "status": "done"
       }
     ]

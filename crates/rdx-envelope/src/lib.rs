@@ -30,7 +30,8 @@
 //! doesn't balance, so that figure is right whenever the signature is.
 //!
 //! The crate does no I/O and builds for `wasm32-unknown-unknown` and `wasm32-wasip2`. Salt comes
-//! from the caller's random number generator; Ed25519 signing is deterministic.
+//! from the caller's random number generator; Ed25519 signing is deterministic, so the same
+//! generator gives the same envelope on every platform.
 
 mod no_system_rng;
 mod ops;
@@ -38,7 +39,7 @@ pub mod synth;
 
 use std::collections::HashSet;
 
-use bc_components::{SigningPrivateKey, SigningPublicKey};
+use bc_components::{Salt, SigningPrivateKey, SigningPublicKey};
 use bc_envelope::prelude::*;
 use bc_rand::RandomNumberGenerator;
 use rdx_model::{
@@ -51,6 +52,9 @@ pub use ops::register;
 
 /// The `'isA'` of a statement envelope. A new layout gets a new version.
 pub const STATEMENT_TYPE: &str = "rdx.statement.v1";
+
+/// Bytes of salt per line: 128 bits, far beyond guessing.
+const SALT_LEN: usize = 16;
 
 mod pred {
     pub const SUPPORTER: &str = "supporter";
@@ -131,7 +135,12 @@ pub fn seal(
         if let Some(reference) = &line.reference {
             l = l.add_assertion(pred::REFERENCE, reference.as_str());
         }
-        e = e.add_assertion(pred::LINE, l.add_salt_using(rng));
+        // A fixed length rather than bc-envelope's size-proportional `add_salt_using`: that one
+        // draws the length as a `usize`, so the same generator gives different salt on 32-bit
+        // WebAssembly and on 64-bit hosts, and envelopes would differ by platform. An elided
+        // line hides its salt's length anyway.
+        let salt = Salt::new_with_len_using(SALT_LEN, rng).expect("SALT_LEN is at least 8");
+        e = e.add_assertion(pred::LINE, l.add_salt_instance(salt));
     }
     Ok(e.sign(signer))
 }

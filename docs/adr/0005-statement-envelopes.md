@@ -26,7 +26,8 @@ Two problems surfaced building `bc-envelope` 0.43 for WebAssembly:
 header assertions (supporter, institution, account mask, currency, period, opening and closing
 balances in minor units, the encrypted original's digest, `lineCount`) and one `"line"` assertion
 per line. Each line is its own envelope (id, position, date, description, amount, reference)
-with a salt, so an elided line's digest can't be confirmed by guessing its contents. The whole is
+with 16 bytes of salt (a fixed length, so the same generator gives the same envelope on 32-bit
+WebAssembly and 64-bit hosts), so an elided line's digest can't be confirmed by guessing its contents. The whole is
 wrapped and signed with Ed25519 (deterministic, so fixtures are reproducible).
 
 **Redaction** elides whole `"line"` assertions. Nothing about an elided line survives, not its
@@ -39,7 +40,7 @@ features, patched in through `[patch.crates-io]`; it goes when a release upstrea
 `bc-envelope` and `bc-components` are built with only the features statements use (`salt`,
 `signature`, `ed25519`, `known_value`).
 
-**No platform randomness.** Salt comes from the caller's generator (`add_salt_using`), which hosts
+**No platform randomness.** Salt comes from the caller's generator, which hosts
 back with their `random` capability. In the browser build getrandom's backends always fail:
 `getrandom_backend="unsupported"` for 0.3 (`.cargo/config.toml`) and a custom function returning
 an error for 0.2 (`rdx-envelope/src/no_system_rng.rs`). An accidental call is an error, not a
