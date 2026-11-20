@@ -42,7 +42,7 @@ fn a_valid_plan_loads_and_runs() {
     assert!(plan.dry_run, "plans are dry runs unless they say otherwise");
     assert_eq!(plan.steps[1].args["value"]["ref"], "hello");
 
-    let report = execute(&plan, &Registry::with_core()).unwrap();
+    let report = execute(&plan, &Registry::with_core(), &mut rdx_host::Host::new()).unwrap();
     assert!(report.ok);
     assert_eq!(report.notes, vec!["hi"]);
     assert!(report.steps.iter().all(|s| s.status == StepStatus::Done));
@@ -107,4 +107,39 @@ fn inputs_override_top_level_fields() {
         .load()
         .unwrap();
     assert_eq!(plan.steps[0].args["message"], "hello Ash");
+}
+
+#[test]
+fn host_op_constructors_build_steps() {
+    let plan = load(
+        r#"[
+      rdx.ops.clock.now { id = "now" },
+      rdx.ops.kv.get { id = "prev", key = "runs/last" },
+      rdx.ops.kv.put { key = "runs/last", value = rdx.ref "now" },
+      rdx.ops.mail.send { to = "treasurer@example.org", subject = "Run", text = "done" },
+    ]"#,
+    )
+    .unwrap();
+    let ops: Vec<&str> = plan.steps.iter().map(|s| s.op.as_str()).collect();
+    assert_eq!(ops, ["clock.now", "kv.get", "kv.put", "mail.send"]);
+    assert_eq!(plan.steps[2].args["value"]["ref"], "now");
+}
+
+#[test]
+fn contracts_check_host_op_arguments() {
+    for (body, expect) in [
+        (
+            r#"[ rdx.ops.mail.send { to = "nobody", subject = "s", text = "t" } ]"#,
+            "email address",
+        ),
+        (
+            r#"[ rdx.ops.mail.send { to = "a@example.org", text = "t" } ]"#,
+            "subject",
+        ),
+        (r#"[ rdx.ops.kv.get { key = "" } ]"#, "non-empty"),
+        (r#"[ rdx.ops.clock.now { zone = "UTC" } ]"#, "zone"),
+    ] {
+        let message = nickel_message(load(body).unwrap_err());
+        assert!(message.contains(expect), "{body}: {message}");
+    }
 }

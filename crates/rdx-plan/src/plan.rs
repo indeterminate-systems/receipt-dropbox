@@ -49,6 +49,11 @@ pub enum PlanError {
     ArgsNotObject { op: String },
     #[error("unknown op `{0}`")]
     UnknownOp(String),
+    #[error("op `{op}` needs the `{capability}` capability, which this host does not offer")]
+    MissingCapability {
+        op: String,
+        capability: rdx_host::Capability,
+    },
 }
 
 impl Plan {

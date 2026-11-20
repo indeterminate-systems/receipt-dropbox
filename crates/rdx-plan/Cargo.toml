@@ -13,6 +13,7 @@ nickel = ["dep:nickel-embed"]
 
 [dependencies]
 nickel-embed = { workspace = true, optional = true }
+rdx-host = { path = "../rdx-host" }
 serde.workspace = true
 serde_json.workspace = true
 sha2.workspace = true

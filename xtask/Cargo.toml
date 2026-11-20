@@ -7,7 +7,9 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
+rdx-host = { path = "../crates/rdx-host" }
 rdx-plan = { path = "../crates/rdx-plan" }
 serde.workspace = true
 serde_json.workspace = true
 serde_yaml = "0.9"
+wit-parser = "0.263"

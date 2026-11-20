@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 
+use rdx_host::{Capability, Host};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -17,8 +18,14 @@ pub trait Op {
         false
     }
 
+    /// The host capabilities the op uses. A plan with this op fails validation on a host that
+    /// lacks any of them, before any step runs.
+    fn needs(&self) -> &'static [Capability] {
+        &[]
+    }
+
     /// Runs the op. `args` has every `{"ref": …}` already replaced by the referenced output.
-    fn run(&self, args: &Value, cx: &mut RunContext) -> Result<Value, OpError>;
+    fn run(&self, args: &Value, cx: &mut RunContext<'_>) -> Result<Value, OpError>;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -35,11 +42,17 @@ impl OpError {
     }
 }
 
-/// What ops can reach while running. Host capabilities (blob store, kv, mail) are added here as
-/// their crates arrive; see docs/architecture.md.
-#[derive(Debug, Default)]
-pub struct RunContext {
+impl From<rdx_host::CapabilityError> for OpError {
+    fn from(e: rdx_host::CapabilityError) -> Self {
+        Self::new(e.message)
+    }
+}
+
+/// What ops can reach while running: the run's notes and the host's capabilities. An op only
+/// touches the capabilities it lists in [`Op::needs`], which the executor has checked exist.
+pub struct RunContext<'h> {
     pub notes: Vec<String>,
+    pub host: &'h mut Host,
 }
 
 /// The ops a host offers.
@@ -85,6 +98,10 @@ pub struct StepReport {
     pub id: Option<String>,
     pub op: String,
     pub status: StepStatus,
+    /// For a skipped step only: the arguments it would have run with, so a dry run shows what
+    /// would happen.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub args: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub output: Option<Value>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -104,15 +121,28 @@ pub struct RunReport {
     pub notes: Vec<String>,
 }
 
-/// Validates a plan against itself and the registry, then runs it in order. A plan that fails
-/// validation runs nothing. A failing step stops the run; the report says which.
-pub fn execute(plan: &Plan, registry: &Registry) -> Result<RunReport, PlanError> {
+/// Validates a plan against itself, the registry and the host, then runs it in order. A plan that
+/// fails validation runs nothing. A failing step stops the run; the report says which.
+///
+/// This doesn't write to the audit log; [`run`](crate::run) does both.
+pub fn execute(plan: &Plan, registry: &Registry, host: &mut Host) -> Result<RunReport, PlanError> {
     plan.validate()?;
-    if let Some(step) = plan.steps.iter().find(|s| registry.get(&s.op).is_none()) {
-        return Err(PlanError::UnknownOp(step.op.clone()));
+    for step in &plan.steps {
+        let op = registry
+            .get(&step.op)
+            .ok_or_else(|| PlanError::UnknownOp(step.op.clone()))?;
+        if let Some(missing) = op.needs().iter().find(|c| !host.offers(**c)) {
+            return Err(PlanError::MissingCapability {
+                op: step.op.clone(),
+                capability: *missing,
+            });
+        }
     }
 
-    let mut cx = RunContext::default();
+    let mut cx = RunContext {
+        notes: Vec::new(),
+        host,
+    };
     let mut outputs: BTreeMap<&str, Value> = BTreeMap::new();
     let mut steps = Vec::with_capacity(plan.steps.len());
     let mut ok = true;
@@ -123,12 +153,15 @@ pub fn execute(plan: &Plan, registry: &Registry) -> Result<RunReport, PlanError>
             id: step.id.clone(),
             op: step.op.clone(),
             status: StepStatus::Done,
+            args: None,
             output: None,
             output_digest: None,
             error: None,
         };
+        let args = resolve(&step.args, &outputs);
         if plan.dry_run && op.effects() {
             report.status = StepStatus::Skipped;
+            report.args = Some(args);
             // Later steps that refer to a skipped step see null.
             if let Some(id) = &step.id {
                 outputs.insert(id, Value::Null);
@@ -136,7 +169,6 @@ pub fn execute(plan: &Plan, registry: &Registry) -> Result<RunReport, PlanError>
             steps.push(report);
             continue;
         }
-        let args = resolve(&step.args, &outputs);
         match op.run(&args, &mut cx) {
             Ok(output) => {
                 report.output_digest = Some(crate::digest(&output));
@@ -195,7 +227,7 @@ mod tests {
         fn effects(&self) -> bool {
             true
         }
-        fn run(&self, _: &Value, cx: &mut RunContext) -> Result<Value, OpError> {
+        fn run(&self, _: &Value, cx: &mut RunContext<'_>) -> Result<Value, OpError> {
             cx.notes.push("sent".into());
             Ok(json!("sent"))
         }
@@ -206,7 +238,7 @@ mod tests {
         fn id(&self) -> &'static str {
             "test.fail"
         }
-        fn run(&self, _: &Value, _: &mut RunContext) -> Result<Value, OpError> {
+        fn run(&self, _: &Value, _: &mut RunContext<'_>) -> Result<Value, OpError> {
             Err(OpError::new("boom"))
         }
     }
@@ -227,11 +259,11 @@ mod tests {
     #[test]
     fn dry_run_skips_effects_and_real_run_performs_them() {
         let steps = json!([{ "op": "test.send" }]);
-        let dry = execute(&plan(true, steps.clone()), &registry()).unwrap();
+        let dry = execute(&plan(true, steps.clone()), &registry(), &mut Host::new()).unwrap();
         assert_eq!(dry.steps[0].status, StepStatus::Skipped);
         assert!(dry.notes.is_empty());
 
-        let real = execute(&plan(false, steps), &registry()).unwrap();
+        let real = execute(&plan(false, steps), &registry(), &mut Host::new()).unwrap();
         assert_eq!(real.steps[0].status, StepStatus::Done);
         assert_eq!(real.notes, vec!["sent"]);
     }
@@ -247,6 +279,7 @@ mod tests {
                 ]),
             ),
             &registry(),
+            &mut Host::new(),
         )
         .unwrap();
         let note_output = report.steps[0].output.clone().unwrap();
@@ -261,6 +294,7 @@ mod tests {
         let err = execute(
             &plan(false, json!([{ "op": "test.send" }, { "op": "nope" }])),
             &registry(),
+            &mut Host::new(),
         )
         .unwrap_err();
         assert_eq!(err, PlanError::UnknownOp("nope".into()));
@@ -277,6 +311,7 @@ mod tests {
                 ]),
             ),
             &registry(),
+            &mut Host::new(),
         )
         .unwrap();
         assert!(!report.ok);
@@ -287,6 +322,11 @@ mod tests {
     #[test]
     fn report_carries_the_plan_digest() {
         let p = plan(true, json!([]));
-        assert_eq!(execute(&p, &registry()).unwrap().plan_digest, p.digest());
+        assert_eq!(
+            execute(&p, &registry(), &mut Host::new())
+                .unwrap()
+                .plan_digest,
+            p.digest()
+        );
     }
 }

@@ -22,4 +22,5 @@ cargo xtask doctor     # is the shell complete?
 cargo xtask ci         # what CI runs
 cargo test
 cargo xtask check      # validate and dry-run every skill
+cargo run -p rdx-cli -- run plan-smoke-test   # run a skill on the local host (dry run)
 ```

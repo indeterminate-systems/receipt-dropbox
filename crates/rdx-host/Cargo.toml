@@ -1,0 +1,27 @@
+[package]
+name = "rdx-host"
+version = "0.1.0"
+description = "Receipt Dropbox host capabilities: the traits every host implements, in-memory and local implementations"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[features]
+default = []
+# Directory-backed capabilities for the local host (`rdx`). Uses `std::fs`, so it is for native and
+# `wasm32-wasip2` builds, not the browser.
+local = ["dep:getrandom"]
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+
+# getrandom has no backend for wasm32-unknown-unknown without opting into its JS one, which the
+# local host never needs: that target has no file system either.
+[target.'cfg(not(all(target_arch = "wasm32", target_os = "unknown")))'.dependencies]
+getrandom = { version = "0.3", optional = true }
+
+[dev-dependencies]
+tempfile = "3"

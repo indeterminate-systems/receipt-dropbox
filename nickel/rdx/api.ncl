@@ -119,6 +119,35 @@ in
 # A value or a reference to an earlier step's output.
 let ValueOrRef = Dyn in
 
+let NonEmptyString =
+  std.contract.from_validator (fun s =>
+    if std.is_string s && s != "" then 'Ok else 'Error { message = "expected a non-empty string" }
+  )
+in
+
+# `{}` as a contract accepts any record, so ops without arguments say so explicitly.
+let NoArgs =
+  std.contract.from_validator (fun r =>
+    if std.is_record r && r == {} then
+      'Ok
+    else
+      'Error {
+        message = "this op takes no arguments",
+        notes = ["Unexpected: %{std.string.join ", " (std.record.fields r)}"],
+      }
+  )
+in
+
+# Deliberately loose: one `@` with text on both sides. The mail host does the real checking.
+let EmailAddress =
+  std.contract.from_validator (fun s =>
+    if std.is_string s && std.string.is_match "^[^@\\s]+@[^@\\s]+$" s then
+      'Ok
+    else
+      'Error { message = "expected an email address like `name@example.org`" }
+  )
+in
+
 {
   # Records are recursive in Nickel, so the contracts are bound under other names above.
   Step = StepC,
@@ -145,6 +174,40 @@ let ValueOrRef = Dyn in
           Use it to record what a step produced in the audit trail. No effects.
         "%
         = step "core.digest" { value | ValueOrRef },
+    },
+
+    # Ops below need host capabilities; a host without one rejects the plan before it runs.
+
+    clock = {
+      now
+        | doc "The host's current time as `{ unix_ms }`. Needs `clock`. No effects."
+        = step "clock.now" NoArgs,
+    },
+
+    kv = {
+      get
+        | doc "The JSON value stored under `key`, or null. Needs `kv`. No effects."
+        = step "kv.get" { key | NonEmptyString },
+
+      put
+        | doc m%"
+          Stores a JSON value under `key`, replacing any value there. Needs `kv`. Has effects:
+          skipped in a dry run, where the report shows the arguments it would use.
+        "%
+        = step "kv.put" { key | NonEmptyString, value | ValueOrRef },
+    },
+
+    mail = {
+      send
+        | doc m%"
+          Sends a plain-text email. Needs `mail-out`. Has effects: skipped in a dry run. The
+          local host writes mail to its outbox directory instead of sending it.
+        "%
+        = step "mail.send" {
+          to | EmailAddress,
+          subject | NonEmptyString,
+          text | String,
+        },
     },
   },
 }

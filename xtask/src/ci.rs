@@ -7,6 +7,13 @@ use std::process::{Command, ExitCode};
 
 use crate::doctor::WASM_TARGETS;
 
+/// Crates whose tests can't run under WASI, and what covers them as WebAssembly instead.
+const NATIVE_ONLY_TESTS: [(&str, &str); 1] = [(
+    "rdx-cli",
+    "its tests spawn the `rdx` binary, which WASI can't; `cargo xtask smoke-wasm` runs `rdx` \
+     under wasmtime instead",
+)];
+
 pub fn run(root: &Path) -> ExitCode {
     let crates = core_crates(root);
     let mut steps: Vec<(String, Vec<String>)> = Vec::new();
@@ -45,15 +52,28 @@ pub fn run(root: &Path) -> ExitCode {
                     "--no-default-features",
                 ],
             );
+            add(
+                &format!("{krate} builds for {target} with all features"),
+                &["check", "-p", krate, "--target", target, "--all-features"],
+            );
         }
         // Type-checking for wasm is not running on wasm: run the tests under wasmtime too
         // (the runner is set in .cargo/config.toml).
+        if let Some((_, why)) = NATIVE_ONLY_TESTS.iter().find(|(name, _)| name == krate) {
+            println!("skip {krate} tests as WebAssembly: {why}");
+            continue;
+        }
         add(
             &format!("{krate} tests run as WebAssembly (wasm32-wasip2, wasmtime)"),
             &["test", "-p", krate, "--target", "wasm32-wasip2"],
         );
     }
     add("Skills", &["xtask", "check"]);
+    add("WIT matches rdx-host", &["xtask", "check-wit"]);
+    add(
+        "rdx as WebAssembly under wasmtime",
+        &["xtask", "smoke-wasm"],
+    );
 
     for (what, args) in steps {
         println!("\n==> {what}: cargo {}", args.join(" "));
