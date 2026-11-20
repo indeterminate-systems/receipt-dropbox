@@ -1,0 +1,62 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:259bb5bc8e0ad996c351c2a327f446c6dcad44bd3e2c533ad55ce1956ccf2f01",
+    "skill": "ingest-receipt",
+    "steps": [
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "extractor": "cfdi",
+          "fields": {
+            "date": "2026-03-12",
+            "kind": "bill",
+            "merchant": "PAPELERÍA EJEMPLO",
+            "reference": "A-1187",
+            "total": {
+              "currency": "MXN",
+              "minor": 116000
+            }
+          },
+          "fiscal": {
+            "cfdi_type": "I",
+            "issuer_rfc": "EKU9003173C9",
+            "payment_form": "04",
+            "payment_method": "PUE",
+            "receiver_name": "ORGANIZACIÓN DE PRUEBA",
+            "receiver_rfc": "XIA190128J61",
+            "uuid": "6F1E2D3C-4B5A-4978-8899-AABBCCDDEEFF",
+            "version": "4.0"
+          },
+          "missing": [],
+          "receipt": {
+            "date": "2026-03-12",
+            "id": "r-470a049c6b72f52a",
+            "kind": "bill",
+            "merchant": "PAPELERÍA EJEMPLO",
+            "reference": "A-1187",
+            "source": "sha256:470a049c6b72f52a7ff31d2ed646c51481af9b2004d029a696e714b28099a700",
+            "supporter": "s-0002",
+            "total": {
+              "currency": "MXN",
+              "minor": 116000
+            }
+          },
+          "source": "sha256:470a049c6b72f52a7ff31d2ed646c51481af9b2004d029a696e714b28099a700",
+          "status": "complete",
+          "warnings": []
+        },
+        "output_digest": "sha256:94383b0aa382a20c6bcef6b390fe9d7cf56ce17b9a113486f2a85c269e1acc6a",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "import \"../fixtures/receipts/cfdi-ingreso.xml\" as 'Text",
+    "media_type": "\"application/xml\"",
+    "supporter": "\"s-0002\""
+  }
+}

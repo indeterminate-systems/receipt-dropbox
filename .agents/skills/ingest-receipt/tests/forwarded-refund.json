@@ -1,0 +1,59 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:4fbc63fbde5e53142043585f63940c3392603cc2342ae6d9aa95486d9e137a0d",
+    "skill": "ingest-receipt",
+    "steps": [
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "attachments": [
+            {
+              "digest": "sha256:58400ebcf9fe4c11d02db7daf95141ecb0fae3ebb806fd35d97e3d6fead3f96c",
+              "file_name": "refund-LC-5521.pdf",
+              "media_type": "application/pdf",
+              "size": 39
+            }
+          ],
+          "extractor": "text",
+          "fields": {
+            "date": "2026-03-18",
+            "kind": "refund",
+            "merchant": "Lantern Cafe Catering",
+            "reference": "LC-5521",
+            "total": {
+              "currency": "EUR",
+              "minor": 4250
+            }
+          },
+          "missing": [],
+          "receipt": {
+            "date": "2026-03-18",
+            "id": "r-3f1f61fd9fa12b0a",
+            "kind": "refund",
+            "merchant": "Lantern Cafe Catering",
+            "reference": "LC-5521",
+            "source": "sha256:3f1f61fd9fa12b0aef94d2ea33726fa2cbfc1331e83f153b9f40dd5a15d38a79",
+            "supporter": "s-0002",
+            "total": {
+              "currency": "EUR",
+              "minor": 4250
+            }
+          },
+          "source": "sha256:3f1f61fd9fa12b0aef94d2ea33726fa2cbfc1331e83f153b9f40dd5a15d38a79",
+          "status": "complete",
+          "warnings": []
+        },
+        "output_digest": "sha256:a2fb89e08b70a35e53bba482ec897b0cd98360a5d9436ff09fa6e862d5c504a8",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "import \"../fixtures/receipts/refund-forwarded.eml\" as 'Text",
+    "supporter": "\"s-0002\""
+  }
+}
