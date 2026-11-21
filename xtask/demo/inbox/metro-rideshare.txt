@@ -1,0 +1,10 @@
+Metro Rideshare
+Trip receipt
+
+Trip: 8927
+Date: 2026-03-21
+Airport to venue, volunteers' luggage
+
+Fare                 221.20
+Booking fee           14.33
+Total USD            235.53
