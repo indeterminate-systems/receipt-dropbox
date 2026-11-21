@@ -6,12 +6,12 @@
     "dry_run": true,
     "notes": [],
     "ok": true,
-    "plan_digest": "sha256:cd95821990fa05f7f5a1a3f575022ea9f95c385d396f8aa97df90c8e14237e3f",
+    "plan_digest": "sha256:101dbcfa71cabaed9558ff694ef80896adbb420f4f04cdc2b05f613b6de2a178",
     "skill": "ingest-receipt",
     "steps": [
       {
-        "id": "pdf",
-        "op": "pdf.text",
+        "id": "text",
+        "op": "ocr.read",
         "output": {
           "document": "sha256:676185a6fbca717d484e63c81e02b51b029cca1c183e9878c02fad03864c90b7",
           "pages": [
@@ -95,9 +95,11 @@
               ]
             }
           ],
-          "text": "Brightline Print Shop\nReceipt no: BP-7741\nDate: 2026-03-14\nPoster printing, 20 copies  48.00\nSales tax  3.84\nTotal paid  USD 51.84\n"
+          "source": "text-layer",
+          "text": "Brightline Print Shop\nReceipt no: BP-7741\nDate: 2026-03-14\nPoster printing, 20 copies  48.00\nSales tax  3.84\nTotal paid  USD 51.84\n",
+          "warnings": []
         },
-        "output_digest": "sha256:f33d5ceba0e9090c017e77f9ddf8c226e91742c6654d31c648f281cc6b4a11ec",
+        "output_digest": "sha256:01a8a0037f85ab6ced92a4a6a96a457f332ea4fbdc5708a40f945df6c1655f98",
         "status": "done"
       },
       {

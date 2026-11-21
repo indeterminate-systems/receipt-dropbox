@@ -21,3 +21,27 @@ thiserror = "2"
 [patch.crates-io]
 # See vendor/README.md: keeps C (secp256k1-sys) out of the WebAssembly builds.
 bc-shamir = { path = "vendor/bc-shamir" }
+
+# OCR (rdx-ocr) runs neural networks, which take minutes unoptimized; its tests run the real
+# models, natively and under wasmtime. Optimizing just these crates keeps test builds of the
+# rest as fast as before.
+[profile.dev.package.rten]
+opt-level = 3
+[profile.dev.package.rten-gemm]
+opt-level = 3
+[profile.dev.package.rten-vecmath]
+opt-level = 3
+[profile.dev.package.rten-tensor]
+opt-level = 3
+[profile.dev.package.rten-simd]
+opt-level = 3
+[profile.dev.package.rten-imageproc]
+opt-level = 3
+[profile.dev.package.ocrs]
+opt-level = 3
+[profile.dev.package.image]
+opt-level = 3
+[profile.dev.package.zune-jpeg]
+opt-level = 3
+[profile.dev.package.png]
+opt-level = 3

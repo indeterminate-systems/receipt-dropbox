@@ -122,3 +122,85 @@ fn contracts_reject_bad_arguments_before_anything_runs() {
         assert!(message.contains(expect), "{args}: {message}");
     }
 }
+
+/// The scanned statement (piece 11's fixture): a page image, no text layer.
+fn scan_host() -> (Host, String) {
+    let bytes = std::fs::read(repo().join("fixtures/scans/st-2026-03.s-0001.scan.pdf")).unwrap();
+    let mut host = Host::memory();
+    let digest = host.blob_store.as_mut().unwrap().put(&bytes).unwrap();
+    (host, digest)
+}
+
+fn run_json(plan: serde_json::Value, host: &mut Host) -> rdx_plan::RunReport {
+    let plan: rdx_plan::Plan = serde_json::from_value(plan).unwrap();
+    execute(&plan, &registry(), host).unwrap()
+}
+
+#[test]
+fn a_scan_without_text_says_to_read_it_with_ocr() {
+    let (mut host, digest) = scan_host();
+    let plan = load(&format!(
+        r#"[ rdx.ops.statement.parse {{ document = "{digest}", supporter = "s-0001" }} ]"#
+    ))
+    .unwrap();
+    let report = execute(&plan, &registry(), &mut host).unwrap();
+    let err = report.steps[0].error.as_deref().unwrap();
+    assert!(err.contains("ocr.read"), "{err}");
+}
+
+#[test]
+fn a_scan_parses_from_the_text_ocr_read_gives() {
+    let (mut host, digest) = scan_host();
+    // Stands in for `ocr.read`'s output (crate rdx-ocr, which tests the real thing): the same
+    // statement's lines and positions, for this document.
+    let typst = std::fs::read(
+        repo().join("fixtures/synthetic/small/statements/st-2026-03.s-0001.typst.pdf"),
+    )
+    .unwrap();
+    let pages = rdx_pdf::text(&typst).unwrap().pages;
+    let text = serde_json::json!({ "document": digest, "source": "ocr", "pages": pages });
+    let report = run_json(
+        serde_json::json!({
+            "version": 1, "skill": "t", "goal": "g",
+            "steps": [{ "id": "st", "op": "statement.parse",
+                        "args": { "document": digest, "supporter": "s-0001", "text": text } }],
+        }),
+        &mut host,
+    );
+    assert!(report.ok, "{report:?}");
+    let out = report.steps[0].output.as_ref().unwrap();
+    assert_eq!(out["parser"], "example-bank");
+    assert_eq!(out["statement"]["original"], digest.as_str());
+}
+
+#[test]
+fn text_read_from_another_document_is_refused() {
+    let (mut host, digest) = scan_host();
+    let text = serde_json::json!({ "document": format!("sha256:{}", "1".repeat(64)), "pages": [] });
+    let report = run_json(
+        serde_json::json!({
+            "version": 1, "skill": "t", "goal": "g",
+            "steps": [{ "op": "statement.parse",
+                        "args": { "document": digest, "supporter": "s-0001", "text": text } }],
+        }),
+        &mut host,
+    );
+    let err = report.steps[0].error.as_deref().unwrap();
+    assert!(err.contains("another document"), "{err}");
+}
+
+#[test]
+fn a_text_layer_wins_over_text_passed_in() {
+    let (mut host, digest) = host_with("st-2026-03.s-0001.pdf");
+    // Junk "OCR" text: ignored, because the PDF has a text layer of its own.
+    let text = serde_json::json!({ "document": digest, "pages": [{ "lines": [] }] });
+    let report = run_json(
+        serde_json::json!({
+            "version": 1, "skill": "t", "goal": "g",
+            "steps": [{ "op": "statement.parse",
+                        "args": { "document": digest, "supporter": "s-0001", "text": text } }],
+        }),
+        &mut host,
+    );
+    assert!(report.ok, "{report:?}");
+}

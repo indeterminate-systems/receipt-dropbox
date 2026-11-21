@@ -6,9 +6,581 @@
     "dry_run": true,
     "notes": [],
     "ok": true,
-    "plan_digest": "sha256:5c50e0ee86928a9a6484f45b5b8d97c354b206da74bb0e9009c4429f76a1f994",
+    "plan_digest": "sha256:650139711ccd3d957e6c8f240dcb399884eadff64ac50b645cbf46c1a8c9b035",
     "skill": "ingest-statement",
     "steps": [
+      {
+        "id": "text",
+        "op": "ocr.read",
+        "output": {
+          "document": "sha256:d3f5ca2c6a89618416acb52fef4a416aa062339f000c6c8b9a50441a043d28aa",
+          "pages": [
+            {
+              "lines": [
+                {
+                  "spans": [
+                    {
+                      "text": "Example Bank",
+                      "x": 54.0,
+                      "x_end": 157.2
+                    },
+                    {
+                      "text": "Statement period",
+                      "x": 489.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 742.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Mar 1, 2026 to Mar 31, 2026",
+                      "x": 444.4,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 730.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Account ending in 0001",
+                      "x": 54.0,
+                      "x_end": 148.1
+                    }
+                  ],
+                  "y": 716.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "All amounts in USD",
+                      "x": 54.0,
+                      "x_end": 132.0
+                    }
+                  ],
+                  "y": 704.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Account summary",
+                      "x": 54.0,
+                      "x_end": 142.0
+                    }
+                  ],
+                  "y": 680.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Beginning balance",
+                      "x": 54.0,
+                      "x_end": 128.0
+                    },
+                    {
+                      "text": "$744.55",
+                      "x": 227.5,
+                      "x_end": 260.0
+                    }
+                  ],
+                  "y": 664.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Withdrawals",
+                      "x": 54.0,
+                      "x_end": 103.0
+                    },
+                    {
+                      "text": "-$1,076.98",
+                      "x": 217.0,
+                      "x_end": 260.0
+                    }
+                  ],
+                  "y": 650.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Deposits",
+                      "x": 54.0,
+                      "x_end": 89.0
+                    },
+                    {
+                      "text": "$1,553.71",
+                      "x": 220.0,
+                      "x_end": 260.0
+                    }
+                  ],
+                  "y": 636.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Ending balance",
+                      "x": 54.0,
+                      "x_end": 116.0
+                    },
+                    {
+                      "text": "$1,221.28",
+                      "x": 220.0,
+                      "x_end": 260.0
+                    }
+                  ],
+                  "y": 622.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Date",
+                      "x": 54.0,
+                      "x_end": 73.0
+                    },
+                    {
+                      "text": "Description",
+                      "x": 100.0,
+                      "x_end": 145.0
+                    },
+                    {
+                      "text": "Withdrawals",
+                      "x": 371.0,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "Deposits",
+                      "x": 455.0,
+                      "x_end": 490.0
+                    },
+                    {
+                      "text": "Balance",
+                      "x": 525.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 588.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/03",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "LANTERN CAFE CATERING #7435",
+                      "x": 100.0,
+                      "x_end": 245.0
+                    },
+                    {
+                      "text": "289.74",
+                      "x": 392.5,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "454.81",
+                      "x": 530.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 572.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/11",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "PAPERLEAF SUPPLY #4159",
+                      "x": 100.0,
+                      "x_end": 218.6
+                    },
+                    {
+                      "text": "279.89",
+                      "x": 392.5,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "174.92",
+                      "x": 530.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 558.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/13",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "PAPERLEAF SUPPLY REFUND",
+                      "x": 100.0,
+                      "x_end": 231.0
+                    },
+                    {
+                      "text": "250.85",
+                      "x": 462.5,
+                      "x_end": 490.0
+                    },
+                    {
+                      "text": "425.77",
+                      "x": 530.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 544.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/13",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "BEANERY COFFEE #6892",
+                      "x": 100.0,
+                      "x_end": 209.5
+                    },
+                    {
+                      "text": "14.23",
+                      "x": 397.5,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "411.54",
+                      "x": 530.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 530.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/13",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "STREAMVIEW SUBSCRIPTION #1537",
+                      "x": 100.0,
+                      "x_end": 258.0
+                    },
+                    {
+                      "text": "34.39",
+                      "x": 397.5,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "377.15",
+                      "x": 530.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 516.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/16",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "METRO RIDESHARE TRIP #2030",
+                      "x": 100.0,
+                      "x_end": 238.0
+                    },
+                    {
+                      "text": "24.94",
+                      "x": 397.5,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "352.21",
+                      "x": 530.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 502.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/17",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "CLEARWAVE TELECOM INV-920207",
+                      "x": 100.0,
+                      "x_end": 253.0
+                    },
+                    {
+                      "text": "62.09",
+                      "x": 397.5,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "290.12",
+                      "x": 530.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 488.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Ref INV-920207",
+                      "x": 100.0,
+                      "x_end": 157.4
+                    }
+                  ],
+                  "y": 474.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Page 1 of 2",
+                      "x": 517.1,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 40.0
+                }
+              ]
+            },
+            {
+              "lines": [
+                {
+                  "spans": [
+                    {
+                      "text": "Example Bank",
+                      "x": 54.0,
+                      "x_end": 157.2
+                    },
+                    {
+                      "text": "Statement period",
+                      "x": 489.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 742.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Mar 1, 2026 to Mar 31, 2026",
+                      "x": 444.4,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 730.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Account ending in 0001",
+                      "x": 54.0,
+                      "x_end": 148.1
+                    }
+                  ],
+                  "y": 716.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "All amounts in USD",
+                      "x": 54.0,
+                      "x_end": 132.0
+                    }
+                  ],
+                  "y": 704.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Date",
+                      "x": 54.0,
+                      "x_end": 73.0
+                    },
+                    {
+                      "text": "Description",
+                      "x": 100.0,
+                      "x_end": 145.0
+                    },
+                    {
+                      "text": "Withdrawals",
+                      "x": 371.0,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "Deposits",
+                      "x": 455.0,
+                      "x_end": 490.0
+                    },
+                    {
+                      "text": "Balance",
+                      "x": 525.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 680.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/22",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "FUEL STOP #7586",
+                      "x": 100.0,
+                      "x_end": 177.5
+                    },
+                    {
+                      "text": "3.67",
+                      "x": 402.5,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "286.45",
+                      "x": 530.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 664.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/23",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "METRO RIDESHARE TRIP #8927",
+                      "x": 100.0,
+                      "x_end": 238.0
+                    },
+                    {
+                      "text": "235.53",
+                      "x": 392.5,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "50.92",
+                      "x": 535.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 650.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/24",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "CITY TRANSIT FARE #3279",
+                      "x": 100.0,
+                      "x_end": 215.5
+                    },
+                    {
+                      "text": "108.21",
+                      "x": 392.5,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "-57.29",
+                      "x": 532.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 636.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/28",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "CORNER GROCERY #8677",
+                      "x": 100.0,
+                      "x_end": 214.5
+                    },
+                    {
+                      "text": "24.29",
+                      "x": 397.5,
+                      "x_end": 420.0
+                    },
+                    {
+                      "text": "-81.58",
+                      "x": 532.5,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 622.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "03/28",
+                      "x": 54.0,
+                      "x_end": 76.5
+                    },
+                    {
+                      "text": "TRANSFER IN",
+                      "x": 100.0,
+                      "x_end": 160.0
+                    },
+                    {
+                      "text": "1,302.86",
+                      "x": 455.0,
+                      "x_end": 490.0
+                    },
+                    {
+                      "text": "1,221.28",
+                      "x": 523.0,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 608.0
+                },
+                {
+                  "spans": [
+                    {
+                      "text": "Page 2 of 2",
+                      "x": 517.1,
+                      "x_end": 558.0
+                    }
+                  ],
+                  "y": 40.0
+                }
+              ]
+            }
+          ],
+          "source": "text-layer",
+          "text": "Example Bank  Statement period\nMar 1, 2026 to Mar 31, 2026\nAccount ending in 0001\nAll amounts in USD\nAccount summary\nBeginning balance  $744.55\nWithdrawals  -$1,076.98\nDeposits  $1,553.71\nEnding balance  $1,221.28\nDate  Description  Withdrawals  Deposits  Balance\n03/03  LANTERN CAFE CATERING #7435  289.74  454.81\n03/11  PAPERLEAF SUPPLY #4159  279.89  174.92\n03/13  PAPERLEAF SUPPLY REFUND  250.85  425.77\n03/13  BEANERY COFFEE #6892  14.23  411.54\n03/13  STREAMVIEW SUBSCRIPTION #1537  34.39  377.15\n03/16  METRO RIDESHARE TRIP #2030  24.94  352.21\n03/17  CLEARWAVE TELECOM INV-920207  62.09  290.12\nRef INV-920207\nPage 1 of 2\n\fExample Bank  Statement period\nMar 1, 2026 to Mar 31, 2026\nAccount ending in 0001\nAll amounts in USD\nDate  Description  Withdrawals  Deposits  Balance\n03/22  FUEL STOP #7586  3.67  286.45\n03/23  METRO RIDESHARE TRIP #8927  235.53  50.92\n03/24  CITY TRANSIT FARE #3279  108.21  -57.29\n03/28  CORNER GROCERY #8677  24.29  -81.58\n03/28  TRANSFER IN  1,302.86  1,221.28\nPage 2 of 2\n",
+          "warnings": []
+        },
+        "output_digest": "sha256:63b853336e847d5308ee8545b5652b32150dec07c7bdc47c2c1b8db3426715c5",
+        "status": "done"
+      },
       {
         "id": "statement",
         "op": "statement.parse",

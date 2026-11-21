@@ -8,6 +8,7 @@
   keys = import "ops/keys.ncl",
   ledger = import "ops/ledger.ncl",
   matching = import "ops/matching.ncl",
+  ocr = import "ops/ocr.ncl",
   pdf = import "ops/pdf.ncl",
   receipt = import "ops/receipt.ncl",
   statement = import "ops/statement.ncl",

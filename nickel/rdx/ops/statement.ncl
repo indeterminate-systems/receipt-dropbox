@@ -57,5 +57,9 @@ in
             }
             | doc "How to read a CSV whose header and values don't settle it."
             | optional,
+          text
+            | lib.ValueOrRef
+            | doc "For a scan or photo: `rdx.ref` to an `ocr.read` step on the same document. Ignored when the PDF has a text layer."
+            | optional,
         },
 }
