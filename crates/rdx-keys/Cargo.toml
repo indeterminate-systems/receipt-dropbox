@@ -1,0 +1,36 @@
+[package]
+name = "rdx-keys"
+version = "0.1.0"
+description = "Receipt Dropbox keys: passkey-wrapped device keys, SSKR recovery, the address-to-keys registry, encryption to recipients"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+# `rdx` registers this crate's ops (its `register` function) when it is a dependency of
+# rdx-cli; see crates/rdx-cli/build.rs.
+[package.metadata.rdx]
+ops = true
+
+[dependencies]
+# Signatures (Ed25519) and encryption to recipients (X25519); no secp256k1 (C) or post-quantum
+# keys, which the default features add.
+bc-envelope = { version = "0.43", default-features = false, features = ["signature", "ed25519", "known_value", "encrypt", "recipient"] }
+bc-components = { version = "0.31", default-features = false, features = ["ed25519"] }
+bc-crypto = { version = "0.14", default-features = false }
+bc-rand = "0.5"
+sskr = "0.12"
+# The trait bc-rand's generators build on; the version bc-rand uses.
+rand_core = "0.9"
+rdx-host = { path = "../rdx-host" }
+# Ops and their registry only; plan loading (Nickel) is the host's business.
+rdx-plan = { path = "../rdx-plan", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+# Wipes the seed from memory once it is split or used.
+zeroize = { version = "1", features = ["derive"] }
+
+# getrandom 0.2 (through rand_core 0.6) has no browser backend unless one is chosen. The core never
+# asks it for randomness (see src/no_system_rng.rs), so it gets a custom one that always fails.
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+getrandom = { version = "0.2", features = ["custom"] }

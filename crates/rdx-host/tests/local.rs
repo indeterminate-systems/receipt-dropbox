@@ -90,3 +90,34 @@ fn os_random_fills() {
     r.fill(&mut a).unwrap();
     assert_ne!(a, [0u8; 32]);
 }
+
+#[test]
+fn dir_secrets_keep_their_passkey_and_files() {
+    use rdx_host::Secrets;
+    let dir = tempfile::tempdir().unwrap();
+    let mut s = local::DirSecrets::new(dir.path().join("secrets")).unwrap();
+    let prf = s.prf(b"salt").unwrap();
+    assert_eq!(prf.len(), 32);
+    let mut again = local::DirSecrets::new(dir.path().join("secrets")).unwrap();
+    assert_eq!(
+        again.prf(b"salt").unwrap(),
+        prf,
+        "the passkey file persists"
+    );
+
+    s.show("recovery-share-1", "ur:sskr/x").unwrap();
+    let shown = dir.path().join("secrets/shown/recovery-share-1.txt");
+    assert_eq!(std::fs::read_to_string(shown).unwrap(), "ur:sskr/x");
+
+    assert_eq!(s.ask("recovery-share-1").unwrap(), None);
+    std::fs::write(
+        dir.path().join("secrets/answers/recovery-share-1.txt"),
+        "ur:sskr/y\n",
+    )
+    .unwrap();
+    assert_eq!(
+        s.ask("recovery-share-1").unwrap().as_deref(),
+        Some("ur:sskr/y")
+    );
+    assert!(s.show("../escape", "x").is_err(), "labels can't name paths");
+}

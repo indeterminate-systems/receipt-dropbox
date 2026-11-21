@@ -33,7 +33,6 @@
 //! from the caller's random number generator; Ed25519 signing is deterministic, so the same
 //! generator gives the same envelope on every platform.
 
-mod no_system_rng;
 mod ops;
 pub mod synth;
 
