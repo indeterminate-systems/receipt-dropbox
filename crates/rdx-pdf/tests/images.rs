@@ -28,8 +28,15 @@ fn a_written_scan_gives_back_its_images_and_where_they_sit() {
     // Not a real JPEG: the reader passes JPEG data through without decoding it.
     let jpeg = b"\xff\xd8\xff\xe0 pretend jpeg \xff\xd9".to_vec();
     let mut pdf = Pdf::new();
-    pdf.page()
-        .image(72.0, 100.0, 200.0, 100.0, 4, 2, &ImageData::Gray8(gray.clone()));
+    pdf.page().image(
+        72.0,
+        100.0,
+        200.0,
+        100.0,
+        4,
+        2,
+        &ImageData::Gray8(gray.clone()),
+    );
     pdf.page().image(
         0.0,
         0.0,
@@ -49,7 +56,10 @@ fn a_written_scan_gives_back_its_images_and_where_they_sit() {
     assert_eq!((first.width, first.height), (PAGE_WIDTH, PAGE_HEIGHT));
     assert_eq!(first.images.len(), 1);
     let img = &first.images[0];
-    assert_eq!((img.x, img.y, img.width, img.height), (72.0, 100.0, 200.0, 100.0));
+    assert_eq!(
+        (img.x, img.y, img.width, img.height),
+        (72.0, 100.0, 200.0, 100.0)
+    );
     assert_eq!((img.pixels_wide, img.pixels_high), (4, 2));
     assert_eq!(img.data, ImageData::Gray8(gray));
 
@@ -96,13 +106,18 @@ fn one_bit_scans_become_gray_and_images_inside_forms_are_found() {
         ),
     ]);
     let img = &page_images(&pdf).unwrap()[0].images[0];
-    assert_eq!((img.x, img.y, img.width, img.height), (10.0, 20.0, 100.0, 50.0));
+    assert_eq!(
+        (img.x, img.y, img.width, img.height),
+        (10.0, 20.0, 100.0, 50.0)
+    );
     let ImageData::Gray8(px) = &img.data else {
         panic!("expected gray pixels, got {:?}", img.data)
     };
     assert_eq!(
         px,
-        &[255, 0, 255, 0, 255, 0, 255, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255]
+        &[
+            255, 0, 255, 0, 255, 0, 255, 0, 255, 255, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255
+        ]
     );
 }
 

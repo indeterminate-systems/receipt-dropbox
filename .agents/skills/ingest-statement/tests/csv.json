@@ -6,9 +6,24 @@
     "dry_run": true,
     "notes": [],
     "ok": true,
-    "plan_digest": "sha256:d6573fb166b3109c1eb545cfc0ef3cb727a1fc1503816eda1a6463004c181909",
+    "plan_digest": "sha256:86a776ed7c2aea9702dede1e13ca179fa1cb4ad6076ad12d6d05ac8c0db338fe",
     "skill": "ingest-statement",
     "steps": [
+      {
+        "id": "text",
+        "op": "ocr.read",
+        "output": {
+          "document": "sha256:fcf4210740ea00845954dc2e3f6fafa9e48c312c2d5492718c9e1e3112746dfd",
+          "pages": [],
+          "source": "none",
+          "text": "",
+          "warnings": [
+            "not a PDF or an image, so there is nothing to read with OCR"
+          ]
+        },
+        "output_digest": "sha256:5274e914c71daf8452926eb736ffd74b96ac24ea978fadd26bb9855a6a5c4466",
+        "status": "done"
+      },
       {
         "id": "statement",
         "op": "statement.parse",

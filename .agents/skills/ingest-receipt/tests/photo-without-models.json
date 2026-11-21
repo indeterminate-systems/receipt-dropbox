@@ -1,0 +1,25 @@
+{
+  "documents": [
+    "fixtures/scans/receipt-photo.png"
+  ],
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": false,
+    "plan_digest": "sha256:fad725d44e2e772168b2fec1c11c94714d4136bac7273d9935bf0fd90c069f27",
+    "skill": "ingest-receipt",
+    "steps": [
+      {
+        "error": "sha256:1574b62cea931f26078f41dca7a816dab9dd12c0c8ed5038f49afb62683fb278: OCR models: text-detection.rten (`sha256:f15cfb56bd02c4bf478a20343986504a1f01e1665c2b3a0ad66340f054b1b5ca`) is not in the blob store; add it first (locally: `rdx blob put text-detection.rten`; the dev shell has it in $RDX_OCR_MODELS)",
+        "id": "text",
+        "op": "ocr.read",
+        "status": "failed"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "\"sha256:1574b62cea931f26078f41dca7a816dab9dd12c0c8ed5038f49afb62683fb278\"",
+    "media_type": "\"image/png\"",
+    "supporter": "\"s-0001\""
+  }
+}

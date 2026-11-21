@@ -1,5 +1,6 @@
 # Code-mode entrypoint for ingest-receipt. No effects: the extraction goes in the run report.
-# A PDF is read from the blob store by `pdf.text` first. Storing the receipt (encrypted to the
+# A PDF or a photo is read from the blob store by `ocr.read` first: its text layer, or OCR
+# when it has none. Storing the receipt (encrypted to the
 # supporter's keys) is added with piece 8.
 let rdx = import "rdx/api.ncl" in
 {
@@ -11,13 +12,13 @@ let rdx = import "rdx/api.ncl" in
     | String
     | doc m%"
       The receipt's text as received. From a file: `import "path/to/bill.eml" as 'Text`
-      (absolute, or relative to the current directory). For a PDF, its blob digest instead
-      (locally: `rdx blob put FILE`).
+      (absolute, or relative to the current directory). For a PDF or a photo (PNG, JPEG), its
+      blob digest instead (locally: `rdx blob put FILE`).
     "%,
 
   media_type
     | String
-    | doc "`message/rfc822` (an .eml), `text/html`, `text/plain`, `application/xml` (CFDI) or `application/pdf`."
+    | doc "`message/rfc822` (an .eml), `text/html`, `text/plain`, `application/xml` (CFDI), `application/pdf`, `image/png` or `image/jpeg`."
     | default
     = "message/rfc822",
 
@@ -41,13 +42,13 @@ let rdx = import "rdx/api.ncl" in
       skill = "ingest-receipt",
       goal = "Read a receipt or bill a supporter sent and turn it into a receipt record",
       steps =
-        if media == "application/pdf" then
+        if std.array.elem media ["application/pdf", "image/png", "image/jpeg"] then
           [
-            rdx.ops.pdf.text { id = "pdf", document = text },
+            rdx.ops.ocr.read { id = "text", document = text },
             rdx.ops.receipt.extract {
               id = "receipt",
               supporter = who,
-              document = rdx.ref "pdf",
+              document = rdx.ref "text",
               hints = known,
             },
           ]

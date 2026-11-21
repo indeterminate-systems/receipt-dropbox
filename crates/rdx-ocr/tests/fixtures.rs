@@ -40,5 +40,9 @@ fn scanned_statement_is_current() {
         return;
     }
     let expected = std::fs::read(&path).expect("run with UPDATE_GOLDEN=1 to create it");
-    assert!(expected == actual, "{} is stale: UPDATE_GOLDEN=1", path.display());
+    assert!(
+        expected == actual,
+        "{} is stale: UPDATE_GOLDEN=1",
+        path.display()
+    );
 }

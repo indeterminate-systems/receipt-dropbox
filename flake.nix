@@ -67,16 +67,13 @@
               ];
               inherit hash;
             };
-          ocrModels = pkgs.linkFarm "ocrs-models" [
-            {
-              name = "text-detection.rten";
-              path = ocrModel "text-detection.rten" "sha256-8Vz7Vr0CxL9HiiA0OYZQSh8B4WZcKzoK1mNA8FSxtco=";
-            }
-            {
-              name = "text-recognition.rten";
-              path = ocrModel "text-recognition.rten" "sha256-5ISGbUzOQDF1vY0AsSj+sIq0LiCN4w5CzZiJ2PFzWm4=";
-            }
-          ];
+          # Copies, not symlinks: tests also run as WebAssembly under wasmtime, and WASI refuses
+          # to follow absolute symlinks.
+          ocrModels = pkgs.runCommand "ocrs-models" { } ''
+            mkdir $out
+            cp ${ocrModel "text-detection.rten" "sha256-8Vz7Vr0CxL9HiiA0OYZQSh8B4WZcKzoK1mNA8FSxtco="} $out/text-detection.rten
+            cp ${ocrModel "text-recognition.rten" "sha256-5ISGbUzOQDF1vY0AsSj+sIq0LiCN4w5CzZiJ2PFzWm4="} $out/text-recognition.rten
+          '';
         in
         {
           default = pkgs.mkShell {

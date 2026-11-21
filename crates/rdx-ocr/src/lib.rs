@@ -188,7 +188,7 @@ pub fn read(
 }
 
 fn finish(mut pages: Vec<Page>, mut warnings: Vec<String>) -> Reading {
-    let mut fix = |pages: &mut Vec<Page>, f: &dyn Fn(&str) -> (String, Vec<(String, String)>)| {
+    let mut fix = |pages: &mut Vec<Page>, f: &dyn Fn(&str) -> repair::Repaired| {
         for span in pages
             .iter_mut()
             .flat_map(|p| p.lines.iter_mut())
@@ -229,12 +229,16 @@ fn gray(data: &ImageData, w: u32, h: u32) -> Result<image::GrayImage, String> {
             .map_err(|e| format!("JPEG: {e}")),
         ImageData::Gray8(px) => sized(px.clone()),
         ImageData::Rgb8(px) => sized(
-            px.chunks_exact(3)
+            px.as_chunks::<3>()
+                .0
+                .iter()
                 .map(|c| luma(c[0], c[1], c[2]))
                 .collect(),
         ),
         ImageData::Cmyk8(px) => sized(
-            px.chunks_exact(4)
+            px.as_chunks::<4>()
+                .0
+                .iter()
                 .map(|c| {
                     let ink = |v: u8| 255 - v.saturating_add(c[3]);
                     luma(ink(c[0]), ink(c[1]), ink(c[2]))
@@ -275,7 +279,10 @@ impl Engine {
         let input = self.0.prepare_input(source).map_err(|e| fail(&e))?;
         let boxes = self.0.detect_words(&input).map_err(|e| fail(&e))?;
         let lines = self.0.find_text_lines(&input, &boxes);
-        let texts = self.0.recognize_text(&input, &lines).map_err(|e| fail(&e))?;
+        let texts = self
+            .0
+            .recognize_text(&input, &lines)
+            .map_err(|e| fail(&e))?;
         Ok(texts
             .iter()
             .flatten()

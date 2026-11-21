@@ -51,7 +51,10 @@ fn a_receipt_photo_is_read_line_by_line() {
 #[test]
 fn a_scanned_statement_pdf_is_read_from_its_page_image_in_points() {
     let pdf = std::fs::read(fixture("st-2026-03.s-0001.scan.pdf")).unwrap();
-    assert!(rdx_pdf::text(&pdf).unwrap().is_empty(), "the scan has no text layer");
+    assert!(
+        rdx_pdf::text(&pdf).unwrap().is_empty(),
+        "the scan has no text layer"
+    );
     let r = read(&pdf, &Options::default(), || Ok(models())).unwrap();
     assert_eq!(r.source, Source::Ocr);
     let text = r.text.to_string();
@@ -62,14 +65,21 @@ fn a_scanned_statement_pdf_is_read_from_its_page_image_in_points() {
         .find(|l| l.spans.iter().any(|s| s.text == "Withdrawals") && l.spans.len() == 5)
         .unwrap_or_else(|| panic!("no table header in:\n{text}"));
     let spans: Vec<&str> = header.spans.iter().map(|s| s.text.as_str()).collect();
-    assert_eq!(spans, ["Date", "Description", "Withdrawals", "Deposits", "Balance"]);
+    assert_eq!(
+        spans,
+        ["Date", "Description", "Withdrawals", "Deposits", "Balance"]
+    );
     // Positions are in points on the page: the Balance column ends at the right margin, 54 pt
     // in from the edge of a 612 pt page.
     let balance = &header.spans[4];
     assert!((balance.x_end - 558.0).abs() < 4.0, "{balance:?}");
     // Each amount sits under its column, as the example-bank parser needs.
     let ends: Vec<f64> = header.spans[2..].iter().map(|s| s.x_end).collect();
-    for line in r.text.lines().filter(|l| l.spans[0].text.starts_with("03/")) {
+    for line in r
+        .text
+        .lines()
+        .filter(|l| l.spans[0].text.starts_with("03/"))
+    {
         for amount in &line.spans[2..] {
             assert!(
                 ends.iter().any(|e| (e - amount.x_end).abs() < 6.0),
@@ -89,5 +99,8 @@ fn bad_models_say_so() {
         })
     })
     .unwrap_err();
-    assert!(err.to_string().contains("not a usable `.rten` model"), "{err}");
+    assert!(
+        err.to_string().contains("not a usable `.rten` model"),
+        "{err}"
+    );
 }

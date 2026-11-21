@@ -42,7 +42,9 @@ impl Op for OcrRead {
                 .and_then(|m| m.get(key))
                 .and_then(Value::as_str)
                 .ok_or_else(|| {
-                    OcrError::Models(format!("`models.{key}` is missing: the blob digest of {file}"))
+                    OcrError::Models(format!(
+                        "`models.{key}` is missing: the blob digest of {file}"
+                    ))
                 })?;
             let store = cx.host.blob_store.as_ref().ok_or_else(|| {
                 OcrError::Models("ran without the `blob-store` capability".into())

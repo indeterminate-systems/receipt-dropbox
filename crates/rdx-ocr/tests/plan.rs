@@ -124,14 +124,14 @@ fn missing_models_say_how_to_add_them() {
 
 #[test]
 fn a_text_pdf_needs_no_models() {
-    let (mut host, digest) = host_with(
-        &repo().join("fixtures/receipts/receipt-pdf.pdf"),
-        false,
-    );
+    let (mut host, digest) = host_with(&repo().join("fixtures/receipts/receipt-pdf.pdf"), false);
     let report = run(
         &format!(r#"[ rdx.ops.ocr.read {{ document = "{digest}" }} ]"#),
         &mut host,
     );
     assert!(report.ok, "{report:#?}");
-    assert_eq!(report.steps[0].output.as_ref().unwrap()["source"], "text-layer");
+    assert_eq!(
+        report.steps[0].output.as_ref().unwrap()["source"],
+        "text-layer"
+    );
 }

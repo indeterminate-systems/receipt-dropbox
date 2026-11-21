@@ -40,12 +40,22 @@ pub(crate) fn page_images(bytes: &[u8]) -> Result<Vec<PageImages>, PdfError> {
 
 fn placed(doc: &Doc, ctm: &Matrix, s: &Stream, ox: f64, oy: f64) -> PageImage {
     // The image fills the unit square of its own space; map the corners onto the page.
-    let corners = [(0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0)]
-        .map(|(u, v)| (ctm[0] * u + ctm[2] * v + ctm[4], ctm[1] * u + ctm[3] * v + ctm[5]));
+    let corners = [(0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0)].map(|(u, v)| {
+        (
+            ctm[0] * u + ctm[2] * v + ctm[4],
+            ctm[1] * u + ctm[3] * v + ctm[5],
+        )
+    });
     let min_x = corners.iter().map(|c| c.0).fold(f64::INFINITY, f64::min);
-    let max_x = corners.iter().map(|c| c.0).fold(f64::NEG_INFINITY, f64::max);
+    let max_x = corners
+        .iter()
+        .map(|c| c.0)
+        .fold(f64::NEG_INFINITY, f64::max);
     let min_y = corners.iter().map(|c| c.1).fold(f64::INFINITY, f64::min);
-    let max_y = corners.iter().map(|c| c.1).fold(f64::NEG_INFINITY, f64::max);
+    let max_y = corners
+        .iter()
+        .map(|c| c.1)
+        .fold(f64::NEG_INFINITY, f64::max);
     let int = |key: &[u8]| doc.dict_get(&s.dict, key).as_i64().unwrap_or(0).max(0) as u32;
     let (w, h) = (int(b"Width"), int(b"Height"));
     PageImage {

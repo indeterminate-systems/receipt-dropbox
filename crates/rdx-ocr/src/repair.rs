@@ -6,8 +6,11 @@
 //! decimals one way: when nearly all its amounts use `.` (or `,`), a lone `14,23` is `14.23`.
 //! Everything else is left as read, and statement balance checks catch what remains.
 
-/// Returns the repaired text and, for each repair, `(read, written)`.
-pub(crate) fn amounts(text: &str) -> (String, Vec<(String, String)>) {
+/// Repaired text and, for each repair, `(read, written)`.
+pub(crate) type Repaired = (String, Vec<(String, String)>);
+
+/// Repairs grouped amounts with misread separators.
+pub(crate) fn amounts(text: &str) -> Repaired {
     let mut fixes = Vec::new();
     let out: Vec<String> = text
         .split(' ')
@@ -99,7 +102,7 @@ pub(crate) fn decimal_convention<'a>(texts: impl Iterator<Item = &'a str>) -> Op
 }
 
 /// Rewrites amounts with a single separator before two digits to the document's convention.
-pub(crate) fn to_convention(text: &str, decimal: char) -> (String, Vec<(String, String)>) {
+pub(crate) fn to_convention(text: &str, decimal: char) -> Repaired {
     let mut fixes = Vec::new();
     let out: Vec<String> = text
         .split(' ')
@@ -127,7 +130,11 @@ pub(crate) fn to_convention(text: &str, decimal: char) -> (String, Vec<(String, 
 fn decimal_of(tok: &str) -> Option<char> {
     let body = tok.trim_start_matches(['-', '+', '$']);
     let b = body.as_bytes();
-    if b.len() < 4 || !b.iter().all(|c| c.is_ascii_digit() || *c == b'.' || *c == b',') {
+    if b.len() < 4
+        || !b
+            .iter()
+            .all(|c| c.is_ascii_digit() || *c == b'.' || *c == b',')
+    {
         return None;
     }
     let sep = b[b.len() - 3];
@@ -143,7 +150,12 @@ mod tests {
 
     #[test]
     fn a_lone_amount_written_against_the_documents_convention_follows_it() {
-        let lines = ["289.74 454.81", "279.89 174.92", "14,23 411.54", "$1,076.98 1302.86"];
+        let lines = [
+            "289.74 454.81",
+            "279.89 174.92",
+            "14,23 411.54",
+            "$1,076.98 1302.86",
+        ];
         assert_eq!(decimal_convention(lines.iter().copied()), Some('.'));
         assert_eq!(to_convention("14,23", '.').0, "14.23");
         assert_eq!(to_convention("-$14,23", '.').0, "-$14.23");

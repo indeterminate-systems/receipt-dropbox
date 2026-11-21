@@ -15,11 +15,13 @@ pub fn fixture(name: &str) -> PathBuf {
 /// The models' directory, from the dev shell's `RDX_OCR_MODELS`. Read when the test is built,
 /// so tests running as WebAssembly under wasmtime (which passes no environment) find it too.
 pub fn models_dir() -> PathBuf {
-    let dir = option_env!("RDX_OCR_MODELS").expect(
-        "RDX_OCR_MODELS is not set: run the tests in the dev shell (`nix develop`), which \
-         fetches the pinned OCR models, or point it at a directory holding text-detection.rten \
-         and text-recognition.rten",
-    );
+    let Some(dir) = option_env!("RDX_OCR_MODELS") else {
+        panic!(
+            "RDX_OCR_MODELS is not set: run the tests in the dev shell (`nix develop`), which \
+             fetches the pinned OCR models, or point it at a directory holding \
+             text-detection.rten and text-recognition.rten"
+        )
+    };
     PathBuf::from(dir)
 }
 
