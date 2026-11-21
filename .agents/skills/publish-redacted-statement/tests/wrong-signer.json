@@ -1,0 +1,33 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": false,
+    "plan_digest": "sha256:d81d93028cda7d0a959f774e65b2abdec5111ab4548e4e131abed2916317fbe1",
+    "skill": "publish-redacted-statement",
+    "steps": [
+      {
+        "id": "redacted",
+        "op": "envelope.redact",
+        "output": {
+          "envelope": "ur:envelope/lftpspmkcstpsojsjkjydpeydyeyendpdyeodmjkdpdydydyehoytpsoioiajzjljkinjtiotpsocyaeadutbeoytpsojeinjtjkjyinjykpjyinjljttpsojzfekshsjnjojzihcxfwhsjtjeoyadtpsojojpieksdmjkjyhsjyihjnihjtjydmkoehoytpsoiojljoihjtinjtiotpsocyaeadcptshdcxfsimuyeowfplmtfssegoksbdtbwyzmdsurtnurdsgtgybtgtgstdongwlrrotngahdcxguoettlyftbstobdpkgygudyrnrpoetoptskwkfziydnvlfxlniysgzcdkftmnidoytpsoisjljpinioinjthsjztpsoksfljkishseyecenftiyihhsetieiyihecehehethsieeodyihdyemidieiaiddyiahseyiheteyiaenieeeihetieemeheoemiaieeteeeoeciaiaenhshsecideoihemecemiaidiaihetenhdcxkoieemeytkndfwdrswgorkstsnlyknpdkgdlyndplemtwyfhihzmtaatprgltsyaoytpsoiejzinjtihlttpsoiajzdyemoytpsoiyhsjnjlkpjtjytpsoescsfzoybstpsotansgmgdglhkqzvoskdedlykdsoxtyzoaalfsblpoytpsojeieihjkiajpinjojyinjljttpsokscefxgsfefpgmhgfphffecxghfegsfefxgwgtcxgaglhfdpeseydyeydyemoytpsoinjpihiyihjpihjtiaihtpsoimgaglhfdpeseydyeydyemoytpsoisjojljkinjyinjljttpsoamoytpsoieiehsjyihtpsoimeydyeyendpdyeodpehemoytpsoinjkkpjojojljpjyihjptpsoiyjkdpdydydyehoytpsoiejzinjtihlntpsoiajzdyesoytpsojeieihjkiajpinjojyinjljttpsokscygtfeghgmgwcxgmgafyfegufdfpgmfecxghgmgagdcxcneteseyemoytpsoiyhsjnjlkpjtjytpsoeshhaeoytpsoieiehsjyihtpsoimeydyeyendpdyeodpeyeooytpsoisjojljkinjyinjljttpsoayoybstpsotansgmgdrkspmyhybavoferkwsbzaduydisalefdoytpsoinjzinjtihfxjlkpjtjytpsobnhdcxrebyosehrhktlbjyytjntotptblorfatkpmsktjyfxcnlbcstimkiehshnoladsfoytpsojejoihjpinjliegujyhsjpjytpsoimeydyeyendpdyeodpdyehoytpsoinjoihjpinjliefejtietpsoimeydyeyendpdyeodpeoehoytpsoiejzinjtihlntpsoiajzdyehoytpsoiyhsjnjlkpjtjytpsoesjsdpoytpsoieiehsjyihtpsoimeydyeyendpdyeodpdyeooytpsoisjojljkinjyinjljttpsoaeoytpsojeieihjkiajpinjojyinjljttpsokscwgsfpglghfegmglcxfxfpfgfecxfxfpghfegmgaglflcxcnemeeeoecoybstpsotansgmgdkbrehkrkrsjztodseytknecfgewmgdmwoytpsojehsiaiajlkpjtjygthsjkjetpsoiedydydyehhdcxvswtcpzsstgdbesewtjzurcwfnctdrpstlimzsismkmysfvlrshygyfshftbrspkoytpsoiejzinjtihlntpsoiajzdyeyoytpsoisjojljkinjyinjljttpsoadoytpsoieiehsjyihtpsoimeydyeyendpdyeodpehehoytpsoiyhsjnjlkpjtjytpsoesjnghoybstpsotansgmgdfsvdvysbpmghuozsprknfwkpnehydlweoytpsojeieihjkiajpinjojyinjljttpsokogdfpgdfegmgsfefpfgcxgugogdgdgshkcxcneeeheceshdcxwsswahwsktmohstdgtfshysfmsaomtbzykmezeaxlrcmbzcehptshehtjyjkecynoytpsoisiakpjpjpihjtiakktpsoiagogufyhdcxytsksfrppyfdfzjyurfnfdlkfmdabwdpbzbehsmynttajntaptfgpyyngomddltaoytpsoiejzinjtihlntpsoiajzdyeooybstpsotansgmgdgylnlrskhfflcxayolkkeyylswlfbghpoytpsoisjojljkinjyinjljttpsoaooytpsoiyhsjnjlkpjtjytpsocfhszcoytpsoieiehsjyihtpsoimeydyeyendpdyeodpeheooytpsojeieihjkiajpinjojyinjljttpsoktgdfpgdfegmgsfefpfgcxgugogdgdgshkcxgmfefggoglfyoyaxtpsotansghlfaohdfzpyseryiacebgoxhynnpdpyrfahchletsaybwcljoehhgfwoyiokbwtenbboeldgwkshybkgwgmlndejnfrbbbtongaaefsfynykindmshyihjzdlttjplytlwpghrybdzclkjkpt",
+          "redacted": 7,
+          "review": [],
+          "root": "sha256:ad3a1ae003416b9d3c95f5bb7a1f8f81c4a05f585b4e64a6330d6faee3c47b9b",
+          "shown": 5
+        },
+        "output_digest": "sha256:4b58882a64c8b08d58cc3a4840324d9b4b4681b80af4889cd4319c301f01f7ca",
+        "status": "done"
+      },
+      {
+        "error": "envelope.verify: the signature does not verify with this key: the envelope was changed, or someone else signed it",
+        "id": "view",
+        "op": "envelope.verify",
+        "status": "failed"
+      }
+    ]
+  },
+  "inputs": {
+    "signer": "\"ur:signing-public-key/lfaohdcxbbsabemewzoxlpldosbzfsgsdmlbhtndryfwpddlhyqdvtrprfldpksaisropkzmlacttbol\""
+  }
+}

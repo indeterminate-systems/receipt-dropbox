@@ -11,5 +11,6 @@
   ocr = import "ops/ocr.ncl",
   pdf = import "ops/pdf.ncl",
   receipt = import "ops/receipt.ncl",
+  render = import "ops/render.ncl",
   statement = import "ops/statement.ncl",
 }
