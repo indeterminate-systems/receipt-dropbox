@@ -29,4 +29,5 @@ pub use money::{Currency, Money, MoneyError};
 pub use receipt::{Receipt, ReceiptItem, ReceiptKind, ReceiptProblem};
 pub use statement::{
     AccountRef, LineClass, RedactionSummary, Statement, StatementLine, StatementProblem, Supporter,
+    SupporterProblem,
 };
