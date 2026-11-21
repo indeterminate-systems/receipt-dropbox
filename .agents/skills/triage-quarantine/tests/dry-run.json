@@ -1,0 +1,45 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:6f1b9ed3510e7c7915ef74fc04205a297ed4ee0b8ca1802a212796312036aed0",
+    "skill": "triage-quarantine",
+    "steps": [
+      {
+        "id": "status",
+        "op": "intake.status",
+        "output": {
+          "expired": 0,
+          "quarantined": []
+        },
+        "output_digest": "sha256:9e525b2024e05e4709152c79ffa95946a497356649e2a2fb7d57e10a9291d8d5",
+        "status": "done"
+      },
+      {
+        "args": {
+          "policy": {
+            "allow": {
+              "addresses": [],
+              "domains": [
+                "example.org"
+              ]
+            },
+            "authserv_id": "mx.cloudflare.net",
+            "claim_url": "https://app.example.org/claim",
+            "intake_address": "receipts@receipts.example.org",
+            "max_bytes": 10485760,
+            "quarantine_days": 7,
+            "reply_interval_days": 7
+          }
+        },
+        "id": "sweep",
+        "op": "intake.sweep",
+        "status": "skipped"
+      }
+    ]
+  },
+  "inputs": {
+    "policy": "{ intake_address = \"receipts@receipts.example.org\", claim_url = \"https://app.example.org/claim\", allow.domains = [\"example.org\"] }"
+  }
+}

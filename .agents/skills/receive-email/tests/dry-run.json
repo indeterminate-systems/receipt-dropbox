@@ -1,0 +1,38 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:d55a453df8ed8a12ebdd0e4d31c6989770b2ad76871805194c04c0bac50dac48",
+    "skill": "receive-email",
+    "steps": [
+      {
+        "args": {
+          "keep_message": false,
+          "message": "sha256:0000000000000000000000000000000000000000000000000000000000000001",
+          "policy": {
+            "allow": {
+              "addresses": [],
+              "domains": [
+                "example.org"
+              ]
+            },
+            "authserv_id": "mx.cloudflare.net",
+            "claim_url": "https://app.example.org/claim",
+            "intake_address": "receipts@receipts.example.org",
+            "max_bytes": 10485760,
+            "quarantine_days": 7,
+            "reply_interval_days": 7
+          }
+        },
+        "id": "receive",
+        "op": "intake.receive",
+        "status": "skipped"
+      }
+    ]
+  },
+  "inputs": {
+    "message": "\"sha256:0000000000000000000000000000000000000000000000000000000000000001\"",
+    "policy": "{ intake_address = \"receipts@receipts.example.org\", claim_url = \"https://app.example.org/claim\", allow.domains = [\"example.org\"] }"
+  }
+}

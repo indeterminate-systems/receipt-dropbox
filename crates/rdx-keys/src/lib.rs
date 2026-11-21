@@ -127,7 +127,13 @@ impl std::fmt::Debug for Keys {
 
 impl Keys {
     pub fn generate(rng: &mut impl RandomNumberGenerator) -> Self {
-        Self(PrivateKeyBase::from_data(random_bytes::<KEY_LEN>(rng)))
+        Self::from_secret(&random_bytes::<KEY_LEN>(rng))
+    }
+
+    /// The keys 32 secret bytes derive. Email intake (rdx-intake) hands a quarantine key to a
+    /// sender this way, inside a link, so the server that made it need not keep it.
+    pub fn from_secret(secret: &[u8; KEY_LEN]) -> Self {
+        Self(PrivateKeyBase::from_data(secret))
     }
 
     /// The Ed25519 key statements and registry events are signed with.

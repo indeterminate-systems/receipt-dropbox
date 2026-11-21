@@ -1,0 +1,27 @@
+[package]
+name = "rdx-intake"
+version = "0.1.0"
+description = "Receipt Dropbox email intake: sender checks, encryption on arrival, quarantine for unverified senders"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+# `rdx` registers this crate's ops (its `register` function) when it is a dependency of
+# rdx-cli; see crates/rdx-cli/build.rs.
+[package.metadata.rdx]
+ops = true
+
+[dependencies]
+bc-envelope = { version = "0.43", default-features = false, features = ["known_value", "encrypt", "recipient"] }
+bc-components = { version = "0.31", default-features = false, features = ["ed25519"] }
+rdx-host = { path = "../rdx-host" }
+rdx-keys = { path = "../rdx-keys" }
+# Ops and their registry only; plan loading (Nickel) is the host's business.
+rdx-plan = { path = "../rdx-plan", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+zeroize = "1"
+
+[dev-dependencies]
+rdx-plan = { path = "../rdx-plan" }

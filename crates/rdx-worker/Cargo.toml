@@ -1,0 +1,24 @@
+[package]
+name = "rdx-worker"
+version = "0.1.0"
+description = "Receipt Dropbox on Cloudflare: the Email Routing Worker that runs intake (rdx-intake) with KV and R2"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+# worker-build bundles the cdylib; the rlib lets native tests reach the staging layer.
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+rdx-host = { path = "../rdx-host" }
+rdx-intake = { path = "../rdx-intake" }
+serde_json.workspace = true
+
+# Only the Workers runtime is JavaScript-hosted wasm32: on every other target this crate is just
+# its staging layer, so the workspace still builds and tests natively and for wasm32-wasip2.
+# The Worker never links rdx-render or rdx-ocr: both need plaintext (ADR-P10, ADR-P11).
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+worker = "0.9"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = ["Crypto"] }

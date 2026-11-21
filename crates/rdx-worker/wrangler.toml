@@ -1,0 +1,30 @@
+# The Receipt Dropbox intake Worker. Setup: README.md. Deploy from this directory:
+#
+#   wrangler deploy --var RDX_INTAKE_POLICY:"$(nickel export --format json --import-path ../../nickel policy.ncl)"
+#
+name = "rdx-intake"
+main = "build/index.js"
+compatibility_date = "2026-11-01"
+
+[build]
+command = "worker-build --release"
+
+# Key registries, inboxes and quarantines. Create it with
+# `wrangler kv namespace create RDX_KV` and paste the id it prints.
+[[kv_namespaces]]
+binding = "RDX_KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"
+
+# Encrypted emails. Create it with `wrangler r2 bucket create rdx-blobs`.
+[[r2_buckets]]
+binding = "RDX_BLOBS"
+bucket_name = "rdx-blobs"
+
+# Deletes expired quarantines once a day (03:17 UTC).
+[triggers]
+crons = ["17 3 * * *"]
+
+# Optional: expiry notices to senders. Needs Email Sending on the Workers Paid plan; without it
+# the setup reply's own deadline is the only notice.
+# [[send_email]]
+# name = "RDX_EMAIL"
