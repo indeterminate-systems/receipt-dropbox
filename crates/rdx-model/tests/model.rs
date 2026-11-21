@@ -112,6 +112,54 @@ fn ids_are_lowercase_slugs() {
     assert!(serde_json::from_str::<SupporterId>(r#""S 1""#).is_err());
 }
 
+// ---------------------------------------------------------------- supporters
+
+fn supporter(json: &str) -> Supporter {
+    serde_json::from_str(json).unwrap()
+}
+
+#[test]
+fn a_supporter_written_before_names_still_reads() {
+    let s = supporter(r#"{"id": "s-0001", "display_name": "Ana"}"#);
+    assert_eq!(s.full_name, None);
+    assert_eq!(s.alias, None);
+    // Absent names stay absent, so older records and digests of them don't change.
+    assert_eq!(
+        serde_json::to_string(&s).unwrap(),
+        r#"{"id":"s-0001","display_name":"Ana"}"#
+    );
+}
+
+#[test]
+fn a_supporter_can_have_a_full_name_and_an_alias() {
+    let s = supporter(
+        r#"{"id": "s-0001", "display_name": "Ana R.",
+            "full_name": "Ana María Rodríguez López", "alias": "Anita"}"#,
+    );
+    assert_eq!(s.full_name.as_deref(), Some("Ana María Rodríguez López"));
+    assert_eq!(s.short_name(), "Anita");
+    assert_eq!(s.validate(), Ok(()));
+}
+
+#[test]
+fn the_short_name_falls_back_to_the_display_name() {
+    let s = supporter(r#"{"id": "s-0001", "display_name": "Ana R."}"#);
+    assert_eq!(s.short_name(), "Ana R.");
+}
+
+#[test]
+fn supporter_names_cannot_be_blank_or_padded() {
+    let s = supporter(r#"{"id": "s-0001", "display_name": " ", "full_name": "", "alias": "Ana "}"#);
+    assert_eq!(
+        s.validate(),
+        Err(vec![
+            SupporterProblem::BlankName("display_name"),
+            SupporterProblem::BlankName("full_name"),
+            SupporterProblem::PaddedName("alias"),
+        ])
+    );
+}
+
 // ---------------------------------------------------------------- statements
 
 fn line(id: &str, d: &str, desc: &str, minor: i64) -> StatementLine {

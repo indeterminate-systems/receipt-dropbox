@@ -8,11 +8,65 @@ use crate::{
 };
 
 /// Someone who pays org costs from a personal account.
+///
+/// Names are personal data: they belong in the supporter's encrypted records and in what the
+/// people who reconcile see, never in the ledger, a server log or the key registry (which the
+/// Worker reads in plaintext). Everything outside the PWA refers to a supporter by `id`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Supporter {
     pub id: SupporterId,
     /// Shown to the people who reconcile; never written to the ledger (which uses `id`).
     pub display_name: String,
+    /// The name as banks and tax receipts (CFDI) print it, for checking that a statement's
+    /// account holder or a receipt's recipient is this supporter.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub full_name: Option<String>,
+    /// What people call them day to day ("Anita"), for messages and short labels.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub alias: Option<String>,
+}
+
+/// Why a supporter record can't be used as written.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum SupporterProblem {
+    #[error("`{0}` is blank")]
+    BlankName(&'static str),
+    #[error("`{0}` starts or ends with whitespace")]
+    PaddedName(&'static str),
+}
+
+impl Supporter {
+    /// The alias if they have one, otherwise the display name.
+    pub fn short_name(&self) -> &str {
+        self.alias.as_deref().unwrap_or(&self.display_name)
+    }
+
+    /// Checks every name, reporting each problem found.
+    pub fn validate(&self) -> Result<(), Vec<SupporterProblem>> {
+        let names = [
+            ("display_name", Some(self.display_name.as_str())),
+            ("full_name", self.full_name.as_deref()),
+            ("alias", self.alias.as_deref()),
+        ];
+        let problems: Vec<_> = names
+            .into_iter()
+            .filter_map(|(field, name)| {
+                let name = name?;
+                if name.trim().is_empty() {
+                    Some(SupporterProblem::BlankName(field))
+                } else if name.trim() != name {
+                    Some(SupporterProblem::PaddedName(field))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        if problems.is_empty() {
+            Ok(())
+        } else {
+            Err(problems)
+        }
+    }
 }
 
 /// Which account a statement is for, without its number.

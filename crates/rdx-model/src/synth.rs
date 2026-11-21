@@ -192,6 +192,8 @@ impl Scenario {
             s.supporters.push(Supporter {
                 id: supporter.clone(),
                 display_name: format!("Test Supporter {n}"),
+                full_name: Some(format!("Test Supporter Number {n}")),
+                alias: Some(format!("Tester {n}")),
             });
             let mut balance = rng.range(500_00, 3_000_00);
             let mut month_start = Date::new(config.start.year(), config.start.month(), 1).unwrap();
