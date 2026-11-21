@@ -5,6 +5,7 @@
 # these constructors and rdx's registered ops are the same set.
 {
   envelope = import "ops/envelope.ncl",
+  intake = import "ops/intake.ncl",
   keys = import "ops/keys.ncl",
   ledger = import "ops/ledger.ncl",
   matching = import "ops/matching.ncl",
