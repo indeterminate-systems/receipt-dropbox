@@ -1,0 +1,11 @@
+LANTERN CAFE CATERING
+12 Example Street, Springfield
+
+Order: 7435
+Date: 2026-03-03
+
+Catering, board meeting (20 people)   268.28
+Sales tax                              21.46
+TOTAL USD                             289.74
+
+Paid by card. Thank you!

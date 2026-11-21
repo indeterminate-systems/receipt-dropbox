@@ -1,0 +1,11 @@
+Clearwave Telecom
+Monthly bill
+
+Invoice number: INV-920207
+Invoice date: 2026-03-07
+
+Office line and internet       57.50
+Taxes                            4.59
+Amount due USD                  62.09
+
+Paid by card on file.

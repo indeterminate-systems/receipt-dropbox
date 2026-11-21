@@ -9,6 +9,7 @@
 //!   skill with it under `wasmtime`, so the core is exercised as WebAssembly, not only natively.
 //! - `cargo xtask doctor`: checks that the shell has the toolchain, wasm targets and tools.
 //! - `cargo xtask ci`: everything CI runs, in the same order, so a local run predicts CI.
+//! - `cargo xtask demo [OUT]`: runs the pipeline end to end on synthetic documents (see `demo.rs`).
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -16,6 +17,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 mod ci;
+mod demo;
 mod doctor;
 
 use rdx_host::Host;
@@ -37,8 +39,11 @@ fn main() -> ExitCode {
             }
         }
         Some("ci") => ci::run(&root()),
+        Some("demo") => demo::run(&root(), args.get(1).map(String::as_str)),
         _ => {
-            eprintln!("usage: cargo xtask <check [SKILL…] | check-wit | smoke-wasm | doctor | ci>");
+            eprintln!(
+                "usage: cargo xtask <check [SKILL…] | check-wit | smoke-wasm | doctor | ci | demo [OUT]>"
+            );
             ExitCode::from(2)
         }
     }
