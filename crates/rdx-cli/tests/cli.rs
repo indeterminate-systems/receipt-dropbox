@@ -199,9 +199,8 @@ fn blob_put_then_ingest_a_statement() {
     );
     assert_eq!(out.status.code(), Some(0), "{}", stderr(&out));
     let report = stdout_json(&out);
-    assert_eq!(report["steps"][0]["output"]["parser"], "example-bank");
-    assert_eq!(
-        report["steps"][0]["output"]["statement"]["original"],
-        digest.as_str()
-    );
+    // Step 0 is `ocr.read` (the text layer, for this PDF); step 1 parses.
+    let parsed = &report["steps"][1]["output"];
+    assert_eq!(parsed["parser"], "example-bank");
+    assert_eq!(parsed["statement"]["original"], digest.as_str());
 }
