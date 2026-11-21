@@ -8,7 +8,14 @@
 //! kv/<hex of key>     values; keys are hex-encoded so no key can name a path
 //! outbox/<n>.json     mail that would have been sent (the local host never sends mail)
 //! audit.jsonl         one run per line
+//! secrets/passkey     a stand-in passkey: 32 random bytes the PRF is keyed with
+//! secrets/shown/      secrets shown to the person (recovery shares to hand out), one file each
+//! secrets/answers/    secrets the person gives when asked (recovery shares), one file each
 //! ```
+//!
+//! The local host is for development and trying skills: its "passkey" is a file, so anyone who
+//! can read the state directory can unlock its keys. The PWA's passkey never leaves the
+//! authenticator.
 
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write};
@@ -17,6 +24,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::{
     AuditLog, BlobStore, CapabilityError, Clock, Host, Kv, MailOut, Message, Random, Result,
+    Secrets,
 };
 
 fn io_err(what: &str, path: &Path, e: io::Error) -> CapabilityError {
@@ -59,6 +67,7 @@ pub fn host(state_dir: &Path) -> Result<Host> {
         .with_mail_out(OutboxDir::new(state_dir.join("outbox"))?)
         .with_clock(SystemClock)
         .with_random(OsRandom)
+        .with_secrets(DirSecrets::new(state_dir.join("secrets"))?)
         .with_audit_log(FileAuditLog::new(state_dir.join("audit.jsonl"))))
 }
 
@@ -189,6 +198,68 @@ impl Random for OsRandom {
         Err(CapabilityError::new(
             "the local host has no randomness in the browser; use the PWA host",
         ))
+    }
+}
+
+/// Secrets as files: see the module docs. Labels name files, so they are limited to
+/// `[a-z0-9-]`.
+pub struct DirSecrets {
+    dir: PathBuf,
+}
+
+impl DirSecrets {
+    pub fn new(dir: PathBuf) -> Result<Self> {
+        ensure_dir(&dir.join("shown"))?;
+        ensure_dir(&dir.join("answers"))?;
+        Ok(Self { dir })
+    }
+
+    fn file(&self, sub: &str, label: &str) -> Result<PathBuf> {
+        let ok = !label.is_empty()
+            && label
+                .bytes()
+                .all(|b| matches!(b, b'a'..=b'z' | b'0'..=b'9' | b'-'));
+        if !ok {
+            return Err(CapabilityError::new(format!(
+                "secret label `{label}` must be lowercase letters, digits and `-`"
+            )));
+        }
+        Ok(self.dir.join(sub).join(format!("{label}.txt")))
+    }
+}
+
+impl Secrets for DirSecrets {
+    fn prf(&mut self, salt: &[u8]) -> Result<Vec<u8>> {
+        use sha2::{Digest, Sha256};
+        let path = self.dir.join("passkey");
+        let key = match read_optional(&path)? {
+            Some(key) => key,
+            None => {
+                let mut key = [0u8; 32];
+                OsRandom.fill(&mut key)?;
+                write_atomic(&path, &key)?;
+                key.to_vec()
+            }
+        };
+        let mut h = Sha256::new();
+        h.update(&key);
+        h.update(salt);
+        Ok(h.finalize().to_vec())
+    }
+
+    fn show(&mut self, label: &str, secret: &str) -> Result<()> {
+        write_atomic(&self.file("shown", label)?, secret.as_bytes())
+    }
+
+    fn ask(&mut self, label: &str) -> Result<Option<String>> {
+        let path = self.file("answers", label)?;
+        read_optional(&path)?
+            .map(|b| {
+                String::from_utf8(b)
+                    .map(|s| s.trim().to_owned())
+                    .map_err(|_| CapabilityError::new(format!("{} is not text", path.display())))
+            })
+            .transpose()
     }
 }
 

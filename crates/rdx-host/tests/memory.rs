@@ -98,9 +98,31 @@ fn hosts_say_what_they_offer() {
 #[test]
 fn capabilities_use_their_wit_names() {
     let names: Vec<String> = Capability::ALL.iter().map(|c| c.to_string()).collect();
-    assert_eq!(names, ["blob-store", "kv", "mail-out", "clock", "random"]);
+    assert_eq!(
+        names,
+        ["blob-store", "kv", "mail-out", "clock", "random", "secrets"]
+    );
     assert_eq!(
         serde_json::to_value(Capability::MailOut).unwrap(),
         "mail-out"
     );
+}
+
+#[test]
+fn memory_secrets_give_a_stable_prf_per_passkey_and_record_what_is_shown() {
+    use rdx_host::Secrets;
+    use rdx_host::memory::MemorySecrets;
+    let mut a = MemorySecrets::default();
+    let mut b = MemorySecrets::new([9; 32]);
+    let first = a.prf(b"salt").unwrap();
+    assert_eq!(first.len(), 32);
+    assert_eq!(first, a.prf(b"salt").unwrap());
+    assert_ne!(first, a.prf(b"other").unwrap());
+    assert_ne!(first, b.prf(b"salt").unwrap());
+
+    a.show("share-1", "ur:sskr/x").unwrap();
+    assert_eq!(a.shown(), [("share-1".to_owned(), "ur:sskr/x".to_owned())]);
+    assert_eq!(a.ask("share-1").unwrap(), None);
+    a.answer("share-1", "ur:sskr/y");
+    assert_eq!(a.ask("share-1").unwrap().as_deref(), Some("ur:sskr/y"));
 }

@@ -4,7 +4,8 @@
 //! binary picks one. The core never takes randomness from it: salt comes from the caller's
 //! generator, which hosts back with their `random` capability. Failing here turns an accidental
 //! call into an error instead of a silent dependency on the platform. getrandom 0.3 gets the same
-//! treatment from `.cargo/config.toml`. Drop this when the PWA (roadmap piece 14) chooses a real
+//! treatment from `.cargo/config.toml`. It lives in rdx-keys, the lowest crate that links the bc
+//! crates, because a binary can register only one. Drop this when the PWA (piece 14) chooses a real
 //! backend for the browser.
 
 #[cfg(all(target_arch = "wasm32", target_os = "unknown"))]

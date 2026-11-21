@@ -77,6 +77,22 @@ pub trait Random {
     fn fill(&mut self, buf: &mut [u8]) -> Result<()>;
 }
 
+/// Secrets that belong to the person at the device, never to a run. WIT: `secrets`.
+///
+/// Only a host where the person is present offers it: the PWA (WebAuthn PRF) and the local
+/// host. Servers don't, so a plan that needs to decrypt fails validation there. What passes
+/// through this capability never appears in plan arguments, outputs or the audit log.
+pub trait Secrets {
+    /// The passkey's PRF output for `salt` (WebAuthn `prf` extension, `eval.first`): 32 bytes
+    /// that only this passkey yields for this salt. The host may prompt the person.
+    fn prf(&mut self, salt: &[u8]) -> Result<Vec<u8>>;
+    /// Shows a secret to the person, such as a recovery share to print or pass on.
+    fn show(&mut self, label: &str, secret: &str) -> Result<()>;
+    /// Asks the person for a secret they hold, such as a recovery share. `None` when they have
+    /// no more to give.
+    fn ask(&mut self, label: &str) -> Result<Option<String>>;
+}
+
 /// Where run reports go: an append-only list of lines. WIT: `audit-log`.
 ///
 /// Not a [`Capability`]: ops never write to it; the runner records every run.
@@ -95,15 +111,17 @@ pub enum Capability {
     MailOut,
     Clock,
     Random,
+    Secrets,
 }
 
 impl Capability {
-    pub const ALL: [Capability; 5] = [
+    pub const ALL: [Capability; 6] = [
         Capability::BlobStore,
         Capability::Kv,
         Capability::MailOut,
         Capability::Clock,
         Capability::Random,
+        Capability::Secrets,
     ];
 
     pub fn name(self) -> &'static str {
@@ -113,6 +131,7 @@ impl Capability {
             Capability::MailOut => "mail-out",
             Capability::Clock => "clock",
             Capability::Random => "random",
+            Capability::Secrets => "secrets",
         }
     }
 }
@@ -131,6 +150,7 @@ pub struct Host {
     pub mail_out: Option<Box<dyn MailOut>>,
     pub clock: Option<Box<dyn Clock>>,
     pub random: Option<Box<dyn Random>>,
+    pub secrets: Option<Box<dyn Secrets>>,
     pub audit_log: Option<Box<dyn AuditLog>>,
 }
 
@@ -150,6 +170,7 @@ impl Host {
             .with_mail_out(Outbox::default())
             .with_clock(FixedClock(FixedClock::GOLDEN))
             .with_random(SeededRandom::new(0))
+            .with_secrets(MemorySecrets::default())
             .with_audit_log(MemoryAuditLog::default())
     }
 
@@ -178,6 +199,11 @@ impl Host {
         self
     }
 
+    pub fn with_secrets(mut self, c: impl Secrets + 'static) -> Self {
+        self.secrets = Some(Box::new(c));
+        self
+    }
+
     pub fn with_audit_log(mut self, c: impl AuditLog + 'static) -> Self {
         self.audit_log = Some(Box::new(c));
         self
@@ -190,6 +216,7 @@ impl Host {
             Capability::MailOut => self.mail_out.is_some(),
             Capability::Clock => self.clock.is_some(),
             Capability::Random => self.random.is_some(),
+            Capability::Secrets => self.secrets.is_some(),
         }
     }
 
@@ -226,4 +253,5 @@ pub const WIT_CAPABILITIES: &[(&str, &[&str])] = &[
     ("kv", &["get", "put", "delete"]),
     ("mail-out", &["send"]),
     ("audit-log", &["append", "last"]),
+    ("secrets", &["prf", "show", "ask"]),
 ];
