@@ -47,5 +47,8 @@ choice doesn't lock accountants out.
 
 ## Action items
 
-1. [ ] `rdx-ledger` writer with golden tests, parsed back with `beancount-parser-lima`.
-2. [ ] Spreadsheet export (CSV first, then XLSX) from the parsed ledger.
+1. [x] `rdx-ledger` writer with golden tests, parsed back with `beancount-parser-lima`. Done in
+   piece 9 (#25), parsed back with `beancount-parser` instead and checked with `bean-check`
+   ([ADR-P09](ADR-P09-beancount-ledger.md)).
+2. [x] Spreadsheet export (CSV first, then XLSX) from the parsed ledger. Done in piece 9 (#25):
+   `ledger.export`.
