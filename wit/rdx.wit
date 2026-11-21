@@ -52,6 +52,16 @@ interface audit-log {
     last: func() -> result<option<string>, capability-error>;
 }
 
+interface secrets {
+    use types.{capability-error};
+    /// The passkey's PRF output for `salt` (WebAuthn `prf`, `eval.first`); may prompt the person.
+    prf: func(salt: list<u8>) -> result<list<u8>, capability-error>;
+    /// Shows a secret to the person (a recovery share to hand out), never to the run.
+    show: func(label: string, secret: string) -> result<_, capability-error>;
+    /// Asks the person for a secret they hold; `none` when they have no more.
+    ask: func(label: string) -> result<option<string>, capability-error>;
+}
+
 // Clock and randomness come from WASI (wasi:clocks, wasi:random) on component hosts and from the
 // host runtime on statically linked builds.
 
@@ -112,4 +122,6 @@ world core {
     import kv;
     import mail-out;
     import audit-log;
+    // Only hosts where the person is present (the PWA, the local host) supply it.
+    import secrets;
 }
