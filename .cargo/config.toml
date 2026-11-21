@@ -1,5 +1,7 @@
 [alias]
-xtask = "run --quiet --package xtask --"
+# Not `--quiet`: xtask links rdx-cli and every domain crate (Typst, ocrs, Nickel), so its first
+# build takes minutes, and without cargo's progress `cargo xtask doctor` looks hung.
+xtask = "run --package xtask --"
 
 # `cargo test --target wasm32-wasip2` runs the test binaries under wasmtime, so the core is tested
 # as WebAssembly and not only type-checked for it. `--dir /` lets tests read the repo's Nickel
