@@ -5,8 +5,8 @@
 # steps) before the core runs anything. `rdx-plan` repeats the structural checks in Rust, because
 # plans can also arrive as JSON.
 #
-# Each op has a constructor under `ops`. Adding an op: see docs/workflow.md.
-let matching_policy = import "rdx/matching.ncl" in
+# Each op has a constructor under `ops`: the built-in ones below, each domain's in `ops/<domain>.ncl`
+# (merged in from ops.ncl). Adding an op: see docs/workflow.md.
 let StepId =
   std.contract.from_validator (fun id =>
     if std.is_string id && std.string.is_match "^[a-z][a-z0-9_-]*$" id then
@@ -108,89 +108,11 @@ let PlanC = {
 }
 in
 
-# Builds a step constructor: takes `{ id ? , ..args }`, checks args against `Args`.
-let step = fun op_id Args => fun input =>
-  let has_id = std.record.has_field "id" input in
-  # Bound under another name: inside the record below, `args` would mean the field itself.
-  let given = if has_id then std.record.remove "id" input else input in
-  (if has_id then { id = input.id } else {})
-  & { op = op_id, args = given | Args }
-in
-
-# A value or a reference to an earlier step's output.
-let ValueOrRef = Dyn in
-
-let NonEmptyString =
-  std.contract.from_validator (fun s =>
-    if std.is_string s && s != "" then 'Ok else 'Error { message = "expected a non-empty string" }
-  )
-in
-
-# `{}` as a contract accepts any record, so ops without arguments say so explicitly.
-let NoArgs =
-  std.contract.from_validator (fun r =>
-    if std.is_record r && r == {} then
-      'Ok
-    else
-      'Error {
-        message = "this op takes no arguments",
-        notes = ["Unexpected: %{std.string.join ", " (std.record.fields r)}"],
-      }
-  )
-in
-
-let UrOf = fun kind =>
-  std.contract.from_validator (fun s =>
-    if std.is_string s && std.string.is_match "^\\s*ur:%{kind}/[a-z]+\\s*$" s then
-      'Ok
-    else
-      'Error {
-        message = "expected a `ur:%{kind}/…` string",
-        notes = ["URs are lowercase letters after the type, like `ur:%{kind}/lfaohdcx…`."],
-      }
-  )
-in
-
-let model = import "model.ncl" in
-
-# A document in the host's blob store: its digest, or a reference to a step that produced one.
-let DocumentC =
-  std.contract.from_validator (fun d =>
-    if std.is_string d && std.string.is_match "^sha256:[0-9a-f]{64}$" d then
-      'Ok
-    else if std.is_record d && std.record.fields d == ["ref"] then
-      'Ok
-    else
-      'Error {
-        message = "expected a document digest like `sha256:<64 hex digits>`",
-        notes = ["Put the file in the blob store first; locally, `rdx blob put FILE` prints its digest."],
-      }
-  )
-in
-
-let DecimalText =
-  std.contract.from_validator (fun s =>
-    if std.is_string s && std.string.is_match "^-?[0-9]+([.][0-9]+)?$" s then
-      'Ok
-    else
-      'Error {
-        message = "expected an amount as decimal text, like \"744.55\" or \"-12.00\"",
-        notes = ["Amounts are text so they are never floating point."],
-      }
-  )
-in
-
-let StatementFormat =
-  std.contract.from_validator (fun f =>
-    if std.is_string f && std.array.elem f ["auto", "csv", "ofx", "example-bank"] then
-      'Ok
-    else
-      'Error {
-        message = "unknown statement format",
-        notes = ["Use auto (detect), csv, ofx or example-bank."],
-      }
-  )
-in
+let lib = import "lib.ncl" in
+let step = lib.step in
+let ValueOrRef = lib.ValueOrRef in
+let NonEmptyString = lib.NonEmptyString in
+let NoArgs = lib.NoArgs in
 
 # Deliberately loose: one `@` with text on both sides. The mail host does the real checking.
 let EmailAddress =
@@ -200,50 +122,6 @@ let EmailAddress =
     else
       'Error { message = "expected an email address like `name@example.org`" }
   )
-in
-
-let MediaType =
-  std.contract.from_validator (fun t =>
-    let known = ["message/rfc822", "text/html", "text/plain", "application/xml"] in
-    if std.is_string t && std.array.elem t known then
-      'Ok
-    else
-      'Error {
-        message = "unsupported media type for receipt extraction",
-        notes = [
-          "Use one of: %{std.string.join ", " known}.",
-          "For a PDF, read its text layer with `pdf.text` and pass that step's output as `document`.",
-        ],
-      }
-  )
-in
-
-let DateOrder =
-  std.contract.from_validator (fun o =>
-    if o == "dmy" || o == "mdy" then
-      'Ok
-    else
-      'Error {
-        message = "invalid date order",
-        notes = ["Use `dmy` (03/04 is 3 April) or `mdy` (March 4)."],
-      }
-  )
-in
-
-let ReceiptHints = {
-  currency
-    | model.Currency
-    | doc "Currency for amounts with no code, or only `$` (dollars or pesos)."
-    | optional,
-  date_order
-    | DateOrder
-    | doc "How to read numeric dates whose day and month could be swapped."
-    | optional,
-  merchant
-    | String
-    | doc "Merchant to use when the document doesn't name one. Emails use the sender."
-    | optional,
-}
 in
 
 {
@@ -260,184 +138,58 @@ in
     | doc "Refers to the output of the earlier step with this id."
     = fun id => { ref = id } | RefC,
 
-  ops = {
-    core = {
-      note
-        | doc "Adds a message to the run report. No effects."
-        = step "core.note" { message | String },
+  # The built-in ops (crate rdx-plan) are here; each domain crate's are in ops/<domain>.ncl.
+  ops =
+    {
+      core = {
+        note
+          | doc "Adds a message to the run report. No effects."
+          = step "core.note" { message | String },
 
-      digest
-        | doc m%"
+        digest
+          | doc m%"
           SHA-256 of a value's canonical JSON (keys sorted, no whitespace), as `sha256:<hex>`.
           Use it to record what a step produced in the audit trail. No effects.
         "%
-        = step "core.digest" { value | ValueOrRef },
-    },
+          = step "core.digest" { value | ValueOrRef },
+      },
 
-    envelope = {
-      redact
-        | doc m%"
-          Elides every line of a sealed statement envelope that confirmed matches don't fully
-          cover. The root digest and signature stay valid. Returns `{ envelope, root, shown,
-          redacted, review }`; `review` lists lines that matches cover only in part. `envelope`
-          is a `ur:envelope/…` string or the output of an earlier `envelope.*` step. No effects.
-        "%
-        = step "envelope.redact" {
-          envelope | ValueOrRef,
-          matches
-            | ValueOrRef
-            | doc "Matches as in `model.ncl`; only confirmed ones count."
-            | default
-            = [],
-        },
+      # Ops below need host capabilities; a host without one rejects the plan before it runs.
 
-      verify
-        | doc m%"
-          Checks a statement envelope's signature against the supporter's public key and returns
-          what the viewable statement shows: header, shown lines, `redacted_rows` and
-          `summary` (`opening + shown + redacted = closing`), and the envelope's `root` digest.
-          Fails if the envelope was changed or someone else signed it. No effects.
-        "%
-        = step "envelope.verify" {
-          envelope | ValueOrRef,
-          signer | UrOf "signing-public-key",
-        },
-    },
+      clock = {
+        now
+          | doc "The host's current time as `{ unix_ms }`. Needs `clock`. No effects."
+          = step "clock.now" NoArgs,
+      },
 
-    # `match` is a Nickel keyword, hence `matching`.
-    matching = {
-      propose
-        | doc m%"
-          Proposes matches between one statement's lines and its supporter's receipts and bills,
-          under a matching `policy` (rdx/matching.ncl; omit it for the defaults, or override only
-          the tolerances you tune). `decided` lists earlier matches: confirmed lines and receipts
-          are left alone and rejected pairs are not proposed again. Output: `proposals` (each
-          with `kind`, `review`, `reasons`, `matches`, `evidence`), `unmatched_lines`,
-          `unmatched_receipts`, `notes` and a `summary`. Every match is `proposed`, never
-          confirmed. No effects.
-        "%
-        = step "matching.propose" {
-          # Usually earlier steps' outputs (`rdx.ref`), so not checked against rdx/model.ncl
-          # here; the op checks them in Rust. (Applying those contracts to imported JSON also
-          # trips a nickel-lang-core 0.19 panic: see docs/reference/nickel.md.)
-          statement | ValueOrRef,
-          receipts | ValueOrRef,
-          decided | ValueOrRef | default = [],
-          policy | matching_policy.Policy | default = {},
-        },
-    },
+      kv = {
+        get
+          | doc "The JSON value stored under `key`, or null. Needs `kv`. No effects."
+          = step "kv.get" { key | NonEmptyString },
 
-    # Ops below need host capabilities; a host without one rejects the plan before it runs.
-
-    clock = {
-      now
-        | doc "The host's current time as `{ unix_ms }`. Needs `clock`. No effects."
-        = step "clock.now" NoArgs,
-    },
-
-    kv = {
-      get
-        | doc "The JSON value stored under `key`, or null. Needs `kv`. No effects."
-        = step "kv.get" { key | NonEmptyString },
-
-      put
-        | doc m%"
+        put
+          | doc m%"
           Stores a JSON value under `key`, replacing any value there. Needs `kv`. Has effects:
           skipped in a dry run, where the report shows the arguments it would use.
         "%
-        = step "kv.put" { key | NonEmptyString, value | ValueOrRef },
-    },
+          = step "kv.put" { key | NonEmptyString, value | ValueOrRef },
+      },
 
-    receipt = {
-      extract
-        | doc m%"
-          Extracts merchant, date, total, reference and kind from a receipt or bill: an email
-          (MIME, forwarded or not), HTML, plain text or CFDI XML, or the output of `pdf.text`.
-          Outputs `status` (`complete` or `needs_review`), the `fields` found, what is `missing`,
-          `warnings`, CFDI `fiscal` data, email `attachments` it didn't read, the `source`
-          digest and, when complete, a `receipt` in the domain model's shape. No effects.
-        "%
-        = step "receipt.extract" {
-          supporter
-            | model.Id
-            | doc "Who sent the receipt, and so whose statement it should match.",
-          document
-            | ValueOrRef
-            | doc "The document's text (`import \"bill.eml\" as 'Text`), or `rdx.ref` to a `pdf.text` step.",
-          media_type
-            | MediaType
-            | doc "Ignored when `document` is a `pdf.text` output."
-            | default
-            = "message/rfc822",
-          receipt_id
-            | model.Id
-            | doc "Id for the receipt. Default: `r-` and 16 hex digits of the source digest."
-            | optional,
-          hints | ReceiptHints | default = {},
-        },
-    },
-
-    mail = {
-      send
-        | doc m%"
+      mail = {
+        send
+          | doc m%"
           Sends a plain-text email. Needs `mail-out`. Has effects: skipped in a dry run. The
           local host writes mail to its outbox directory instead of sending it.
         "%
-        = step "mail.send" {
-          to | EmailAddress,
-          subject | NonEmptyString,
-          text | String,
-        },
-    },
-
-    pdf = {
-      text
-        | doc m%"
-          The text layer of a PDF in the blob store: `{ document, pages, text }`. `pages` holds
-          each line's spans (runs of words split at wide gaps, with left and right edges in
-          points); `text` is the same as plain lines. Empty `text` means no text layer (a scan).
-          Needs `blob-store`. No effects.
-        "%
-        = step "pdf.text" { document | DocumentC },
-    },
-
-    statement = {
-      parse
-        | doc m%"
-          Parses a bank statement (CSV, OFX, or a PDF in a known layout) from the blob store into
-          a checked statement: `{ statement, parser, checks }`. Fails, saying what to fix, if the
-          lines don't add up (running balances, printed totals, opening + lines = closing). Facts
-          the document doesn't state are passed here; facts it does state must agree. Needs
-          `blob-store`. No effects.
-        "%
-        = step "statement.parse" {
-          document | DocumentC | doc "The statement file's blob digest.",
-          supporter | model.Id | doc "Whose account this is.",
-          statement_id
-            | model.Id
-            | doc "Defaults to `st-<YYYY-MM of the period start>.<supporter>`."
-            | optional,
-          format
-            | StatementFormat
-            | doc "Parser to use; detected from the document when absent."
-            | optional,
-          currency | model.Currency | doc "Needed when the document doesn't say (CSV)." | optional,
-          period | model.Period | doc "Needed when the lines don't fix it." | optional,
-          account
-            | { institution | NonEmptyString, mask | String }
-            | doc "Bank and last digits of the account; needed for CSV."
-            | optional,
-          opening | DecimalText | doc "When the document prints no balances." | optional,
-          closing | DecimalText | doc "When the document prints no balances." | optional,
-          csv
-            | {
-              delimiter | String | optional,
-              date_order | [| 'ymd, 'mdy, 'dmy |] | optional,
-              decimal | [| 'auto, 'point, 'comma |] | optional,
-            }
-            | doc "How to read a CSV whose header and values don't settle it."
-            | optional,
-        },
-    },
-  },
+          =
+            step
+              "mail.send"
+              {
+                to | EmailAddress,
+                subject | NonEmptyString,
+                text | String,
+              },
+      },
+    }
+    & (import "ops.ncl"),
 }

@@ -7,7 +7,7 @@ that a test or `cargo xtask check` can verify, so an agent always knows whether 
  1. Contract      2. Failing test     3. Op            4. Skill            5. Skill test
  nickel/rdx/  →   crates/*/tests  →   Rust Op impl →   .agents/skills/ →   fixtures +
  contract for     golden fixture      passes tests;    <goal>/scripts/     golden plan
- args + output    + expected output   api.ncl ctor     main.ncl composes   run report
+ args + output    + expected output   ops/<domain>.ncl main.ncl composes   run report
                                                        ops into a plan
 ```
 
@@ -27,8 +27,19 @@ or personal data in `fixtures/`.
 ## 3. The op
 
 Implement the `Op` trait (`rdx_plan::Op`): `id()`, `effects()` (does it change anything outside
-the run?) and `run()`. Register its constructor in `nickel/rdx/api.ncl` under `ops`, applying the
-contract from stage 1. The test from stage 2 passes; so does the crate's `wasm32` check.
+the run?) and `run()`. Put its constructor, applying the contract from stage 1, in the domain's
+own `nickel/rdx/ops/<domain>.ncl`, which skills reach as `rdx.ops.<domain>.<op>`. The test from
+stage 2 passes; so does the crate's `wasm32` check.
+
+A new domain crate is wired in without editing any shared list beyond one line in each of two
+indexes, which merge with `union` (`.gitattributes`) so parallel pieces don't conflict:
+
+- `crates/rdx-cli/Cargo.toml`: a dependency on the crate, which sets
+  `[package.metadata.rdx] ops = true` and exports `pub fn register(&mut Registry)`;
+  `crates/rdx-cli/build.rs` generates the calls, so `rdx` and `cargo xtask check` run its ops.
+- `nickel/rdx/ops.ncl`: `<domain> = import "ops/<domain>.ncl",`.
+
+`crates/rdx-cli/tests/api.rs` fails if a registered op has no constructor or the reverse.
 
 ## 4. The skill
 

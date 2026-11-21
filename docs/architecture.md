@@ -69,11 +69,11 @@ clock directly; those come through the capability traits in layer 2.
 | `rdx-model` | Money (integer minor units plus currency), `Statement`, `StatementLine`, `Receipt`, `Match`, `Supporter`, identifiers and digests |
 | `rdx-plan` | Plan types, plan validation and the executor. **Scaffolded in this PR.** |
 | `rdx-config` | Loads Nickel configuration and policy through `nickel-embed`, against the contracts in `nickel/rdx/` |
-| `rdx-pdf` | PDF text layer: lines and spans with positions, in pure Rust. See [ADR-0006](adr/0006-pdf-text-layer-reader.md) |
+| `rdx-pdf` | PDF text layer: lines and spans with positions, in pure Rust. See [ADR-P04](adr/ADR-P04-pdf-text-layer-reader.md) |
 | `rdx-statement` | Statement parsing (CSV, OFX, PDF layouts) behind the `statement-parser` extension point, with balance checks; OCR fallback through the `ocr` capability (piece 11) |
 | `rdx-receipt` | Receipt and emailed-bill extraction (amount, date, merchant, reference) |
 | `rdx-match` | Candidate generation and scoring between statement lines and receipts, with tolerances from policy |
-| `rdx-envelope` | Gordian Envelope: one salted assertion per transaction, signing, elision of unmatched lines, verification (`bc-envelope`, `bc-components`); encryption to recipients comes with `rdx-keys`. See [ADR-0005](adr/0005-statement-envelopes.md) |
+| `rdx-envelope` | Gordian Envelope: one salted assertion per transaction, signing, elision of unmatched lines, verification (`bc-envelope`, `bc-components`); encryption to recipients comes with `rdx-keys`. See [ADR-P07](adr/ADR-P07-statement-envelopes.md) |
 | `rdx-keys` | Key hierarchy: passkey PRF to seed, device keys, SSKR recovery shares (`sskr`), rotation and revocation records |
 | `rdx-ledger` | Beancount writer and reader, with audit metadata on every entry. See [ADR-0003](adr/0003-beancount-ledger.md) |
 | `rdx-render` | Typst rendering of elided envelope data, including the root digest and a UR/QR of the envelope |
@@ -165,7 +165,8 @@ rdx.plan {
    input and output digests and any skipped effects, and goes to the audit log.
 
 A new op is added in three places, test first: a Rust `Op` implementation with unit tests, its
-constructor and argument contract in `api.ncl`, and a golden plan test. A skill is then a goal
+constructor and argument contract in its domain's `nickel/rdx/ops/<domain>.ncl`, and a golden
+plan test. A skill is then a goal
 composed from ops: see [the TDD to skills workflow](workflow.md).
 
 ## Data flows
@@ -218,7 +219,7 @@ docs/
   adr/                 decision records
   reference/           quick references: Agent Skills spec, Nickel
 crates/                Rust crates (rdx-plan today)
-nickel/rdx/            Nickel API and contracts for plans and config
+nickel/rdx/            Nickel API (api.ncl, ops/<domain>.ncl per domain crate) and contracts
 wit/                   WIT interfaces for capabilities and extensions
 .agents/skills/        Agent Skills (.claude/skills links here)
 xtask/                 cargo xtask: repo checks written in Rust

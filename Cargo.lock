@@ -1710,6 +1710,7 @@ dependencies = [
 name = "rdx-cli"
 version = "0.1.0"
 dependencies = [
+ "nickel-embed",
  "rdx-envelope",
  "rdx-host",
  "rdx-match",
@@ -1719,6 +1720,7 @@ dependencies = [
  "rdx-statement",
  "serde_json",
  "tempfile",
+ "toml",
 ]
 
 [[package]]

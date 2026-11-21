@@ -1,4 +1,4 @@
-# ADR-0006: A small PDF text-layer reader of our own
+# ADR-P04: A small PDF text-layer reader of our own
 
 **Status:** Proposed
 **Date:** 2026-11-20

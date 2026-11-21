@@ -1,0 +1,7 @@
+# Lists with one line per domain crate. Pieces developed in parallel each add a line; `union`
+# keeps both sides' lines when merging main into a branch, instead of reporting a conflict.
+# (GitHub's merge button ignores merge drivers, so merge main locally: AGENTS.md, "Parallel work".)
+# A bad union (say, two edits to the same line) fails loudly: cargo rejects duplicate keys, Nickel
+# rejects duplicate fields, and crates/rdx-cli/tests/api.rs checks ops against constructors.
+crates/rdx-cli/Cargo.toml merge=union
+nickel/rdx/ops.ncl merge=union

@@ -1,6 +1,6 @@
 ---
 name: op-author
-description: Adds or changes a Receipt Dropbox op - the Nickel contract for its arguments, a failing Rust test, the Rust `Op` implementation and its constructor in nickel/rdx/api.ncl - so skills can use it in plans. Use when a goal needs something the core cannot do yet (parse, match, encrypt, write), before writing the skill with skill-author.
+description: Adds or changes a Receipt Dropbox op - the Nickel contract for its arguments, a failing Rust test, the Rust `Op` implementation and its constructor in nickel/rdx/ops/<domain>.ncl - so skills can use it in plans. Use when a goal needs something the core cannot do yet (parse, match, encrypt, write), before writing the skill with skill-author.
 metadata:
   rdx-kind: dev
 ---
@@ -17,10 +17,12 @@ done until it passes the WebAssembly checks, and those need the wasm targets and
 
 ## 1. Contract
 
-In `nickel/rdx/api.ncl`, write the contract for the op's arguments: every field with a type, a
+In `nickel/rdx/ops/<domain>.ncl` (one file per domain crate), write the contract for the op's arguments: every field with a type, a
 `doc`, and a `default` where one is sensible. Reject bad input with a message that tells an agent
 what to change (`std.contract.from_validator` with `message` and `notes`). Ops live in a
 namespace per area (`statement.parse`, `ledger.post`), never in `core` unless they are about plans.
+Shared helpers (`step`, `ValueOrRef`, `Document`, `DecimalText`, …) come from
+`nickel/rdx/lib.ncl`, domain-model contracts from `nickel/rdx/model.ncl`.
 
 ## 2. Failing test
 
@@ -43,17 +45,30 @@ Implement `rdx_plan::Op` (`crates/rdx-plan/src/exec.rs`):
 - Do no I/O directly: storage, mail, time and randomness come from host capabilities
   (`wit/rdx.wit`). Money is integer minor units plus a currency; never floats.
 
-Give the crate a `register(&mut Registry)` for its ops (as `rdx_envelope::register` does), call
-it from `rdx_cli::registry()` (the local host, and what `cargo xtask check` runs skills with),
-and add the constructor under `ops` in `api.ncl`:
+Give the crate a `pub fn register(&mut Registry)` for its ops (as `rdx_envelope::register`
+does) and the constructor in its domain file:
 
 ```nickel
-statement = {
+# nickel/rdx/ops/statement.ncl
+let lib = import "../lib.ncl" in
+let step = lib.step in
+{
   parse
     | doc "Parses a statement into lines and balances. No effects."
     = step "statement.parse" StatementParseArgs,
-},
+}
 ```
+
+A new domain crate also needs, without touching any other shared file:
+
+- `[package.metadata.rdx] ops = true` in its own `Cargo.toml`, and one dependency line in
+  `crates/rdx-cli/Cargo.toml`. `crates/rdx-cli/build.rs` then calls its `register` from
+  `rdx_cli::registry()` (the local host, and what `cargo xtask check` runs skills with), and
+  fails the build if a crate with ops isn't a dependency.
+- one line in `nickel/rdx/ops.ncl`: `statement = import "ops/statement.ncl",`.
+
+Both files merge with `union` (`.gitattributes`), so pieces adding domains in parallel don't
+conflict. `crates/rdx-cli/tests/api.rs` checks that registered ops and constructors match.
 
 ## Done when
 
