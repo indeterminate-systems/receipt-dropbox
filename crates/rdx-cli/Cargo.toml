@@ -17,6 +17,7 @@ path = "src/main.rs"
 rdx-envelope = { path = "../rdx-envelope" }
 rdx-host = { path = "../rdx-host", features = ["local"] }
 rdx-match = { path = "../rdx-match" }
+rdx-ocr = { path = "../rdx-ocr" }
 rdx-pdf = { path = "../rdx-pdf" }
 rdx-plan = { path = "../rdx-plan" }
 rdx-receipt = { path = "../rdx-receipt" }
