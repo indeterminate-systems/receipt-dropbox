@@ -65,7 +65,8 @@ needs review.
   `example-bank` footer misread as `Page L of 1` joined the last line's description.
 - The models' licence: the author publishes them as CC-BY-SA-4.0 on Hugging Face (trained on
   HierText); the mirror used says MIT. Shipping them to supporters' browsers needs attribution
-  and, to be safe, treating them as CC-BY-SA. This is an open question for Ash.
+  and, to be safe, treating them as CC-BY-SA. Ash accepted both (2026-11-21): the PWA (piece 14),
+  which first ships the models, shows their attribution.
 - The `rten` and `ocrs` crates are built optimized in the dev profile (workspace `Cargo.toml`),
   because unoptimized inference made a test take two minutes; the OCR tests now take seconds
   natively and about 35 s per test binary under wasmtime.
