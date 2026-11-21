@@ -8,6 +8,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::PdfError;
+use crate::crypt::Security;
 use crate::lex::{Dict, Lexer, Obj, Stream, is_delim, is_ws};
 
 /// Decompressed streams larger than this are refused, so a small hostile file can't exhaust
@@ -18,6 +19,9 @@ const MAX_TREE_DEPTH: usize = 32;
 
 pub(crate) struct Doc {
     objects: BTreeMap<u32, Obj>,
+    /// Generation numbers of the objects written directly in the file, which encryption keys
+    /// depend on.
+    generations: BTreeMap<u32, u16>,
     trailer: Dict,
 }
 
@@ -29,29 +33,61 @@ pub(crate) struct PageObj {
 }
 
 impl Doc {
-    pub fn load(bytes: &[u8]) -> Result<Doc, PdfError> {
+    /// Reads a PDF, decrypting it with `password` (user or owner) if it is password-protected.
+    /// An empty password opens files protected only against editing, as viewers do.
+    pub fn load(bytes: &[u8], password: &str) -> Result<Doc, PdfError> {
         let head = &bytes[..bytes.len().min(1024)];
         if find(head, b"%PDF-", 0).is_none() {
             return Err(PdfError::NotPdf);
         }
         let mut doc = Doc {
             objects: BTreeMap::new(),
+            generations: BTreeMap::new(),
             trailer: Dict::new(),
         };
         doc.scan_objects(bytes);
         doc.scan_trailers(bytes);
+        // Object streams are encrypted as a whole, so they are decrypted before unpacking.
+        doc.decrypt(password)?;
         doc.unpack_object_streams();
-        if doc.trailer.contains_key(&b"Encrypt"[..]) {
-            return Err(PdfError::Encrypted);
-        }
         Ok(doc)
+    }
+
+    fn decrypt(&mut self, password: &str) -> Result<(), PdfError> {
+        let (dict, own_number) = match self.trailer.get(&b"Encrypt"[..]) {
+            None => return Ok(()),
+            Some(Obj::Ref(n, _)) => (self.get(*n).as_dict().cloned(), Some(*n)),
+            Some(other) => (other.as_dict().cloned(), None),
+        };
+        let dict = dict.ok_or_else(|| {
+            PdfError::Malformed("the trailer's /Encrypt is not a dictionary".into())
+        })?;
+        // Entries may be indirect; the crypt filter dictionaries in practice never are.
+        let dict: Dict = dict
+            .iter()
+            .map(|(k, v)| (k.clone(), self.resolve(v).clone()))
+            .collect();
+        let id = match self.dict_get(&self.trailer, b"ID").as_array() {
+            Some([Obj::Str(first), ..]) => first.clone(),
+            _ => Vec::new(),
+        };
+        let security = Security::open(&dict, &id, password)?;
+        for (num, obj) in self.objects.iter_mut() {
+            // The encryption dictionary itself is never encrypted.
+            if Some(*num) == own_number {
+                continue;
+            }
+            let generation = self.generations.get(num).copied().unwrap_or(0);
+            decrypt_obj(&security, *num, generation, obj);
+        }
+        Ok(())
     }
 
     fn scan_objects(&mut self, bytes: &[u8]) {
         let mut from = 0;
         while let Some(at) = find(bytes, b"obj", from) {
             from = at + 3;
-            let Some(num) = object_header(bytes, at) else {
+            let Some((num, generation)) = object_header(bytes, at) else {
                 continue;
             };
             if bytes
@@ -90,6 +126,7 @@ impl Doc {
                 merge_trailer(&mut self.trailer, d);
             }
             self.objects.insert(num, obj);
+            self.generations.insert(num, generation);
         }
     }
 
@@ -277,7 +314,7 @@ impl Doc {
 }
 
 fn merge_trailer(trailer: &mut Dict, d: &Dict) {
-    for key in [&b"Root"[..], b"Encrypt", b"Info"] {
+    for key in [&b"Root"[..], b"Encrypt", b"Info", b"ID"] {
         if let Some(v) = d.get(key) {
             trailer.insert(key.to_vec(), v.clone());
         }
@@ -294,8 +331,36 @@ pub(crate) fn find(hay: &[u8], needle: &[u8], from: usize) -> Option<usize> {
         .map(|p| p + from)
 }
 
-/// For `obj` at `at`, the object number of a well-formed `n g obj` header before it.
-fn object_header(bytes: &[u8], at: usize) -> Option<u32> {
+/// Decrypts an object's strings and, for a stream, its data. Cross-reference streams are never
+/// encrypted, and metadata streams aren't when the handler says so.
+fn decrypt_obj(security: &Security, num: u32, generation: u16, obj: &mut Obj) {
+    match obj {
+        Obj::Str(s) => *s = security.decrypt_string(num, generation, s),
+        Obj::Array(items) => items
+            .iter_mut()
+            .for_each(|o| decrypt_obj(security, num, generation, o)),
+        Obj::Dict(d) => d
+            .values_mut()
+            .for_each(|o| decrypt_obj(security, num, generation, o)),
+        Obj::Stream(s) => {
+            let kind = s.dict.get(&b"Type"[..]).and_then(Obj::as_name);
+            if kind == Some(b"XRef") {
+                return;
+            }
+            if !(kind == Some(b"Metadata") && !security.encrypt_metadata) {
+                s.raw = security.decrypt_stream(num, generation, &s.raw);
+            }
+            s.dict
+                .values_mut()
+                .for_each(|o| decrypt_obj(security, num, generation, o));
+        }
+        _ => {}
+    }
+}
+
+/// For `obj` at `at`, the object and generation numbers of a well-formed `n g obj` header
+/// before it.
+fn object_header(bytes: &[u8], at: usize) -> Option<(u32, u16)> {
     let mut i = at;
     let skip_ws = |i: &mut usize| {
         let start = *i;
@@ -314,7 +379,7 @@ fn object_header(bytes: &[u8], at: usize) -> Option<u32> {
     if !skip_ws(&mut i) {
         return None;
     }
-    digits(&mut i)?;
+    let generation = digits(&mut i)?;
     if !skip_ws(&mut i) {
         return None;
     }
@@ -322,7 +387,7 @@ fn object_header(bytes: &[u8], at: usize) -> Option<u32> {
     if i > 0 && !is_ws(bytes[i - 1]) && !is_delim(bytes[i - 1]) {
         return None;
     }
-    num.parse().ok()
+    Some((num.parse().ok()?, generation.parse().ok()?))
 }
 
 /// A stream's raw bytes starting after the `stream` keyword, and where parsing resumes.
@@ -533,7 +598,7 @@ mod tests {
     #[test]
     fn object_headers_need_two_numbers() {
         let b = b"xx 12 0 obj";
-        assert_eq!(object_header(b, 8), Some(12));
+        assert_eq!(object_header(b, 8), Some((12, 0)));
         assert_eq!(object_header(b"endobj", 3), None);
         assert_eq!(object_header(b"a12 0 obj", 6), None);
     }

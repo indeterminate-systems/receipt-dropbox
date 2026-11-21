@@ -13,8 +13,8 @@ const MAX_PIXELS: u64 = 80_000_000;
 /// US Letter, for pages that state no media box.
 const LETTER: [f64; 4] = [0.0, 0.0, 612.0, 792.0];
 
-pub(crate) fn page_images(bytes: &[u8]) -> Result<Vec<PageImages>, PdfError> {
-    let doc = Doc::load(bytes)?;
+pub(crate) fn page_images(bytes: &[u8], password: &str) -> Result<Vec<PageImages>, PdfError> {
+    let doc = Doc::load(bytes, password)?;
     let pages = doc.pages();
     if pages.is_empty() {
         return Err(PdfError::Malformed("no pages found".into()));

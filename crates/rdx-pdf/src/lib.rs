@@ -25,6 +25,7 @@
 //! ```
 
 mod content;
+mod crypt;
 mod file;
 mod font;
 mod image;
@@ -44,8 +45,15 @@ pub use op::{PdfText, read_document, register};
 pub enum PdfError {
     #[error("not a PDF (no `%PDF-` header)")]
     NotPdf,
-    #[error("the PDF is encrypted; save an unencrypted copy (print to PDF) and use that instead")]
-    Encrypted,
+    /// Opening it needs a password the bank gave the account holder (Mexican banks usually use
+    /// the holder's RFC or date of birth).
+    #[error(
+        "the PDF is password-protected; it opens only with its password, which the supporter \
+         gives on their own device"
+    )]
+    PasswordRequired,
+    #[error("the password doesn't open this PDF")]
+    WrongPassword,
     #[error("unsupported PDF feature: {0}")]
     Unsupported(String),
     #[error("malformed PDF: {0}")]
@@ -168,12 +176,34 @@ pub enum ImageData {
 /// Images inside form XObjects are included; inline images (`BI … EI`), which scanners don't
 /// use for whole pages, are not.
 pub fn page_images(bytes: &[u8]) -> Result<Vec<PageImages>, PdfError> {
-    image::page_images(bytes)
+    image::page_images(bytes, "")
 }
 
-/// Reads the text layer of a PDF.
+/// [`page_images`] of a password-protected PDF.
+pub fn page_images_with_password(
+    bytes: &[u8],
+    password: &str,
+) -> Result<Vec<PageImages>, PdfError> {
+    image::page_images(bytes, password)
+}
+
+/// Whether the PDF opens only with a password. A PDF protected only against editing or printing
+/// (an empty user password) opens without one, and so doesn't need one.
+pub fn needs_password(bytes: &[u8]) -> bool {
+    matches!(file::Doc::load(bytes, ""), Err(PdfError::PasswordRequired))
+}
+
+/// Reads the text layer of a PDF. A password-protected one fails with
+/// [`PdfError::PasswordRequired`]; read it with [`text_with_password`].
 pub fn text(bytes: &[u8]) -> Result<Text, PdfError> {
-    let doc = file::Doc::load(bytes)?;
+    text_with_password(bytes, "")
+}
+
+/// Reads the text layer of a PDF, decrypting it with `password` (the user or the owner
+/// password; ignored when the PDF isn't protected). Decryption happens in memory only: the
+/// caller's bytes, the original as the bank sent it, are never changed.
+pub fn text_with_password(bytes: &[u8], password: &str) -> Result<Text, PdfError> {
+    let doc = file::Doc::load(bytes, password)?;
     let pages = doc.pages();
     if pages.is_empty() {
         return Err(PdfError::Malformed("no pages found".into()));

@@ -17,6 +17,11 @@ default = []
 write = []
 
 [dependencies]
+# PDF standard security (password-protected statements): MD5 and RC4 for revisions 2 to 4, AES
+# for 4 to 6, SHA-2 for 5 and 6. RustCrypto's pure-Rust implementations, which need no
+# randomness to decrypt, so they build for both wasm targets.
+aes = "0.8"
+md-5 = "0.10"
 # Pure Rust and allocation-only, so the reader builds for both wasm targets. lopdf would be the
 # obvious choice, but it pulls in getrandom, which has no wasm32-unknown-unknown backend without
 # JavaScript.
@@ -24,6 +29,7 @@ miniz_oxide = "0.8"
 rdx-plan = { path = "../rdx-plan", default-features = false }
 serde.workspace = true
 serde_json.workspace = true
+sha2.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]

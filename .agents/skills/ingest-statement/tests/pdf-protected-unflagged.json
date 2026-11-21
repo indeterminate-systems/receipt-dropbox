@@ -1,0 +1,24 @@
+{
+  "documents": [
+    "fixtures/synthetic/small/statements/st-2026-03.s-0001.locked.pdf"
+  ],
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": false,
+    "plan_digest": "sha256:81d809d6b9101e2609ca3c883f79bd42ff52f5d4da6ed25319a01038f15a06cc",
+    "skill": "ingest-statement",
+    "steps": [
+      {
+        "error": "sha256:9fe9c901385c0ad1510d17654162856986aef04da78de0afb8abafd955f4992a: the PDF is password-protected; it opens only with its password, which the supporter gives on their own device",
+        "id": "text",
+        "op": "ocr.read",
+        "status": "failed"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "\"sha256:9fe9c901385c0ad1510d17654162856986aef04da78de0afb8abafd955f4992a\"",
+    "supporter": "\"s-0001\""
+  }
+}

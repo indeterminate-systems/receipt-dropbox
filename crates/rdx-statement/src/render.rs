@@ -54,6 +54,19 @@ const ROW: f64 = 14.0;
 /// The statement as an Example Bank PDF, with at most `rows_per_page` table rows a page
 /// (continuation rows count).
 pub fn example_bank_pdf(statement: &Statement, rows_per_page: usize) -> Vec<u8> {
+    example_bank(statement, rows_per_page).finish()
+}
+
+/// [`example_bank_pdf`], protected with `password` (AES-256) as Mexican banks send statements.
+pub fn example_bank_pdf_locked(
+    statement: &Statement,
+    rows_per_page: usize,
+    password: &str,
+) -> Vec<u8> {
+    example_bank(statement, rows_per_page).finish_locked(password)
+}
+
+fn example_bank(statement: &Statement, rows_per_page: usize) -> Pdf {
     let rows_per_page = rows_per_page.max(2);
     // Table rows: each line, plus a `Ref` row under lines with a reference.
     enum Row<'a> {
@@ -191,7 +204,7 @@ pub fn example_bank_pdf(statement: &Statement, rows_per_page: usize) -> Vec<u8> 
             &footer,
         );
     }
-    pdf.finish()
+    pdf
 }
 
 fn ofx_date(d: Date) -> String {

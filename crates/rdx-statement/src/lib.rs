@@ -34,6 +34,7 @@ mod ofx;
 mod op;
 #[cfg(feature = "render")]
 pub mod render;
+pub mod unlock;
 
 use rdx_model::{
     AccountRef, Currency, Date, Digest, LineId, Money, Period, Statement, StatementId,
@@ -44,6 +45,7 @@ use serde::{Deserialize, Serialize};
 pub use amount::DecimalStyle;
 pub use csv::{CsvOptions, DateOrder};
 pub use op::{StatementParse, register};
+pub use unlock::{RememberPassword, StatementUnlock};
 
 /// What a parser reads: text (CSV, OFX) or a PDF's text layer.
 pub enum Input<'a> {
