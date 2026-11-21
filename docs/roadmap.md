@@ -10,7 +10,7 @@ green.
 | 1 | **Dev environment and CI** | `flake.nix` dev shell (Rust with both wasm targets, wasmtime, wasm-bindgen-cli, Nickel, Typst), a matching template in nix-dev-environment-templates, CI for tests, wasm builds and skill checks | `op-author` (dev) | – |
 | 2 | **Host layer and `rdx` CLI** | `rdx-host` capability traits mirrored in `wit/rdx.wit` (blob store, kv, clock, random, mail-out), a local host, `rdx run <skill> --input k=v [--execute]` as the code-mode entrypoint, run reports to an audit log | `plan-smoke-test` runs through `rdx` | – |
 | 3 | **Domain model and fixtures** | `rdx-model`: money in minor units with currency, statements, lines, balances, receipts, supporters, digests; a synthetic statement and receipt generator for tests. Receipts carry an optional fiscal id (CFDI UUID, issuer and receiver RFC, payment form) supporters a kind (employee, volunteer, contractor), and the organization an optional fiscal profile (RFC, regime) since an informal group has none, so piece 15 doesn't reshape the model | – | – |
-| 4 | **Statement parsing** | PDF text-layer extraction in Rust, the `statement-parser` extension point, CSV and OFX parsers, one PDF layout, balance checks (opening + lines = closing) | `ingest-statement` | 2, 3 |
+| 4 | **Statement parsing** | PDF text-layer extraction in Rust, the `statement-parser` extension point, CSV and OFX parsers, one PDF layout, balance checks (opening + lines = closing); password-protected PDFs opened on the supporter's device with a password asked for or remembered per account | `ingest-statement` | 2, 3 |
 | 5 | **Receipt and bill extraction** | Amount, date, merchant and reference from PDF, HTML and email bodies; the `receipt-extractor` extension point | `ingest-receipt` | 2, 3 |
 | 6 | **Matching engine** | Candidate generation and scoring, tolerances (amount, date window, merchant similarity) as Nickel policy, split and partial payments flagged for review; amounts in different currencies matched at a policy exchange rate and tolerance ([compliance](compliance.md) R16) | `reconcile-statement` (dry run: proposed matches) | 3 (fixtures from 4 and 5 help) |
 | 7 | **Gordian Envelope statements and redaction** | `rdx-envelope`: one salted assertion per line, Ed25519 signing, elision of unmatched lines with the root digest unchanged, verification that derives the total redacted from the signed balances; `envelope.redact` and `envelope.verify` ops; `bc-envelope` on both wasm targets without C ([ADR-P07](adr/ADR-P07-statement-envelopes.md)) | `verify-statement` | 3 |
@@ -19,8 +19,8 @@ green.
 | 10 | **Typst rendering** | Typst compiled into the core, a statement template fed only from elided envelope data: "Personal, redacted" rows, opening and closing balances, total redacted, root digest, UR/QR | `publish-redacted-statement` | 7 |
 | 11 | **OCR fallback** | Pure-Rust OCR (`ocrs`) as the `ocr.read` op, used when a PDF has no text layer and for photos | adds a step to `ingest-statement` | 4 |
 | 12 | **Audit trail and grants** | Append-only audit log linking ledger entries and viewable rows to receipts and encrypted originals; uploader-granted access to an original for an accountant | `grant-original`, `audit-trail` | 7, 9 |
-| 13 | **Email intake on Cloudflare** | Allowlist and SPF/DKIM/DMARC checks, encrypt-on-arrival to sender keys, quarantine key with expiry, one rate-limited verification reply, expiry cleanup; a `workers-rs` host with R2 and KV. Email Routing hands the message to the Worker in memory, so plaintext never rests anywhere. (A hosted inbox such as AgentMail was considered: it stores messages in plaintext by default, which breaks "plaintext discarded"; it could be a later `intake-adapter` if deletion is shown to purge attachments.) The Worker never links `rdx-render` (piece 10) and runs no OCR (piece 11): both need plaintext. | `triage-quarantine` | 2, 8 |
-| 14 | **PWA** | Leptos client-side app in Rust: passkey unlock, OPFS storage, upload folder, match review, publishing, accountant view; installable and offline. Loads the Typst renderer (piece 10) only when someone publishes; fetches and caches the OCR models (piece 11) by digest and shows their CC-BY-SA-4.0 attribution | – (people use it; agents use skills) | 2, 8; integrates 4 to 10 |
+| 13 | **Email intake on Cloudflare** | Allowlist and SPF/DKIM/DMARC checks, encrypt-on-arrival to sender keys, quarantine key with expiry, one rate-limited verification reply, expiry cleanup; a `workers-rs` host with R2 and KV. Email Routing hands the message to the Worker in memory, so plaintext never rests anywhere. (A hosted inbox such as AgentMail was considered: it stores messages in plaintext by default, which breaks "plaintext discarded"; it could be a later `intake-adapter` if deletion is shown to purge attachments.) The Worker never links `rdx-render` (piece 10) and runs no OCR (piece 11): both need plaintext. | `receive-email`, `triage-quarantine` | 2, 8 |
+| 14 | **PWA** | Leptos client-side app in Rust: passkey unlock, OPFS storage, upload folder, match review, publishing, accountant view; installable and offline. The `secrets` prompts, including a bank statement's password (label `statement-password-<12 hex>`). For email intake (piece 13): the claim page that reads a setup link's fragment, onboards the address and releases its quarantined mail, and HTTP routes on the Worker to fetch inbox and quarantined blobs and to publish a key registry, which must require proof of the mailbox (for example a signature by its quarantine key). Loads the Typst renderer (piece 10) only when someone publishes; fetches and caches the OCR models (piece 11) by digest and shows their CC-BY-SA-4.0 attribution | – (people use it; agents use skills) | 2, 8; integrates 4 to 10 |
 | 15 | **Fiscal proof and reimbursement claims** | A per-organization **proof policy** ([compliance](compliance.md#it-depends-on-what-kind-of-organization-it-is) R0): `company`, `nonprofit`, `donataria-autorizada`, `individual` (persona física, with a `sat-registered` flag; employees are supporters, payroll out of scope) or `informal-group` (no RFC: the receipt, or a CFDI to the supporter or *público en general*, is the proof). The policy picks which of R1 to R10 apply: CFDI 4.0 XML capture and parsing, receptor checks against the organization's fiscal profile, SAT status and art. 69-B checks as a host capability (re-run at month close and before the annual return), CFDI ↔ statement line ↔ reimbursement transfer matching, cash and fuel flags, fiscal ledger metadata, claims with approval and deadlines, viáticos export for payroll, a US accountable-plan profile; for a donataria, donation receipts, the administration cap and transparency report data; foreign vendors' invoices as proof with IVA and withholding flags (R17); thresholds and policies as Nickel per fiscal year | `verify-cfdi`, `claim-reimbursement` | 3, 5, 6, 9 |
 | 16 | **Supporter data rights and retention** | [Compliance](compliance.md) R11 to R15: privacy notice and recorded consent (LFPDPPP), ARCO requests (export, correct, delete, object) from the PWA, partial and pre-redacted statement uploads, retention per document class with legal hold (delete originals, keep digests and redacted envelopes), worker-classification signals | `retention-sweep`, `handle-data-request` | 7, 8, 12 |
 
@@ -29,8 +29,10 @@ green.
 | Piece | Delivers | Depends on |
 | :-- | :-- | :-- |
 | **Matching strategies as extensions** | The `match-strategy` extension point (architecture §3) as a trait and WIT interface, so an organization can add a strategy (for example per-merchant rules) without changing `rdx-match`; piece 6 built the strategies in. | 6 |
-| **Real bank layouts** | A `statement-parser` per bank the organization's supporters use, written against anonymized samples (never committed: synthetic look-alikes go in `fixtures/`), starting with the Mexican banks. Found by piece 4, which ships one synthetic layout (`example-bank`) | 4 |
-| **Encrypted PDFs** | Read PDFs with an owner password and an empty user password (RC4, AES-128/256), which many bank downloads are; `rdx-pdf` refuses them today ([ADR-P04](adr/ADR-P04-pdf-text-layer-reader.md)). Found by piece 4 | 4 |
+| **Real bank layouts** | A `statement-parser` per bank the organization's supporters use, written against anonymized samples (never committed: synthetic look-alikes go in `fixtures/`), starting with the Mexican banks. Wise is accepted through its PDF statements and transfer receipts, not its tracking links (Ash, 2026-11-21). Found by piece 4, which ships one synthetic layout (`example-bank`) | 4 |
+| **Password-protected scans** | OCR of a protected PDF with no text layer: `ocr.read` takes no password yet, so `statement.unlock` refuses one ([ADR-P04](adr/ADR-P04-password-protected-statements.md)). Found by piece 4 | 4, 11 |
+| **Forget a remembered password** | An op that removes one account's remembered statement password from `statement-passwords/<address>`. Found by piece 4 | 4 |
+| **Auto-forwarded mail** | Accept receipts a supporter's mailbox forwards automatically, which keep the merchant's `From` and so are rejected today, for example through plus-addressing (`receipts+ana@…`). Found by piece 13 ([ADR-P13](adr/ADR-P13-email-intake.md)) | 13 |
 | **Fuzzing the PDF reader** | `cargo fuzz` targets for `rdx_pdf::text` and the statement parsers, before the PWA takes uploads from the public. Found by piece 4 | 4, 14 |
 | **Receipt extraction follow-ups** | Line items on receipts (`items` is empty today); scoring `receipt.extract` against the invoice benchmark below at a pinned revision, to tune its keywords | 5 |
 | **OCR accuracy on real scans** | Score `ocr.read` and the parsers that use it against the SROIE and CORD receipt datasets below at a pinned revision; tune repairs and preprocessing from the results. Found by piece 11, whose results are on synthetic scans only | 11 |
@@ -62,7 +64,7 @@ generator.
 wave 1 (done):               1   2   3
 wave 2 (done):               4   5   6   7
 wave 3 (done):               8   9   10  11
-wave 4 (next):               12  13  14  15
+wave 4 (in progress):        12  13  14  15
 wave 5:                      16
 ```
 
@@ -95,6 +97,22 @@ Done, waves 1 and 2 merged by 2026-11-20, wave 3 by 2026-11-21:
   rather than a host capability; `ingest-statement` and `ingest-receipt` read scans and photos
   ([ADR-P11](adr/ADR-P11-ocr.md)). The models are CC-BY-SA-4.0; Ash accepted attribution and
   share-alike (2026-11-21).
+
+Wave 4, so far (2026-11-21):
+
+- Piece 13 (#34): crates `rdx-intake` (ops `intake.receive`, `intake.status`, `intake.sweep`,
+  `intake.release`; policy in `nickel/rdx/intake.ncl`) and `rdx-worker` (the Email Routing
+  Worker), skills `receive-email` and `triage-quarantine`. Each email is kept whole as one
+  envelope encrypted to the sender's keys; for a sender without keys, the quarantine key lives
+  only in the setup link sent to them, so the server can't open quarantined mail
+  ([ADR-P13](adr/ADR-P13-email-intake.md)). Added `Keys::from_secret` to `rdx-keys`.
+- Piece 4, password-protected statements (#35): `rdx-pdf` decrypts PDF standard security
+  (revisions 2 to 6) in memory, and `rdx-statement` adds `statement.unlock` (asks through
+  `secrets`, or tries the account's remembered password) and `statement.remember-password` (keeps
+  it encrypted to the supporter's keys). The bank's file is kept as sent and opened only on the
+  supporter's device ([ADR-P04](adr/ADR-P04-password-protected-statements.md)).
+- Piece 3 follow-up (#32): a supporter's optional `full_name` (as banks and CFDIs print it) and
+  `alias`.
 
 The compliance research behind pieces 15 and 16 is in (#11, #12, #15); their code is not.
 

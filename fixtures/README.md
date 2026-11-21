@@ -22,6 +22,7 @@ and review the diff.
 | `synthetic/small/envelopes/` | each statement sealed as a Gordian Envelope (`*.full.ur`) and redacted with the scenario's matches (`*.redacted.ur`), signed with the published synthetic key in `signer.ur` (`rdx_envelope::synth`, which proves nothing). Written by `crates/rdx-envelope/tests/fixtures.rs`: `UPDATE_GOLDEN=1 cargo test -p rdx-envelope --test fixtures` |
 | `synthetic/small/statements/*.ofx` | the same statements as OFX 1.02 downloads (`rdx_statement::render::ofx`) |
 | `synthetic/small/statements/*.pdf` | the same statements as PDFs in the `example-bank` layout, two pages each (`rdx_statement::render::example_bank_pdf`); `UPDATE_GOLDEN=1 cargo test -p rdx-statement --test parse` rewrites them and the OFX files |
+| `synthetic/small/statements/*.locked.pdf` | the first statement's `example-bank` PDF protected with AES-256 (revision 6) under the password `XAXX010101000` (the SAT's generic RFC, standing in for the holder's), for `statement.unlock`; rewritten with the PDFs by `UPDATE_GOLDEN=1 cargo test -p rdx-statement --test parse` |
 | `synthetic/small/statements/*.typst.pdf` | the first statement in the same layout made by Typst, so the PDF reader is tested on another producer's output (subset fonts, ToUnicode maps, object streams); made from `layouts/example-bank.typ` with the command in that file |
 | `layouts/` | the Typst version of the `example-bank` layout and the statement JSON it was rendered from |
 

@@ -191,6 +191,9 @@ shop):
   Banxico rate published in the DOF for the previous business day, to confirm). The reimbursement
   is booked in pesos at what the organization actually pays the supporter, and any difference is
   an exchange gain or loss.
+- Multi-currency accounts such as **Wise** count as statements too: they are accepted through
+  their PDF statements and transfer receipts, never their tracking links, which are not a
+  document the supporter can seal (Ash, 2026-11-21).
 
 **A Mexican organization paying a foreign vendor** that cannot issue a CFDI (software, a venue or
 supplier abroad, an online platform):

@@ -49,9 +49,9 @@ change both together.
 | `crates/rdx-host` | host capability traits (blob store, kv, mail-out, clock, random, audit log), in-memory and local (directory) implementations |
 | `crates/rdx-plan` | plans (code-mode entrypoint): types, validation, executor, built-in ops, audit chain, Nickel loading |
 | `crates/rdx-cli` | `rdx`, the local host: `rdx run <skill>`, `rdx blob put FILE`, `rdx audit verify`; `rdx_cli::registry()` holds every op, registered by `build.rs` from its domain-crate dependencies |
-| `crates/rdx-pdf` | PDF text layer (lines, spans, positions) and the `pdf.text` op; a fixture writer behind feature `write` |
-| `crates/rdx-statement` | statement parsers (CSV, OFX, the `example-bank` PDF layout), balance checks, the `statement.parse` op |
-| `crates/rdx-model` | domain model (money, dates, statements, receipts, matches, ledger entries) and the synthetic data generator (`rdx_model::synth`) |
+| `crates/rdx-pdf` | PDF text layer (lines, spans, positions) and the `pdf.text` op; decrypts password-protected PDFs (standard security R2-R6); a fixture writer behind feature `write` |
+| `crates/rdx-statement` | statement parsers (CSV, OFX, the `example-bank` PDF layout), balance checks; ops `statement.parse`, `statement.unlock` (opens a password-protected PDF with a password asked through `secrets` or remembered) and `statement.remember-password` |
+| `crates/rdx-model` | domain model (money, dates, statements, receipts, matches, ledger entries, supporters) and the synthetic data generator (`rdx_model::synth`) |
 | `crates/rdx-envelope` | statements as signed Gordian Envelopes: seal, redact (elide unmatched lines), verify, open, encrypt to recipients; `envelope.*` ops |
 | `crates/rdx-receipt` | receipt and bill extraction (emails, PDFs via `pdf.text`, HTML, text, CFDI XML), the `receipt-extractor` trait and the `receipt.extract` op |
 | `crates/rdx-match` | matching: proposes line ↔ receipt matches (exact, tolerance, other currency, split, instalments, partial) under a policy; op `matching.propose` |
@@ -59,9 +59,12 @@ change both together.
 | `crates/rdx-ledger` | the Beancount ledger: books confirmed matches with audit metadata, stores each version as a blob (kv `ledger/<name>`), reads it back, exports CSV and XLSX; `ledger.*` ops |
 | `crates/rdx-render` | Typst renders a verified, redacted envelope to the viewable PDF; op `render.statement`. Large: the PWA loads it only to publish, and the Worker never links it |
 | `crates/rdx-ocr` | OCR for scanned PDFs and photos (ocrs), in the text layer's shape; op `ocr.read`. Its models are blobs; the dev shell puts them in `$RDX_OCR_MODELS` |
+| `crates/rdx-intake` | email intake rules: sender checks (allowlist, DMARC from the receiving server's `Authentication-Results`), encrypt to the sender's keys, quarantine under a key only the sender's setup link holds, one rate-limited reply, expiry; `intake.*` ops |
+| `crates/rdx-worker` | the Cloudflare Email Routing Worker (`workers-rs`, built only for `wasm32-unknown-unknown`) around `rdx-intake`, staging KV and R2 around the synchronous core; setup in its README |
 | `nickel/rdx/api.ncl` | plan contracts and the built-in ops' constructors agents write against; `rdx.ops` also merges in `ops.ncl` |
 | `nickel/rdx/ops/<domain>.ncl` | each domain crate's op constructors (`rdx.ops.<domain>.<op>`), listed one per line in `nickel/rdx/ops.ncl`; helpers in `nickel/rdx/lib.ncl` |
 | `nickel/rdx/matching.ncl` | the matching policy contract (tolerances, date windows, exchange rates) and its defaults |
+| `nickel/rdx/intake.ncl` | the email intake policy contract (allowlist, quarantine and reply intervals, size limit) and its defaults; the Worker gets it exported as JSON |
 | `nickel/rdx/model.ncl` | contracts for the domain model's JSON, for op contracts to reuse |
 | `fixtures/synthetic/` | generated fixtures; `UPDATE_GOLDEN=1 cargo test -p rdx-model --test fixtures` rewrites them, and `UPDATE_GOLDEN=1 cargo test -p rdx-statement --test parse` the OFX and PDF statements |
 | `fixtures/receipts/` | hand-written synthetic receipts, bills, emails and a CFDI for extraction tests |

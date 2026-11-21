@@ -66,19 +66,19 @@ clock directly; those come through the capability traits in layer 2.
 
 | Crate | Responsibility |
 | :-- | :-- |
-| `rdx-model` | Money (integer minor units plus currency), `Statement`, `StatementLine`, `Receipt`, `Match`, `Supporter`, identifiers and digests |
+| `rdx-model` | Money (integer minor units plus currency), `Statement`, `StatementLine`, `Receipt`, `Match`, `Supporter`, identifiers and digests. A supporter has an optional `full_name` (as banks and CFDIs print it) and `alias`; names are personal data and never go into the ledger, logs or the key registry, which use the supporter's id. Where supporter records are stored is decided in pieces 14 and 16 |
 | `rdx-plan` | Plan types, plan validation and the executor. **Scaffolded in this PR.** |
 | `rdx-config` | Loads Nickel configuration and policy through `nickel-embed`, against the contracts in `nickel/rdx/` |
-| `rdx-pdf` | PDF text layer: lines and spans with positions, in pure Rust. See [ADR-P04](adr/ADR-P04-pdf-text-layer-reader.md) |
-| `rdx-statement` | Statement parsing (CSV, OFX, PDF layouts) behind the `statement-parser` extension point, with balance checks; takes `ocr.read`'s output for a document with no text layer |
+| `rdx-pdf` | PDF text layer: lines and spans with positions, in pure Rust; decrypts password-protected PDFs (standard security, revisions 2 to 6) in memory. See [ADR-P04](adr/ADR-P04-pdf-text-layer-reader.md) and [ADR-P04 protected statements](adr/ADR-P04-password-protected-statements.md) |
+| `rdx-statement` | Statement parsing (CSV, OFX, PDF layouts) behind the `statement-parser` extension point, with balance checks; takes `ocr.read`'s output for a document with no text layer, and `statement.unlock`'s for a password-protected one |
 | `rdx-receipt` | Receipt and emailed-bill extraction (amount, date, merchant, reference) |
 | `rdx-match` | Candidate generation and scoring between statement lines and receipts, with tolerances from policy |
 | `rdx-envelope` | Gordian Envelope: one salted assertion per transaction, signing, elision of unmatched lines, verification (`bc-envelope`, `bc-components`); encryption to recipients comes with `rdx-keys`. See [ADR-P07](adr/ADR-P07-statement-envelopes.md) |
-| `rdx-keys` | Device keys wrapped by a passkey's PRF output, the recovery key and its SSKR shares, the key registry as a chain of signed Gordian Envelope events, encryption to recipients. See [ADR-P08](adr/ADR-P08-keys-and-recovery.md) and [Key management](#key-management) |
+| `rdx-keys` | Device keys wrapped by a passkey's PRF output, the recovery key and its SSKR shares, the key registry as a chain of signed Gordian Envelope events, encryption to recipients; keys derived from a random secret (`Keys::from_secret`) for intake's quarantine. See [ADR-P08](adr/ADR-P08-keys-and-recovery.md) and [Key management](#key-management) |
 | `rdx-ledger` | Beancount writer and reader, with audit metadata on every entry; CSV and XLSX export. See [ADR-0003](adr/0003-beancount-ledger.md) and [ADR-P09](adr/ADR-P09-beancount-ledger.md) |
 | `rdx-render` | Typst rendering of a verified, elided envelope, including the root digest and a UR/QR of the envelope. Large (it roughly triples `rdx.wasm`), so the PWA loads it only to publish and the Cloudflare Worker never links it. See [ADR-P10](adr/ADR-P10-typst-rendering.md) |
 | `rdx-ocr` | OCR for scanned PDFs and photos (`ocrs`, pure Rust), in the shape of the text layer so parsers don't change; its models are blobs fetched by digest. Runs only where plaintext is (PWA, local), never on a Worker. See [ADR-P11](adr/ADR-P11-ocr.md) |
-| `rdx-intake` | Intake rules: allowlist, SPF/DKIM/DMARC results, quarantine lifecycle, rate-limited replies |
+| `rdx-intake` | Intake rules: allowlist, the receiving server's SPF/DKIM/DMARC results, encryption of each email to the sender's keys, quarantine under a key only the sender's setup link holds, rate-limited replies, expiry. See [ADR-P13](adr/ADR-P13-email-intake.md) |
 | `rdx-audit` | Append-only audit log: plan digests, input and output digests, who granted what |
 
 ### 2. Capabilities (what a host provides)
@@ -129,7 +129,7 @@ same names, so the crate can be built two ways:
 | Host | Build | Notes |
 | :-- | :-- | :-- |
 | PWA | Rust UI (Leptos, client-side rendering) + core, `wasm32-unknown-unknown` via `wasm-bindgen` | WebAuthn PRF through `web-sys`; OPFS storage; OCR runs in the page, with its models fetched and cached by digest and their CC-BY-SA-4.0 attribution shown; the Typst renderer is loaded only when someone publishes. The service worker is generated, not hand-written. |
-| Cloudflare | `worker` crate (`workers-rs`) | Email Routing hands mail to the Worker; encrypt on arrival to the sender's public keys from KV, store in R2, discard plaintext. Never links `rdx-render` and runs no OCR. |
+| Cloudflare | `rdx-worker` (`workers-rs`), `wasm32-unknown-unknown` | Email Routing hands mail to the Worker; encrypt on arrival to the sender's public keys from KV, store in R2, discard plaintext. KV and R2 are asynchronous and the core is not, so the Worker loads the kv keys a call can touch, runs the core against them, then writes new blobs, then kv, then deletions, so kv never points at a missing blob. Never links `rdx-render` and runs no OCR. |
 | Google (later) | Cloud Run service embedding wasmtime | Gmail push notifications through Pub/Sub; Drive folders as intake and blob store. Not scheduled; see the roadmap. |
 | Local | `rdx` (crate `rdx-cli`), built natively and as `rdx.wasm`, a WASI command that `wasmtime run` executes | Runs plans from the command line; the agents' code-mode entrypoint. State (blobs, kv, outbox, `audit.jsonl`) lives in `.rdx/`. `cargo xtask smoke-wasm` runs the smoke-test skill through `rdx.wasm` in CI. |
 
@@ -181,20 +181,25 @@ composed from ops: see [the TDD to skills workflow](workflow.md).
 1. The supporter picks a PDF. The core hashes it, encrypts it to the supporter's device keys and
    writes ciphertext to the blob store. The ciphertext digest becomes the statement's audit id.
 2. The text layer is read; if it is empty, or the upload is a photo, OCR (`ocr.read`) runs in
-   the page.
+   the page. A password-protected PDF is kept as the bank sent it and opened only in memory on
+   the device: `statement.unlock` asks for the password through `secrets` or tries the one
+   remembered for that account, which is kept encrypted to the supporter's keys in kv
+   `statement-passwords/<address>`.
 3. A statement-parser extension turns text into lines with opening and closing balances.
 4. Each line becomes a salted assertion in a signed Gordian Envelope.
 
 ### Email intake (Cloudflare or Google)
 
 1. Check SPF/DKIM/DMARC results and the org allowlist. Reject anything not allowlisted.
-2. Known sender: encrypt each attachment to every active device key for that address and its
-   recovery key, store
-   ciphertext, discard plaintext.
+2. Known sender: encrypt the whole message, as one envelope, to every active device key for that
+   address and its recovery key, store ciphertext, discard plaintext. The PWA splits it into
+   body and attachments after decrypting.
 3. Unknown but allowlisted sender: encrypt to a quarantine key with an expiry, reply once (rate
-   limited) with a PWA link to verify the address and create keys. On verification the PWA
-   re-encrypts to the new keys; on expiry the quarantine key is destroyed, the document deleted
-   and the sender notified.
+   limited) with a PWA link to verify the address and create keys. The quarantine key's secret is
+   only in that link's fragment; the server keeps the public half. On verification the PWA
+   re-encrypts to the new keys; on expiry the documents and the public half are deleted and the
+   sender notified (when the host can send new mail; otherwise the reply's deadline is the
+   notice). See [ADR-P13](adr/ADR-P13-email-intake.md).
 
 ### Reconciliation and publishing (PWA)
 
@@ -254,5 +259,9 @@ fixtures/              test statements, receipts and golden outputs (synthetic o
 - **Gordian crates on `wasm32-unknown-unknown`** need checking for randomness (`getrandom`'s `js`
   backend) early in the envelope thread.
 - **Statement formats** vary by bank. The parser extension point exists for this; the first
-  thread should collect real (anonymized) layouts before tuning.
-- **Workers email limits** (message size, CPU time for encryption of large PDFs) need measuring.
+  thread should collect real (anonymized) layouts before tuning. Wise is accepted through its PDF
+  statements and transfer receipts, not tracking links.
+- **Workers email limits.** Partly answered by piece 13: intake takes messages up to 10 MiB by
+  default (Cloudflare's own limit is 25 MiB; the Worker holds about twice the message in 128 MB of
+  memory), and the bundled Worker is 0.5 MB gzipped, under the free plan's 3 MB. CPU time for
+  encrypting large PDFs on the free plan still needs measuring.
