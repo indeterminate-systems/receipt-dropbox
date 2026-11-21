@@ -1,8 +1,9 @@
-//! A minimal PDF writer for synthetic fixtures: text in Helvetica, nothing else.
+//! A minimal PDF writer for synthetic fixtures: text in Helvetica, rules and images (for scans).
 //!
 //! The fonts are the standard ones, written without `/Widths` as many real producers do, so the
 //! reader's fallback widths get exercised. Output is deterministic: no dates, no ids.
 
+use crate::ImageData;
 use crate::font::helvetica_width;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -23,6 +24,7 @@ pub struct Pdf {
 #[derive(Default)]
 pub struct PageContent {
     ops: String,
+    images: Vec<(u32, u32, ImageData)>,
 }
 
 /// Width of `text` in Helvetica at `size` points (bold is treated as regular; close enough to
@@ -47,6 +49,31 @@ impl PageContent {
     /// Draws `text` so that it ends at `x_end`.
     pub fn text_right(&mut self, style: Style, size: f64, x_end: f64, y: f64, text: &str) {
         self.text(style, size, x_end - text_width(text, size), y, text);
+    }
+
+    /// Draws an image over the rectangle with its bottom left at (`x`, `y`), `width` by `height`
+    /// points: a JPEG as it is, raw pixels compressed with Flate. Panics on
+    /// [`ImageData::Unsupported`], which has nothing to draw.
+    #[allow(clippy::too_many_arguments)]
+    pub fn image(
+        &mut self,
+        x: f64,
+        y: f64,
+        width: f64,
+        height: f64,
+        pixels_wide: u32,
+        pixels_high: u32,
+        data: &ImageData,
+    ) {
+        assert!(
+            !matches!(data, ImageData::Unsupported(_)),
+            "nothing to draw for an unsupported image"
+        );
+        let name = self.images.len();
+        self.ops.push_str(&format!(
+            "q {width:.2} 0 0 {height:.2} {x:.2} {y:.2} cm /Im{name} Do Q\n"
+        ));
+        self.images.push((pixels_wide, pixels_high, data.clone()));
     }
 
     /// A horizontal rule, as statements draw under table headers.
@@ -85,8 +112,11 @@ impl Pdf {
     }
 
     pub fn finish(self) -> Vec<u8> {
-        // Objects: 1 catalog, 2 page tree, 3 and 4 fonts, then a page and its content per page.
+        // Objects: 1 catalog, 2 page tree, 3 and 4 fonts, then a page and its content per page,
+        // then the images.
         let n_pages = self.pages.len();
+        let mut next_image = 5 + 2 * n_pages;
+        let mut image_objects: Vec<Vec<u8>> = Vec::new();
         let mut objects: Vec<Vec<u8>> = Vec::new();
         objects.push(b"<< /Type /Catalog /Pages 2 0 R >>".to_vec());
         let kids: Vec<String> = (0..n_pages).map(|i| format!("{} 0 R", 5 + 2 * i)).collect();
@@ -106,10 +136,21 @@ impl Pdf {
             );
         }
         for (i, page) in self.pages.iter().enumerate() {
+            // Text-only pages are written exactly as before images existed, so fixtures made
+            // with this writer keep their digests.
+            let mut xobjects = String::new();
+            for (k, (w, h, data)) in page.images.iter().enumerate() {
+                xobjects.push_str(&format!("/Im{k} {next_image} 0 R "));
+                next_image += 1;
+                image_objects.push(image_object(*w, *h, data));
+            }
+            if !xobjects.is_empty() {
+                xobjects = format!(" /XObject << {xobjects}>>");
+            }
             objects.push(
                 format!(
                     "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {PAGE_WIDTH} {PAGE_HEIGHT}] \
-                     /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents {} 0 R >>",
+                     /Resources << /Font << /F1 3 0 R /F2 4 0 R >>{xobjects} >> /Contents {} 0 R >>",
                     6 + 2 * i
                 )
                 .into_bytes(),
@@ -124,6 +165,8 @@ impl Pdf {
             stream.extend_from_slice(b"\nendstream");
             objects.push(stream);
         }
+
+        objects.extend(image_objects);
 
         let mut out = b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n".to_vec();
         let mut offsets = Vec::new();
@@ -149,4 +192,54 @@ impl Pdf {
         );
         out
     }
+}
+
+fn image_object(w: u32, h: u32, data: &ImageData) -> Vec<u8> {
+    let (space, filter, body) = match data {
+        ImageData::Jpeg(j) => ("DeviceGray", "DCTDecode", j.clone()),
+        ImageData::Gray8(p) => ("DeviceGray", "FlateDecode", deflate(p)),
+        ImageData::Rgb8(p) => ("DeviceRGB", "FlateDecode", deflate(p)),
+        ImageData::Cmyk8(p) => ("DeviceCMYK", "FlateDecode", deflate(p)),
+        ImageData::Unsupported(_) => unreachable!("refused when drawn"),
+    };
+    // A JPEG says its own colour space; readers take the JPEG's, so gray is only a label.
+    let space = match data {
+        ImageData::Jpeg(j) => jpeg_space(j).unwrap_or(space),
+        _ => space,
+    };
+    let mut out = format!(
+        "<< /Type /XObject /Subtype /Image /Width {w} /Height {h} /ColorSpace /{space} \
+         /BitsPerComponent 8 /Filter /{filter} /Length {} >>\nstream\n",
+        body.len()
+    )
+    .into_bytes();
+    out.extend_from_slice(&body);
+    out.extend_from_slice(b"\nendstream");
+    out
+}
+
+fn deflate(p: &[u8]) -> Vec<u8> {
+    miniz_oxide::deflate::compress_to_vec_zlib(p, 6)
+}
+
+/// The colour space a JPEG's start-of-frame header implies, from its component count.
+fn jpeg_space(j: &[u8]) -> Option<&'static str> {
+    let mut i = 2;
+    while i + 9 < j.len() {
+        if j[i] != 0xff {
+            return None;
+        }
+        let marker = j[i + 1];
+        let len = usize::from(j[i + 2]) << 8 | usize::from(j[i + 3]);
+        if matches!(marker, 0xc0..=0xc3) {
+            return match j[i + 9] {
+                1 => Some("DeviceGray"),
+                3 => Some("DeviceRGB"),
+                4 => Some("DeviceCMYK"),
+                _ => None,
+            };
+        }
+        i += 2 + len;
+    }
+    None
 }

@@ -13,9 +13,11 @@ pub fn register(r: &mut Registry) -> &mut Registry {
 
 /// `statement.parse { document, supporter, .. }` → `{ statement, parser, checks }`.
 ///
-/// `document` is the blob digest of a CSV, OFX or PDF file. The other arguments are [`Hints`].
-/// The statement's `original` is the document's digest, linking it to what was uploaded. Fails,
-/// with what to fix, when the statement doesn't add up.
+/// `document` is the blob digest of a CSV, OFX or PDF file, or of a scan. The other arguments are
+/// [`Hints`], plus `text`: the output of `ocr.read` (or `pdf.text`) for this document, used when
+/// it has no text layer of its own (a scanned PDF or a photo). The statement's `original` is the
+/// document's digest, linking it to what was uploaded. Fails, with what to fix, when the
+/// statement doesn't add up.
 pub struct StatementParse;
 
 impl Op for StatementParse {
@@ -30,8 +32,10 @@ impl Op for StatementParse {
     fn run(&self, args: &Value, cx: &mut RunContext<'_>) -> Result<Value, OpError> {
         let (digest, bytes) = rdx_pdf::read_document(self.id(), args, cx)?;
         let mut hint_args = args.clone();
+        let read = read_text(self.id(), &digest, args)?;
         if let Some(map) = hint_args.as_object_mut() {
             map.remove("document");
+            map.remove("text");
             map.insert("original".into(), Value::String(digest.clone()));
         }
         let hints: Hints = serde_json::from_value(hint_args)
@@ -40,12 +44,18 @@ impl Op for StatementParse {
         let fail = |e: &dyn std::fmt::Display| OpError::new(format!("{digest}: {e}"));
         let outcome = if rdx_pdf::is_pdf(&bytes) {
             let text = rdx_pdf::text(&bytes).map_err(|e| fail(&e))?;
-            if text.is_empty() {
+            if !text.is_empty() {
+                parse(&Input::Pdf(&text), &hints)
+            } else if let Some(read) = &read {
+                parse(&Input::Pdf(read), &hints)
+            } else {
                 return Err(fail(
-                    &"the PDF has no text layer (a scan?); OCR is not available yet",
+                    &"the PDF has no text layer (a scan?); read it with `ocr.read` and pass that \
+                      step's output as `text`",
                 ));
             }
-            parse(&Input::Pdf(&text), &hints)
+        } else if let Some(read) = read.as_ref().filter(|_| is_image(&bytes)) {
+            parse(&Input::Pdf(read), &hints)
         } else {
             let text = text_of(&bytes);
             parse(&Input::Text(&text), &hints)
@@ -58,6 +68,30 @@ impl Op for StatementParse {
             "checks": outcome.checks,
         }))
     }
+}
+
+/// The `text` argument's pages, checked to belong to this document.
+fn read_text(op: &str, digest: &str, args: &Value) -> Result<Option<rdx_pdf::Text>, OpError> {
+    let Some(text) = args.get("text").filter(|t| !t.is_null()) else {
+        return Ok(None);
+    };
+    let bad = |why: &str| OpError::new(format!("{op}: `text` {why}"));
+    if text.get("document").and_then(Value::as_str) != Some(digest) {
+        return Err(bad(
+            "was read from another document; pass the output of `ocr.read` for this one",
+        ));
+    }
+    let pages = text
+        .get("pages")
+        .cloned()
+        .ok_or_else(|| bad("has no `pages`: pass the output of `ocr.read`"))?;
+    let pages = serde_json::from_value(pages).map_err(|e| bad(&format!("is malformed: {e}")))?;
+    Ok(Some(rdx_pdf::Text { pages }))
+}
+
+/// A PNG or JPEG: a photo of a statement, readable only through `text`.
+fn is_image(bytes: &[u8]) -> bool {
+    bytes.starts_with(b"\x89PNG\r\n\x1a\n") || bytes.starts_with(b"\xff\xd8\xff")
 }
 
 /// UTF-8, or else Latin-1, which many banks' CSV and OFX exports still use (`CHARSET:1252`). The

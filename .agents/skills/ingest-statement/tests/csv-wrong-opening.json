@@ -6,9 +6,24 @@
     "dry_run": true,
     "notes": [],
     "ok": false,
-    "plan_digest": "sha256:cb1b9a8739a15b1d3dccee8f5b8225685071c455e4ca6d69cbee0d4e680711b1",
+    "plan_digest": "sha256:65210e9661374eb146824ab11bc6c170a7414d0067481e25e14ecfb135f5deee",
     "skill": "ingest-statement",
     "steps": [
+      {
+        "id": "text",
+        "op": "ocr.read",
+        "output": {
+          "document": "sha256:fcf4210740ea00845954dc2e3f6fafa9e48c312c2d5492718c9e1e3112746dfd",
+          "pages": [],
+          "source": "none",
+          "text": "",
+          "warnings": [
+            "not a PDF or an image, so there is nothing to read with OCR"
+          ]
+        },
+        "output_digest": "sha256:5274e914c71daf8452926eb736ffd74b96ac24ea978fadd26bb9855a6a5c4466",
+        "status": "done"
+      },
       {
         "error": "sha256:fcf4210740ea00845954dc2e3f6fafa9e48c312c2d5492718c9e1e3112746dfd: row 2: printed balance 454.81 but the lines so far add up to 410.26; an amount or sign was misread, or a line is missing",
         "id": "statement",

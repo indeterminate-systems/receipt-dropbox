@@ -6,9 +6,24 @@
     "dry_run": true,
     "notes": [],
     "ok": false,
-    "plan_digest": "sha256:4300d2c57021e26d74483d721903fce230d572bbc624197879aea13fea60f1a7",
+    "plan_digest": "sha256:4da265abb86968986153debcde639a2103f01c5876b5e39ddbc6bbc388d155cd",
     "skill": "ingest-statement",
     "steps": [
+      {
+        "id": "text",
+        "op": "ocr.read",
+        "output": {
+          "document": "sha256:fcf4210740ea00845954dc2e3f6fafa9e48c312c2d5492718c9e1e3112746dfd",
+          "pages": [],
+          "source": "none",
+          "text": "",
+          "warnings": [
+            "not a PDF or an image, so there is nothing to read with OCR"
+          ]
+        },
+        "output_digest": "sha256:5274e914c71daf8452926eb736ffd74b96ac24ea978fadd26bb9855a6a5c4466",
+        "status": "done"
+      },
       {
         "error": "sha256:fcf4210740ea00845954dc2e3f6fafa9e48c312c2d5492718c9e1e3112746dfd: currency is missing: the document doesn't say; pass `currency`, such as \"USD\"",
         "id": "statement",

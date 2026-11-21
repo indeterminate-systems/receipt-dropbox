@@ -6,12 +6,12 @@ use std::rc::Rc;
 
 use crate::file::Doc;
 use crate::font::Font;
-use crate::lex::{Dict, Lexer, Obj};
+use crate::lex::{Dict, Lexer, Obj, Stream};
 
 /// Form XObjects nested deeper than this are not followed.
 const MAX_FORM_DEPTH: usize = 8;
 
-type Matrix = [f64; 6];
+pub(crate) type Matrix = [f64; 6];
 const IDENTITY: Matrix = [1.0, 0.0, 0.0, 1.0, 0.0, 0.0];
 
 /// `a × b`, PDF's row-vector convention: apply `a`, then `b`.
@@ -69,6 +69,8 @@ pub(crate) struct Interpreter<'d> {
     doc: &'d Doc,
     fonts: HashMap<u32, Rc<Font>>,
     pub glyphs: Vec<Glyph>,
+    /// Image XObjects drawn, with the transformation that maps the unit square onto the page.
+    pub images: Vec<(Matrix, Stream)>,
 }
 
 impl<'d> Interpreter<'d> {
@@ -77,6 +79,7 @@ impl<'d> Interpreter<'d> {
             doc,
             fonts: HashMap::new(),
             glyphs: Vec::new(),
+            images: Vec::new(),
         }
     }
 
@@ -216,8 +219,13 @@ impl<'d> Interpreter<'d> {
         let Some(Obj::Stream(s)) = xobjects.get(name).map(|o| doc.resolve(o)) else {
             return;
         };
-        if doc.dict_get(&s.dict, b"Subtype").as_name() != Some(b"Form") {
-            return;
+        match doc.dict_get(&s.dict, b"Subtype").as_name() {
+            Some(b"Form") => {}
+            Some(b"Image") => {
+                self.images.push((gs.ctm, s.clone()));
+                return;
+            }
+            _ => return,
         }
         let Ok(data) = doc.decode(s) else { return };
         let matrix = match doc.dict_get(&s.dict, b"Matrix").as_array() {

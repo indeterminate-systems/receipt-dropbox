@@ -1,0 +1,24 @@
+{
+  "documents": [
+    "fixtures/scans/st-2026-03.s-0001.scan.pdf"
+  ],
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": false,
+    "plan_digest": "sha256:8e7e28584300edfda9b839382c527b5bcd915fca8d6bb9c658020f63b08eae66",
+    "skill": "ingest-statement",
+    "steps": [
+      {
+        "error": "sha256:b9dec0bbce3650c4e01901e90d63969256afdb4f2cf8e4fa0a01ea3edd372126: OCR models: text-detection.rten (`sha256:f15cfb56bd02c4bf478a20343986504a1f01e1665c2b3a0ad66340f054b1b5ca`) is not in the blob store; add it first (locally: `rdx blob put text-detection.rten`; the dev shell has it in $RDX_OCR_MODELS)",
+        "id": "text",
+        "op": "ocr.read",
+        "status": "failed"
+      }
+    ]
+  },
+  "inputs": {
+    "document": "\"sha256:b9dec0bbce3650c4e01901e90d63969256afdb4f2cf8e4fa0a01ea3edd372126\"",
+    "supporter": "\"s-0001\""
+  }
+}

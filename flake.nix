@@ -53,6 +53,28 @@
 
       devShells = forEachSupportedSystem (
         { pkgs, system }:
+        let
+          # The OCR models rdx-ocr's tests read (piece 11, docs/adr/ADR-P11-ocr.md). Pinned by
+          # hash; the Hugging Face mirror is pinned to a commit because the author's own bucket
+          # refuses some networks. The product never bundles these: hosts put them in the blob
+          # store, where `ocr.read` finds them by the same digests.
+          ocrModel =
+            name: hash:
+            pkgs.fetchurl {
+              urls = [
+                "https://ocrs-models.s3-accelerate.amazonaws.com/${name}"
+                "https://huggingface.co/Pieces/ocrs-mirror/resolve/fad3720109ad35b579f6bc6501290d1a2388ad11/${name}"
+              ];
+              inherit hash;
+            };
+          # Copies, not symlinks: tests also run as WebAssembly under wasmtime, and WASI refuses
+          # to follow absolute symlinks.
+          ocrModels = pkgs.runCommand "ocrs-models" { } ''
+            mkdir $out
+            cp ${ocrModel "text-detection.rten" "sha256-8Vz7Vr0CxL9HiiA0OYZQSh8B4WZcKzoK1mNA8FSxtco="} $out/text-detection.rten
+            cp ${ocrModel "text-recognition.rten" "sha256-5ISGbUzOQDF1vY0AsSj+sIq0LiCN4w5CzZiJ2PFzWm4="} $out/text-recognition.rten
+          '';
+        in
         {
           default = pkgs.mkShell {
             packages = with pkgs; [
@@ -73,7 +95,10 @@
               self.formatter.${system}
             ];
 
-            env.RUST_SRC_PATH = "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
+            env = {
+              RUST_SRC_PATH = "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
+              RDX_OCR_MODELS = "${ocrModels}";
+            };
           };
         }
       );
