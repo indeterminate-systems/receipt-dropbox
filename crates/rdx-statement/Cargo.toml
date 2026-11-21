@@ -17,12 +17,17 @@ default = []
 render = ["rdx-pdf/write"]
 
 [dependencies]
+# Remembered statement passwords are envelopes encrypted to the supporter's keys (rdx-keys).
+bc-envelope = { version = "0.43", default-features = false, features = ["known_value", "encrypt", "recipient"] }
+rdx-keys = { path = "../rdx-keys" }
 rdx-model = { path = "../rdx-model" }
 rdx-pdf = { path = "../rdx-pdf" }
 rdx-plan = { path = "../rdx-plan", default-features = false }
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+# Wipes passwords from memory once used.
+zeroize = "1"
 
 [dev-dependencies]
 rdx-host = { path = "../rdx-host" }

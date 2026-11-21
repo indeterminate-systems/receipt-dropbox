@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 
 use rdx_model::synth::{Config, Scenario, statement_csv};
 use rdx_model::{Digest, Statement};
-use rdx_statement::render::{example_bank_pdf, ofx};
+use rdx_statement::render::{example_bank_pdf, example_bank_pdf_locked, ofx};
 use rdx_statement::{Hints, Input, ParseError, Source, parse};
 use serde_json::json;
 
@@ -70,6 +70,33 @@ fn committed_fixtures_match_the_renderers() {
             &example_bank_pdf(st, FIXTURE_ROWS),
         );
     }
+    // The first statement again, password-protected as Mexican banks send them.
+    let st = &scenario.statements[0];
+    golden(
+        &statements_dir().join(format!("{}.locked.pdf", st.id)),
+        &example_bank_pdf_locked(st, FIXTURE_ROWS, LOCKED_PASSWORD),
+    );
+}
+
+/// The password of `*.locked.pdf`: the SAT's generic RFC, standing in for the holder's.
+const LOCKED_PASSWORD: &str = "XAXX010101000";
+
+#[test]
+fn a_locked_statement_parses_once_unlocked() {
+    let scenario = Scenario::generate(&Config::small());
+    let st = &scenario.statements[0];
+    let bytes = example_bank_pdf_locked(st, FIXTURE_ROWS, LOCKED_PASSWORD);
+    assert_eq!(
+        rdx_pdf::text(&bytes),
+        Err(rdx_pdf::PdfError::PasswordRequired)
+    );
+    let text = rdx_pdf::text_with_password(&bytes, LOCKED_PASSWORD).unwrap();
+    assert_eq!(
+        parse(&Input::Pdf(&text), &hints(st, json!({})))
+            .unwrap()
+            .statement,
+        *st
+    );
 }
 
 #[test]

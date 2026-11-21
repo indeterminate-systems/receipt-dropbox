@@ -9,13 +9,16 @@ use crate::{Hints, Input, parse};
 /// Registers this crate's ops.
 pub fn register(r: &mut Registry) -> &mut Registry {
     r.register(StatementParse)
+        .register(crate::unlock::StatementUnlock)
+        .register(crate::unlock::RememberPassword)
 }
 
 /// `statement.parse { document, supporter, .. }` → `{ statement, parser, checks }`.
 ///
 /// `document` is the blob digest of a CSV, OFX or PDF file, or of a scan. The other arguments are
 /// [`Hints`], plus `text`: the output of `ocr.read` (or `pdf.text`) for this document, used when
-/// it has no text layer of its own (a scanned PDF or a photo). The statement's `original` is the
+/// it has no text layer of its own (a scanned PDF or a photo), or the output of
+/// `statement.unlock` for a password-protected PDF. The statement's `original` is the
 /// document's digest, linking it to what was uploaded. Fails, with what to fix, when the
 /// statement doesn't add up.
 pub struct StatementParse;
@@ -43,7 +46,20 @@ impl Op for StatementParse {
 
         let fail = |e: &dyn std::fmt::Display| OpError::new(format!("{digest}: {e}"));
         let outcome = if rdx_pdf::is_pdf(&bytes) {
-            let text = rdx_pdf::text(&bytes).map_err(|e| fail(&e))?;
+            let text = match rdx_pdf::text(&bytes) {
+                // Opened on the supporter's device by `statement.unlock`.
+                Err(rdx_pdf::PdfError::PasswordRequired) if read.is_some() => {
+                    rdx_pdf::Text { pages: Vec::new() }
+                }
+                Err(rdx_pdf::PdfError::PasswordRequired) => {
+                    return Err(fail(
+                        &"the PDF is password-protected; open it on the supporter's device with \
+                          `statement.unlock`, which asks them for the password, and pass that \
+                          step's output as `text`",
+                    ));
+                }
+                other => other.map_err(|e| fail(&e))?,
+            };
             if !text.is_empty() {
                 parse(&Input::Pdf(&text), &hints)
             } else if let Some(read) = &read {

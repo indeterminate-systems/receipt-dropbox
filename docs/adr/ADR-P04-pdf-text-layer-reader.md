@@ -41,8 +41,8 @@ text, Canadian French), which it read cleanly.
 
 ## Consequences
 
-- Password-protected statements need an unencrypted copy until encryption support is added
-  (RC4 and AES with an empty user password would cover most bank downloads).
+- Password-protected statements are now read: see
+  [ADR-P04 password-protected statements](ADR-P04-password-protected-statements.md).
 - If lopdf drops getrandom or makes it optional, this can be revisited; the public API
   (`rdx_pdf::text`, `Text`, `Line`, `Span`) would stay.
 - Fuzzing the reader is worth adding before the PWA accepts uploads from the public.

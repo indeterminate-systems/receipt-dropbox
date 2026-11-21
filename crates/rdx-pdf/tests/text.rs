@@ -153,12 +153,16 @@ fn a_scan_has_an_empty_text_layer() {
 #[test]
 fn bad_input_says_what_is_wrong() {
     assert_eq!(text(b"date,amount\n"), Err(PdfError::NotPdf));
+    // Password-protected PDFs are tested in tests/locked.rs; this one's protection is broken.
     let encrypted = hand_built(&[b"<< /Type /Catalog >>"]);
     let encrypted = String::from_utf8_lossy(&encrypted).replace(
         "<< /Root 1 0 R >>",
-        "<< /Root 1 0 R /Encrypt << /Filter /Standard >> >>",
+        "<< /Root 1 0 R /Encrypt << /Filter /Standard /V 2 /R 3 >> >>",
     );
-    assert_eq!(text(encrypted.as_bytes()), Err(PdfError::Encrypted));
+    assert!(matches!(
+        text(encrypted.as_bytes()),
+        Err(PdfError::Malformed(_))
+    ));
     assert!(matches!(
         text(b"%PDF-1.4\n%%EOF"),
         Err(PdfError::Malformed(_))

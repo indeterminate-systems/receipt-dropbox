@@ -112,6 +112,27 @@ impl Pdf {
     }
 
     pub fn finish(self) -> Vec<u8> {
+        serialize(self.objects(), "1.4", "")
+    }
+
+    /// The same document, protected with `password` as Mexican banks protect statements:
+    /// AES-256 (PDF 2.0's revision 6), with `password` as both the user and the owner password.
+    /// Deterministic like [`Pdf::finish`]: the salts and IVs derive from the content and password.
+    pub fn finish_locked(self, password: &str) -> Vec<u8> {
+        let mut objects = self.objects();
+        let mut seed = password.as_bytes().to_vec();
+        objects.iter().for_each(|o| seed.extend_from_slice(o));
+        let lock = crate::crypt::lock::Lock::new(&seed);
+        for (i, body) in objects.iter_mut().enumerate() {
+            *body = encrypt_stream(body, |data| lock.encrypt(i + 1, data));
+        }
+        objects.push(lock.dictionary(password).into_bytes());
+        let id = lock.id();
+        let trailer = format!(" /Encrypt {} 0 R /ID [<{id}> <{id}>]", objects.len());
+        serialize(objects, "1.7", &trailer)
+    }
+
+    fn objects(self) -> Vec<Vec<u8>> {
         // Objects: 1 catalog, 2 page tree, 3 and 4 fonts, then a page and its content per page,
         // then the images.
         let n_pages = self.pages.len();
@@ -167,31 +188,37 @@ impl Pdf {
         }
 
         objects.extend(image_objects);
-
-        let mut out = b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n".to_vec();
-        let mut offsets = Vec::new();
-        for (i, body) in objects.iter().enumerate() {
-            offsets.push(out.len());
-            out.extend_from_slice(format!("{} 0 obj\n", i + 1).as_bytes());
-            out.extend_from_slice(body);
-            out.extend_from_slice(b"\nendobj\n");
-        }
-        let xref = out.len();
-        out.extend_from_slice(
-            format!("xref\n0 {}\n0000000000 65535 f \n", objects.len() + 1).as_bytes(),
-        );
-        for off in offsets {
-            out.extend_from_slice(format!("{off:010} 00000 n \n").as_bytes());
-        }
-        out.extend_from_slice(
-            format!(
-                "trailer\n<< /Size {} /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n",
-                objects.len() + 1
-            )
-            .as_bytes(),
-        );
-        out
+        objects
     }
+}
+
+/// The file around `objects` (numbered from 1, the first being the catalog), with `trailer`
+/// added to the trailer dictionary.
+fn serialize(objects: Vec<Vec<u8>>, version: &str, trailer: &str) -> Vec<u8> {
+    let mut out = format!("%PDF-{version}\n").into_bytes();
+    out.extend_from_slice(b"%\xe2\xe3\xcf\xd3\n");
+    let mut offsets = Vec::new();
+    for (i, body) in objects.iter().enumerate() {
+        offsets.push(out.len());
+        out.extend_from_slice(format!("{} 0 obj\n", i + 1).as_bytes());
+        out.extend_from_slice(body);
+        out.extend_from_slice(b"\nendobj\n");
+    }
+    let xref = out.len();
+    out.extend_from_slice(
+        format!("xref\n0 {}\n0000000000 65535 f \n", objects.len() + 1).as_bytes(),
+    );
+    for off in offsets {
+        out.extend_from_slice(format!("{off:010} 00000 n \n").as_bytes());
+    }
+    out.extend_from_slice(
+        format!(
+            "trailer\n<< /Size {} /Root 1 0 R{trailer} >>\nstartxref\n{xref}\n%%EOF\n",
+            objects.len() + 1
+        )
+        .as_bytes(),
+    );
+    out
 }
 
 fn image_object(w: u32, h: u32, data: &ImageData) -> Vec<u8> {
@@ -215,6 +242,28 @@ fn image_object(w: u32, h: u32, data: &ImageData) -> Vec<u8> {
     .into_bytes();
     out.extend_from_slice(&body);
     out.extend_from_slice(b"\nendstream");
+    out
+}
+
+/// Replaces the data of a stream object as this writer formats them (`<< … /Length n … >>`,
+/// `stream`, data, `endstream`), fixing its `/Length`. Other objects are returned unchanged.
+fn encrypt_stream(body: &[u8], encrypt: impl Fn(&[u8]) -> Vec<u8>) -> Vec<u8> {
+    const START: &[u8] = b"\nstream\n";
+    const END: &[u8] = b"\nendstream";
+    let Some(at) = body.windows(START.len()).position(|w| w == START) else {
+        return body.to_vec();
+    };
+    let data = &body[at + START.len()..body.len() - END.len()];
+    let dict = String::from_utf8(body[..at].to_vec()).expect("the writer's dictionaries are ASCII");
+    let sealed = encrypt(data);
+    let dict = dict.replace(
+        &format!("/Length {}", data.len()),
+        &format!("/Length {}", sealed.len()),
+    );
+    let mut out = dict.into_bytes();
+    out.extend_from_slice(START);
+    out.extend_from_slice(&sealed);
+    out.extend_from_slice(END);
     out
 }
 
