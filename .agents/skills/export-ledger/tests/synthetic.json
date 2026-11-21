@@ -1,0 +1,362 @@
+{
+  "documents": [
+    "fixtures/ledger/synthetic-small.beancount"
+  ],
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:d371036eb50d7ddc06a6fd86904c55d20dd76c5e6dedfa315f3cea981294ed31",
+    "skill": "export-ledger",
+    "steps": [
+      {
+        "id": "ledger",
+        "op": "ledger.read",
+        "output": {
+          "balances": [
+            {
+              "account": "Liabilities:Reimbursable:S-0001",
+              "amount": {
+                "currency": "USD",
+                "minor": -61640
+              },
+              "date": "2026-04-01",
+              "statement": {
+                "currency": "USD",
+                "id": "st-2026-03.s-0001",
+                "original": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+                "period_end": "2026-03-31",
+                "supporter": "s-0001"
+              }
+            },
+            {
+              "account": "Liabilities:Reimbursable:S-0002",
+              "amount": {
+                "currency": "USD",
+                "minor": -64419
+              },
+              "date": "2026-04-01",
+              "statement": {
+                "currency": "USD",
+                "id": "st-2026-03.s-0002",
+                "original": "sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c",
+                "period_end": "2026-03-31",
+                "supporter": "s-0002"
+              }
+            }
+          ],
+          "digest": "sha256:75dff01a9b612ac3f0abe039ab02ac3726c1f97555583adce00ab5e14c3207f6",
+          "entries": [
+            {
+              "date": "2026-03-03",
+              "line": {
+                "line": "l01",
+                "statement": "st-2026-03.s-0001"
+              },
+              "narration": "LANTERN CAFE CATERING #7435",
+              "payee": "Lantern Cafe Catering",
+              "postings": [
+                {
+                  "account": "Expenses:Events:Catering",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 28974
+                  }
+                },
+                {
+                  "account": "Liabilities:Reimbursable:S-0001",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": -28974
+                  }
+                }
+              ],
+              "receipt": "r-2026-03.s-0001.03",
+              "receipt_source": "sha256:545e8a660e04effac6192000501745f760d3e9f6cca918ae792c5025164d21f4",
+              "statement": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+              "supporter": "s-0001"
+            },
+            {
+              "date": "2026-03-08",
+              "line": {
+                "line": "l03",
+                "statement": "st-2026-03.s-0002"
+              },
+              "narration": "LANTERN CAFE CATERING #7019",
+              "payee": "Lantern Cafe Catering",
+              "postings": [
+                {
+                  "account": "Expenses:Events:Catering",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 9958
+                  }
+                },
+                {
+                  "account": "Liabilities:Reimbursable:S-0002",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": -9958
+                  }
+                }
+              ],
+              "receipt": "r-2026-03.s-0002.08",
+              "receipt_source": "sha256:ddfb32c72024bc14762804c3d886f2a671a8977b6da1ac144bb1221326330bad",
+              "statement": "sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c",
+              "supporter": "s-0002"
+            },
+            {
+              "date": "2026-03-11",
+              "line": {
+                "line": "l02",
+                "statement": "st-2026-03.s-0001"
+              },
+              "narration": "PAPERLEAF SUPPLY #4159",
+              "payee": "Paperleaf Supply",
+              "postings": [
+                {
+                  "account": "Expenses:Office:Supplies",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 27989
+                  }
+                },
+                {
+                  "account": "Liabilities:Reimbursable:S-0001",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": -27989
+                  }
+                }
+              ],
+              "receipt": "r-2026-03.s-0001.01",
+              "receipt_source": "sha256:96a89262dba3fde56ec76923ba4d8ce22c0bb5dbc862c33935b334ca79e03edf",
+              "statement": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+              "supporter": "s-0001"
+            },
+            {
+              "date": "2026-03-11",
+              "line": {
+                "line": "l04",
+                "statement": "st-2026-03.s-0002"
+              },
+              "narration": "CLEARWAVE TELECOM INV-004932",
+              "payee": "Clearwave Telecom",
+              "postings": [
+                {
+                  "account": "Expenses:Utilities:Phone",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 6020
+                  }
+                },
+                {
+                  "account": "Liabilities:Reimbursable:S-0002",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": -6020
+                  }
+                }
+              ],
+              "receipt": "r-2026-03.s-0002.10",
+              "receipt_source": "sha256:5334b0a5fb64f95c8996476c038e83857ffa439efd28fd0cfd5aa84e2a5f60ba",
+              "statement": "sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c",
+              "supporter": "s-0002"
+            },
+            {
+              "date": "2026-03-13",
+              "line": {
+                "line": "l03",
+                "statement": "st-2026-03.s-0001"
+              },
+              "narration": "PAPERLEAF SUPPLY REFUND",
+              "payee": "Paperleaf Supply",
+              "postings": [
+                {
+                  "account": "Expenses:Office:Supplies",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": -25085
+                  }
+                },
+                {
+                  "account": "Liabilities:Reimbursable:S-0001",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 25085
+                  }
+                }
+              ],
+              "receipt": "r-2026-03.s-0001.05",
+              "receipt_source": "sha256:05f02af6ad4f9d8d82551c1ced8a40be5b643821ceb4b8689919e59df28c9c4b",
+              "statement": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+              "supporter": "s-0001"
+            },
+            {
+              "date": "2026-03-17",
+              "line": {
+                "line": "l07",
+                "statement": "st-2026-03.s-0001"
+              },
+              "narration": "CLEARWAVE TELECOM INV-920207",
+              "payee": "Clearwave Telecom",
+              "postings": [
+                {
+                  "account": "Expenses:Utilities:Phone",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 6209
+                  }
+                },
+                {
+                  "account": "Liabilities:Reimbursable:S-0001",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": -6209
+                  }
+                }
+              ],
+              "receipt": "r-2026-03.s-0001.04",
+              "receipt_source": "sha256:3f9c48f461d8a787d84ded77915461b09d3c25da033abf99e1f065feef427d7f",
+              "statement": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+              "supporter": "s-0001"
+            },
+            {
+              "date": "2026-03-19",
+              "line": {
+                "line": "l07",
+                "statement": "st-2026-03.s-0002"
+              },
+              "narration": "BRIGHTLINE PRINT #8286",
+              "payee": "Brightline Print Shop",
+              "postings": [
+                {
+                  "account": "Expenses:Office:Printing",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 26604
+                  }
+                },
+                {
+                  "account": "Liabilities:Reimbursable:S-0002",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": -26604
+                  }
+                }
+              ],
+              "receipt": "r-2026-03.s-0002.09",
+              "receipt_source": "sha256:0baa634f0f9d26c539b003a4a722b5a708f9f967517e073422753362ea0f79f1",
+              "statement": "sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c",
+              "supporter": "s-0002"
+            },
+            {
+              "date": "2026-03-21",
+              "line": {
+                "line": "l09",
+                "statement": "st-2026-03.s-0002"
+              },
+              "narration": "METRO RIDESHARE TRIP #9055",
+              "payee": "Metro Rideshare",
+              "postings": [
+                {
+                  "account": "Expenses:Travel:Local",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 28444
+                  }
+                },
+                {
+                  "account": "Liabilities:Reimbursable:S-0002",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": -28444
+                  }
+                }
+              ],
+              "receipt": "r-2026-03.s-0002.07",
+              "receipt_source": "sha256:fdc6328d173130b975a21863cf64590163e6f352a8b7affc329c240098895e59",
+              "statement": "sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c",
+              "supporter": "s-0002"
+            },
+            {
+              "date": "2026-03-23",
+              "line": {
+                "line": "l09",
+                "statement": "st-2026-03.s-0001"
+              },
+              "narration": "METRO RIDESHARE TRIP #8927",
+              "payee": "Metro Rideshare",
+              "postings": [
+                {
+                  "account": "Expenses:Travel:Local",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 23553
+                  }
+                },
+                {
+                  "account": "Liabilities:Reimbursable:S-0001",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": -23553
+                  }
+                }
+              ],
+              "receipt": "r-2026-03.s-0001.02",
+              "receipt_source": "sha256:9e073a4e398ce697338b1e7fd32c36106a8805dc97b36cd49cf5cb09da868928",
+              "statement": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+              "supporter": "s-0001"
+            },
+            {
+              "date": "2026-03-24",
+              "line": {
+                "line": "l10",
+                "statement": "st-2026-03.s-0002"
+              },
+              "narration": "METRO RIDESHARE TRIP REFUND",
+              "payee": "Metro Rideshare",
+              "postings": [
+                {
+                  "account": "Expenses:Travel:Local",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": -6607
+                  }
+                },
+                {
+                  "account": "Liabilities:Reimbursable:S-0002",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 6607
+                  }
+                }
+              ],
+              "receipt": "r-2026-03.s-0002.11",
+              "receipt_source": "sha256:668dca60634770912dd860e5de3f798173bf243d31b0f7d3d48568d2976fcdbb",
+              "statement": "sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c",
+              "supporter": "s-0002"
+            }
+          ],
+          "ledger": "sha256:75dff01a9b612ac3f0abe039ab02ac3726c1f97555583adce00ab5e14c3207f6",
+          "text": "; Receipt Dropbox ledger (Beancount). Written by rdx's `ledger.post`, which rewrites the whole\n; file from its entries: change it through rdx, since `ledger.read` refuses hand edits.\n\n2026-03-03 open Expenses:Events:Catering\n2026-03-19 open Expenses:Office:Printing\n2026-03-11 open Expenses:Office:Supplies\n2026-03-21 open Expenses:Travel:Local\n2026-03-11 open Expenses:Utilities:Phone\n2026-03-03 open Liabilities:Reimbursable:S-0001\n2026-03-08 open Liabilities:Reimbursable:S-0002\n\n2026-03-03 * \"Lantern Cafe Catering\" \"LANTERN CAFE CATERING #7435\" ^st-2026-03.s-0001\n  supporter: \"s-0001\"\n  line: \"st-2026-03.s-0001/l01\"\n  receipt: \"r-2026-03.s-0001.03\"\n  receipt-source: \"sha256:545e8a660e04effac6192000501745f760d3e9f6cca918ae792c5025164d21f4\"\n  statement: \"sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86\"\n  Expenses:Events:Catering 289.74 USD\n  Liabilities:Reimbursable:S-0001 -289.74 USD\n\n2026-03-08 * \"Lantern Cafe Catering\" \"LANTERN CAFE CATERING #7019\" ^st-2026-03.s-0002\n  supporter: \"s-0002\"\n  line: \"st-2026-03.s-0002/l03\"\n  receipt: \"r-2026-03.s-0002.08\"\n  receipt-source: \"sha256:ddfb32c72024bc14762804c3d886f2a671a8977b6da1ac144bb1221326330bad\"\n  statement: \"sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c\"\n  Expenses:Events:Catering 99.58 USD\n  Liabilities:Reimbursable:S-0002 -99.58 USD\n\n2026-03-11 * \"Paperleaf Supply\" \"PAPERLEAF SUPPLY #4159\" ^st-2026-03.s-0001\n  supporter: \"s-0001\"\n  line: \"st-2026-03.s-0001/l02\"\n  receipt: \"r-2026-03.s-0001.01\"\n  receipt-source: \"sha256:96a89262dba3fde56ec76923ba4d8ce22c0bb5dbc862c33935b334ca79e03edf\"\n  statement: \"sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86\"\n  Expenses:Office:Supplies 279.89 USD\n  Liabilities:Reimbursable:S-0001 -279.89 USD\n\n2026-03-11 * \"Clearwave Telecom\" \"CLEARWAVE TELECOM INV-004932\" ^st-2026-03.s-0002\n  supporter: \"s-0002\"\n  line: \"st-2026-03.s-0002/l04\"\n  receipt: \"r-2026-03.s-0002.10\"\n  receipt-source: \"sha256:5334b0a5fb64f95c8996476c038e83857ffa439efd28fd0cfd5aa84e2a5f60ba\"\n  statement: \"sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c\"\n  Expenses:Utilities:Phone 60.20 USD\n  Liabilities:Reimbursable:S-0002 -60.20 USD\n\n2026-03-13 * \"Paperleaf Supply\" \"PAPERLEAF SUPPLY REFUND\" ^st-2026-03.s-0001\n  supporter: \"s-0001\"\n  line: \"st-2026-03.s-0001/l03\"\n  receipt: \"r-2026-03.s-0001.05\"\n  receipt-source: \"sha256:05f02af6ad4f9d8d82551c1ced8a40be5b643821ceb4b8689919e59df28c9c4b\"\n  statement: \"sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86\"\n  Expenses:Office:Supplies -250.85 USD\n  Liabilities:Reimbursable:S-0001 250.85 USD\n\n2026-03-17 * \"Clearwave Telecom\" \"CLEARWAVE TELECOM INV-920207\" ^st-2026-03.s-0001\n  supporter: \"s-0001\"\n  line: \"st-2026-03.s-0001/l07\"\n  receipt: \"r-2026-03.s-0001.04\"\n  receipt-source: \"sha256:3f9c48f461d8a787d84ded77915461b09d3c25da033abf99e1f065feef427d7f\"\n  statement: \"sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86\"\n  Expenses:Utilities:Phone 62.09 USD\n  Liabilities:Reimbursable:S-0001 -62.09 USD\n\n2026-03-19 * \"Brightline Print Shop\" \"BRIGHTLINE PRINT #8286\" ^st-2026-03.s-0002\n  supporter: \"s-0002\"\n  line: \"st-2026-03.s-0002/l07\"\n  receipt: \"r-2026-03.s-0002.09\"\n  receipt-source: \"sha256:0baa634f0f9d26c539b003a4a722b5a708f9f967517e073422753362ea0f79f1\"\n  statement: \"sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c\"\n  Expenses:Office:Printing 266.04 USD\n  Liabilities:Reimbursable:S-0002 -266.04 USD\n\n2026-03-21 * \"Metro Rideshare\" \"METRO RIDESHARE TRIP #9055\" ^st-2026-03.s-0002\n  supporter: \"s-0002\"\n  line: \"st-2026-03.s-0002/l09\"\n  receipt: \"r-2026-03.s-0002.07\"\n  receipt-source: \"sha256:fdc6328d173130b975a21863cf64590163e6f352a8b7affc329c240098895e59\"\n  statement: \"sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c\"\n  Expenses:Travel:Local 284.44 USD\n  Liabilities:Reimbursable:S-0002 -284.44 USD\n\n2026-03-23 * \"Metro Rideshare\" \"METRO RIDESHARE TRIP #8927\" ^st-2026-03.s-0001\n  supporter: \"s-0001\"\n  line: \"st-2026-03.s-0001/l09\"\n  receipt: \"r-2026-03.s-0001.02\"\n  receipt-source: \"sha256:9e073a4e398ce697338b1e7fd32c36106a8805dc97b36cd49cf5cb09da868928\"\n  statement: \"sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86\"\n  Expenses:Travel:Local 235.53 USD\n  Liabilities:Reimbursable:S-0001 -235.53 USD\n\n2026-03-24 * \"Metro Rideshare\" \"METRO RIDESHARE TRIP REFUND\" ^st-2026-03.s-0002\n  supporter: \"s-0002\"\n  line: \"st-2026-03.s-0002/l10\"\n  receipt: \"r-2026-03.s-0002.11\"\n  receipt-source: \"sha256:668dca60634770912dd860e5de3f798173bf243d31b0f7d3d48568d2976fcdbb\"\n  statement: \"sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c\"\n  Expenses:Travel:Local -66.07 USD\n  Liabilities:Reimbursable:S-0002 66.07 USD\n\n2026-04-01 balance Liabilities:Reimbursable:S-0001 -616.40 USD\n  statement-id: \"st-2026-03.s-0001\"\n  supporter: \"s-0001\"\n  statement: \"sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86\"\n\n2026-04-01 balance Liabilities:Reimbursable:S-0002 -644.19 USD\n  statement-id: \"st-2026-03.s-0002\"\n  supporter: \"s-0002\"\n  statement: \"sha256:22cfea39b50639bc1c6c4f7dec8f8cd06e2a634eb14e9f429e63aa6aa7ef0e0c\"\n"
+        },
+        "output_digest": "sha256:bde83d5f480de02452d274cb1c0f1253432ed9adc1f6b4f78a0707dfb6b07e82",
+        "status": "done"
+      },
+      {
+        "args": {
+          "format": "xlsx",
+          "ledger": "sha256:75dff01a9b612ac3f0abe039ab02ac3726c1f97555583adce00ab5e14c3207f6"
+        },
+        "id": "export",
+        "op": "ledger.export",
+        "status": "skipped"
+      }
+    ]
+  },
+  "inputs": {
+    "format": "'xlsx",
+    "ledger": "\"sha256:75dff01a9b612ac3f0abe039ab02ac3726c1f97555583adce00ab5e14c3207f6\""
+  }
+}

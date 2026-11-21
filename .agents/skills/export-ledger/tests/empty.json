@@ -1,0 +1,36 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [
+      "ledger `main` has nothing posted yet"
+    ],
+    "ok": true,
+    "plan_digest": "sha256:7241d5ec623badb4db2b288c67ee44d29cfac253538e11183b180342ce57ed6b",
+    "skill": "export-ledger",
+    "steps": [
+      {
+        "id": "ledger",
+        "op": "ledger.read",
+        "output": {
+          "balances": [],
+          "digest": null,
+          "entries": [],
+          "ledger": "main",
+          "text": "; Receipt Dropbox ledger (Beancount). Written by rdx's `ledger.post`, which rewrites the whole\n; file from its entries: change it through rdx, since `ledger.read` refuses hand edits.\n"
+        },
+        "output_digest": "sha256:2302dcf23f70f3350139c04ad381745d42bb8ed4e31a96726fae81c38967b984",
+        "status": "done"
+      },
+      {
+        "args": {
+          "format": "csv",
+          "ledger": "main"
+        },
+        "id": "export",
+        "op": "ledger.export",
+        "status": "skipped"
+      }
+    ]
+  },
+  "inputs": {}
+}

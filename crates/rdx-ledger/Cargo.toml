@@ -1,0 +1,26 @@
+[package]
+name = "rdx-ledger"
+version = "0.1.0"
+description = "Receipt Dropbox ledger: books confirmed matches to Beancount with audit metadata, reads it back and exports it as CSV or XLSX"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+# `rdx` registers this crate's ops (its `register` function) when it is a dependency of
+# rdx-cli; see crates/rdx-cli/build.rs.
+[package.metadata.rdx]
+ops = true
+
+[dependencies]
+rdx-model = { path = "../rdx-model" }
+# Only the `Op` trait, registry and host capabilities; plan loading (Nickel) is the host's business.
+rdx-plan = { path = "../rdx-plan", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+# An independent Beancount parser (Unlicense, pure Rust) checks that what we write is Beancount.
+beancount-parser = "2.6"
+nickel-embed.workspace = true
+rdx-plan = { path = "../rdx-plan" }
