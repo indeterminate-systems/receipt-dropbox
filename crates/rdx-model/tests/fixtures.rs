@@ -55,6 +55,9 @@ fn generated_data_is_internally_consistent() {
         };
         let s = Scenario::generate(&config);
         assert_eq!(s.supporters.len(), 3);
+        for sp in &s.supporters {
+            assert_eq!(sp.validate(), Ok(()), "seed {seed}, {}", sp.id);
+        }
         assert_eq!(s.statements.len(), 6);
         for st in &s.statements {
             assert_eq!(st.validate(), Ok(()), "seed {seed}, {}", st.id);
@@ -171,6 +174,20 @@ fn the_nickel_contract_accepts_the_fixture_and_rejects_floats() {
     );
     let err = unbalanced.unwrap_err().to_string();
     assert!(err.contains("does not balance"), "{err}");
+
+    let supporter = |fields: &str| {
+        check(format!(
+            r#"let m = import "rdx/model.ncl" in {{ id = "s-0001", {fields} }} | m.Supporter"#
+        ))
+    };
+    assert!(supporter(r#"display_name = "Ana""#).is_ok());
+    let named =
+        supporter(r#"display_name = "Ana R.", full_name = "Ana Rodríguez", alias = "Anita""#);
+    assert!(named.is_ok(), "{}", named.unwrap_err());
+    let blank = supporter(r#"display_name = "Ana", alias = " ""#)
+        .unwrap_err()
+        .to_string();
+    assert!(blank.contains("name"), "{blank}");
 }
 
 /// Renders JSON as a Nickel expression.

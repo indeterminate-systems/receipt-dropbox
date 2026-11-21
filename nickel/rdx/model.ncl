@@ -130,6 +130,27 @@ let MatchC = {
 }
 in
 
+# Repeats Supporter::validate: a name is never blank or padded with whitespace.
+let NameC =
+  matching
+    "name"
+    "^\\S(.*\\S)?$"
+    "A name can't be blank or start or end with whitespace."
+in
+
+# Names are personal data: keep them out of the ledger, logs and the key registry (see
+# Supporter in crates/rdx-model/src/statement.rs).
+let SupporterC = {
+  id | IdC,
+  display_name | NameC | doc "Shown to the people who reconcile.",
+  full_name
+    | NameC
+    | doc "The name as banks and tax receipts print it."
+    | optional,
+  alias | NameC | doc "What people call them day to day." | optional,
+}
+in
+
 let ScenarioC = {
   config | {
     seed | std.number.Integer,
@@ -138,7 +159,7 @@ let ScenarioC = {
     start | DateC,
     currency | CurrencyC,
   },
-  supporters | Array { id | IdC, display_name | String },
+  supporters | Array SupporterC,
   statements | Array StatementC,
   receipts | Array ReceiptC,
   matches | Array MatchC,
@@ -168,5 +189,6 @@ in
   Receipt = ReceiptC,
   LineRef = LineRefC,
   Match = MatchC,
+  Supporter = SupporterC,
   Scenario = ScenarioC,
 }

@@ -9,11 +9,15 @@
   "supporters": [
     {
       "id": "s-0001",
-      "display_name": "Test Supporter 1"
+      "display_name": "Test Supporter 1",
+      "full_name": "Test Supporter Number 1",
+      "alias": "Tester 1"
     },
     {
       "id": "s-0002",
-      "display_name": "Test Supporter 2"
+      "display_name": "Test Supporter 2",
+      "full_name": "Test Supporter Number 2",
+      "alias": "Tester 2"
     }
   ],
   "statements": [
