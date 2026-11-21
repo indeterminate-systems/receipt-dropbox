@@ -2,7 +2,8 @@
 //!
 //! Statements and receipts arrive as PDFs. Most have a text layer, which this crate reads in pure
 //! Rust with no I/O, so it runs in the PWA, on Workers and under wasmtime alike. A PDF without a
-//! text layer (a scan) gives an empty [`Text`]; OCR (roadmap piece 11) handles those.
+//! text layer (a scan) gives an empty [`Text`]; [`page_images`] gives its pixels for OCR
+//! (crate `rdx-ocr`, roadmap piece 11).
 //!
 //! Positions matter for statements: a withdrawal and a deposit differ only by the column the
 //! amount sits in. So each [`Line`] keeps its [`Span`]s (runs of words separated by a gap wider
@@ -26,6 +27,7 @@
 mod content;
 mod file;
 mod font;
+mod image;
 mod layout;
 mod lex;
 mod op;
@@ -122,6 +124,51 @@ impl fmt::Display for Text {
 /// Whether the bytes look like a PDF (a `%PDF-` header near the start).
 pub fn is_pdf(bytes: &[u8]) -> bool {
     file::find(&bytes[..bytes.len().min(1024)], b"%PDF-", 0).is_some()
+}
+
+/// The images on one page, for reading a scan with OCR.
+#[derive(Debug, Clone, PartialEq)]
+pub struct PageImages {
+    /// Page size in points.
+    pub width: f64,
+    pub height: f64,
+    /// In drawing order.
+    pub images: Vec<PageImage>,
+}
+
+/// One image as drawn on a page.
+#[derive(Debug, Clone, PartialEq)]
+pub struct PageImage {
+    /// Left and bottom edges of the area the image covers, in points from the page's bottom left.
+    pub x: f64,
+    pub y: f64,
+    /// Size of that area in points.
+    pub width: f64,
+    pub height: f64,
+    pub pixels_wide: u32,
+    pub pixels_high: u32,
+    pub data: ImageData,
+}
+
+/// An image's pixels, rows top to bottom, or the JPEG file it is stored as.
+#[derive(Debug, Clone, PartialEq)]
+pub enum ImageData {
+    /// A JPEG file (`DCTDecode`), not decoded here.
+    Jpeg(Vec<u8>),
+    /// One byte per pixel, 0 black; 1-bit scans are widened to this.
+    Gray8(Vec<u8>),
+    Rgb8(Vec<u8>),
+    Cmyk8(Vec<u8>),
+    /// An encoding or colour space this reader doesn't decode (CCITT fax, JBIG2, JPEG 2000,
+    /// indexed colour), and why.
+    Unsupported(String),
+}
+
+/// Every image drawn on each page, with where it sits: what OCR reads when a PDF is a scan.
+/// Images inside form XObjects are included; inline images (`BI … EI`), which scanners don't
+/// use for whole pages, are not.
+pub fn page_images(bytes: &[u8]) -> Result<Vec<PageImages>, PdfError> {
+    image::page_images(bytes)
 }
 
 /// Reads the text layer of a PDF.

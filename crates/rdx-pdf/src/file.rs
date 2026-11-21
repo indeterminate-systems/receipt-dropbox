@@ -24,6 +24,8 @@ pub(crate) struct Doc {
 pub(crate) struct PageObj {
     pub resources: Dict,
     pub contents: Vec<u8>,
+    /// `[x0 y0 x1 y1]` in points, from the page or the nearest page-tree node above it.
+    pub media_box: Option<[f64; 4]>,
 }
 
 impl Doc {
@@ -178,7 +180,7 @@ impl Doc {
         if let Some(catalog) = catalog {
             let mut seen = BTreeSet::new();
             let pages = catalog.get(&b"Pages"[..]).unwrap_or(&Obj::Null);
-            self.walk(pages, &Dict::new(), &mut seen, 0, &mut out);
+            self.walk(pages, &Dict::new(), None, &mut seen, 0, &mut out);
         }
         if out.is_empty() {
             // No usable page tree: take every page object in object-number order.
@@ -191,7 +193,7 @@ impl Doc {
                         .as_dict()
                         .cloned()
                         .unwrap_or_default();
-                    out.push(self.page(d, resources));
+                    out.push(self.page(d, resources, None));
                 }
             }
         }
@@ -202,6 +204,7 @@ impl Doc {
         &self,
         node: &Obj,
         inherited: &Dict,
+        inherited_box: Option<[f64; 4]>,
         seen: &mut BTreeSet<u32>,
         depth: usize,
         out: &mut Vec<PageObj>,
@@ -221,18 +224,25 @@ impl Doc {
             Some(r) => r.clone(),
             None => inherited.clone(),
         };
+        let media_box = self.media_box(dict).or(inherited_box);
         let kids = self.dict_get(dict, b"Kids");
         let is_tree = dict.get(&b"Type"[..]).and_then(Obj::as_name) == Some(b"Pages");
         if let (true, Some(kids)) = (is_tree || kids.as_array().is_some(), kids.as_array()) {
             for kid in kids {
-                self.walk(kid, &resources, seen, depth + 1, out);
+                self.walk(kid, &resources, media_box, seen, depth + 1, out);
             }
         } else {
-            out.push(self.page(dict, resources));
+            out.push(self.page(dict, resources, media_box));
         }
     }
 
-    fn page(&self, dict: &Dict, resources: Dict) -> PageObj {
+    fn media_box(&self, dict: &Dict) -> Option<[f64; 4]> {
+        let a = self.dict_get(dict, b"MediaBox").as_array()?;
+        let v: Vec<f64> = a.iter().filter_map(|o| self.resolve(o).as_f64()).collect();
+        (v.len() == 4).then(|| [v[0], v[1], v[2], v[3]])
+    }
+
+    fn page(&self, dict: &Dict, resources: Dict, inherited_box: Option<[f64; 4]>) -> PageObj {
         let mut contents = Vec::new();
         let parts: Vec<&Obj> = match self.dict_get(dict, b"Contents") {
             Obj::Array(items) => items.iter().map(|o| self.resolve(o)).collect(),
@@ -250,6 +260,7 @@ impl Doc {
         PageObj {
             resources,
             contents,
+            media_box: self.media_box(dict).or(inherited_box),
         }
     }
 
