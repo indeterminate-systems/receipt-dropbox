@@ -247,6 +247,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "beancount-parser"
+version = "2.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8ab2fd4f8afd9d52d3f57adc4c4f22b08123cffb395da26d2f8b62d89c20e694"
+dependencies = [
+ "nom",
+ "nom_locate",
+]
+
+[[package]]
 name = "biblatex"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -367,6 +377,12 @@ name = "by_address"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "64fa3c856b712db6612c019f14756e64e4bcea13337a6b33b696333a9eaa2d06"
+
+[[package]]
+name = "bytecount"
+version = "0.6.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "175812e0be2bccb6abe50bb8d566126198344f707e304f45c648fd8f2cc0365e"
 
 [[package]]
 name = "bytemuck"
@@ -2248,6 +2264,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "nom"
+version = "8.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df9761775871bdef83bee530e60050f7e54b1105350d6884eb0fb4f46c2f9405"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
+name = "nom_locate"
+version = "5.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b577e2d69827c4740cba2b52efaad1c4cc7c73042860b199710b3575c68438d"
+dependencies = [
+ "bytecount",
+ "memchr",
+ "nom",
+]
+
+[[package]]
 name = "num-bigint"
 version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2881,6 +2917,7 @@ dependencies = [
  "rdx-envelope",
  "rdx-host",
  "rdx-keys",
+ "rdx-ledger",
  "rdx-match",
  "rdx-pdf",
  "rdx-plan",
@@ -2937,6 +2974,19 @@ dependencies = [
  "sskr",
  "thiserror",
  "zeroize",
+]
+
+[[package]]
+name = "rdx-ledger"
+version = "0.1.0"
+dependencies = [
+ "beancount-parser",
+ "nickel-embed",
+ "rdx-model",
+ "rdx-plan",
+ "serde",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]

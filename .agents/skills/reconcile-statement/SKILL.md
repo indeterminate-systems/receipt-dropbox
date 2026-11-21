@@ -8,7 +8,7 @@ metadata:
 # Reconcile statement
 
 **Goal:** propose which lines of one statement the receipts explain, so a person can confirm
-them, and list what is still unexplained.
+them, list what is still unexplained, and book what the person has confirmed to the ledger.
 
 ## Run it
 
@@ -20,6 +20,8 @@ them, and list what is still unexplained.
 | `receipts` | receipts and bills (`Array Receipt`); other supporters' are ignored | the synthetic receipts |
 | `decided` | earlier decisions (`Array Match`): confirmed lines and receipts are left alone, rejected pairs never come back | `[]` |
 | `policy` | tolerances (`Policy` in `nickel/rdx/matching.ncl`); give only what you change | `{}` (the defaults) |
+| `accounts` | expense accounts for booking (`Accounts` in `nickel/rdx/ledger.ncl`): `by_receipt`, `by_merchant`, `fallback` | the synthetic scenario's accounts |
+| `ledger` | the ledger confirmed matches are posted to | `"main"` |
 
 ```sh
 rdx run reconcile-statement --input statement='import "/path/to/statement.json"' \
@@ -27,8 +29,10 @@ rdx run reconcile-statement --input statement='import "/path/to/statement.json"'
 rdx run reconcile-statement --input policy='{ amount.tolerance_bps = 2000 }'   # allow 20% tips
 ```
 
-In this repository, `rdx` is `cargo run -p rdx-cli --`. The plan has no effects: the report's
-`proposals` step output is the result, and nothing is confirmed or booked.
+In this repository, `rdx` is `cargo run -p rdx-cli --`. With no confirmed match in `decided`, the
+plan has no effects: the report's `proposals` step output is the result. When `decided` confirms
+matches, two more steps book them: `booking` (`ledger.book`, which runs in a dry run too) and
+`posted` (`ledger.post`, skipped until you run with `--execute`).
 
 ## Read the report
 
@@ -55,3 +59,24 @@ The `proposals` step's output:
 
 When the person rejects a proposal, pass it back in `decided` with `status = "rejected"` so it is
 not proposed again; confirmed ones go in with `status = "confirmed"`.
+
+## Book what is confirmed
+
+Only matches the person confirmed are booked, never proposals. Pass every decision so far in
+`decided`; the `booking` step's output shows what would be written:
+
+- `entries` and `text`: the Beancount entries (expense against
+  `Liabilities:Reimbursable:<supporter>`, a refund reversing it), each with `receipt`,
+  `receipt-source`, `statement` (digest of the encrypted original) and `line` metadata. Show
+  the person `text` and `summary.reimbursable` (what the organization owes for this statement).
+- `skipped`: rejected or proposed matches, not booked.
+- `notes` mentioning `Expenses:Uncategorized`: receipts with no account. Ask the person which
+  account each belongs to and pass it in `accounts.by_receipt` (or `by_merchant`) before
+  executing.
+- The step fails with `has no digest of its encrypted original`: the statement must be stored
+  encrypted first (its `original`); don't book without it, since the audit trail needs it.
+
+Once the person agrees, run again with `--execute`. The `posted` step reports `added` (new
+entries), `already_booked` (posting twice is harmless) and the ledger's new `digest`. A
+`booked differently` error means that line was already booked another way: corrections are new
+entries, not re-posts. To read or export the ledger, use `export-ledger`.
