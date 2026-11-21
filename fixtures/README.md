@@ -59,3 +59,28 @@ and the `ingest-receipt` skill's golden cases). Merchants, people, RFCs and foli
 | `refund-forwarded.eml` | refund forwarded by a supporter: base64 HTML, euro decimal comma, a PDF attachment |
 | `no-total.txt` | order confirmation without a total: needs review |
 | `receipt-pdf.pdf` | PDF receipt with a text layer, written by `crates/rdx-receipt/tests/pdf.rs` (`UPDATE_GOLDEN=1 cargo test -p rdx-receipt --test pdf`) |
+
+## `ledger/`
+
+The Beancount ledger and its CSV export for the `synthetic/small` scenario's confirmed matches,
+written by `rdx-ledger` and checked by `crates/rdx-ledger/tests/ledger.rs` and `export.rs`. After
+changing how entries are booked or rendered, run
+
+```
+UPDATE_GOLDEN=1 cargo test -p rdx-ledger --test ledger
+UPDATE_GOLDEN=1 cargo test -p rdx-ledger --test export
+```
+
+and review the diff.
+
+| File | Contents |
+| :-- | :-- |
+| `synthetic-small.beancount` | `open` directives, one balance assertion per statement on the supporter's reimbursable account, and one transaction per confirmed match with `supporter`, `line`, `receipt`, `receipt-source` and `statement` metadata |
+| `synthetic-small.csv` | the same ledger as `ledger.export` writes it: one row per posting with its audit links |
+
+## `scans/`
+
+Synthetic documents with no text layer, for OCR (`rdx-ocr`): a till receipt photographed on a
+desk and the `example-bank` statement as a scanned page, made with Typst. See
+[`scans/README.md`](scans/README.md) for each file and how to regenerate it. The tests that read
+them need the OCR models, which the dev shell puts in `$RDX_OCR_MODELS`.

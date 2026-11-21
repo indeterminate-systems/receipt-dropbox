@@ -52,15 +52,21 @@ change both together.
 | `crates/rdx-pdf` | PDF text layer (lines, spans, positions) and the `pdf.text` op; a fixture writer behind feature `write` |
 | `crates/rdx-statement` | statement parsers (CSV, OFX, the `example-bank` PDF layout), balance checks, the `statement.parse` op |
 | `crates/rdx-model` | domain model (money, dates, statements, receipts, matches, ledger entries) and the synthetic data generator (`rdx_model::synth`) |
-| `crates/rdx-envelope` | statements as signed Gordian Envelopes: seal, redact (elide unmatched lines), verify; `envelope.*` ops |
+| `crates/rdx-envelope` | statements as signed Gordian Envelopes: seal, redact (elide unmatched lines), verify, open, encrypt to recipients; `envelope.*` ops |
 | `crates/rdx-receipt` | receipt and bill extraction (emails, PDFs via `pdf.text`, HTML, text, CFDI XML), the `receipt-extractor` trait and the `receipt.extract` op |
 | `crates/rdx-match` | matching: proposes line ↔ receipt matches (exact, tolerance, other currency, split, instalments, partial) under a policy; op `matching.propose` |
+| `crates/rdx-keys` | device keys wrapped by a passkey, the recovery key and its SSKR shares, the key registry (signed envelope events), encryption to recipients; `keys.*` ops; reaches the passkey and shares only through the `secrets` capability |
+| `crates/rdx-ledger` | the Beancount ledger: books confirmed matches with audit metadata, stores each version as a blob (kv `ledger/<name>`), reads it back, exports CSV and XLSX; `ledger.*` ops |
+| `crates/rdx-render` | Typst renders a verified, redacted envelope to the viewable PDF; op `render.statement`. Large: the PWA loads it only to publish, and the Worker never links it |
+| `crates/rdx-ocr` | OCR for scanned PDFs and photos (ocrs), in the text layer's shape; op `ocr.read`. Its models are blobs; the dev shell puts them in `$RDX_OCR_MODELS` |
 | `nickel/rdx/api.ncl` | plan contracts and the built-in ops' constructors agents write against; `rdx.ops` also merges in `ops.ncl` |
 | `nickel/rdx/ops/<domain>.ncl` | each domain crate's op constructors (`rdx.ops.<domain>.<op>`), listed one per line in `nickel/rdx/ops.ncl`; helpers in `nickel/rdx/lib.ncl` |
 | `nickel/rdx/matching.ncl` | the matching policy contract (tolerances, date windows, exchange rates) and its defaults |
 | `nickel/rdx/model.ncl` | contracts for the domain model's JSON, for op contracts to reuse |
 | `fixtures/synthetic/` | generated fixtures; `UPDATE_GOLDEN=1 cargo test -p rdx-model --test fixtures` rewrites them, and `UPDATE_GOLDEN=1 cargo test -p rdx-statement --test parse` the OFX and PDF statements |
 | `fixtures/receipts/` | hand-written synthetic receipts, bills, emails and a CFDI for extraction tests |
+| `fixtures/ledger/` | golden Beancount ledger and CSV export of the synthetic scenario; `UPDATE_GOLDEN=1 cargo test -p rdx-ledger --test ledger` (then `--test export`) rewrites them |
+| `fixtures/scans/` | synthetic scans for OCR: a receipt photo and the `example-bank` statement as a scanned page |
 | `wit/rdx.wit` | capability and extension interfaces (mirrors the Rust traits) |
 | `.agents/skills/` | Agent Skills; `.claude/skills` links here |
 | `xtask/` | repo checks |

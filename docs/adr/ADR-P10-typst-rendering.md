@@ -59,8 +59,8 @@ unverified can be rendered.
   renderer as a separate module when someone publishes, not with the app, and the Cloudflare
   Worker (piece 13) must not link `rdx-render`: it never renders, and Workers cap script size.
   Typst has no feature flags to drop that data; shrinking it is follow-up work.
-- **Rust version.** Typst 0.15 needs Rust 1.92, so `rdx-render` sets its own `rust-version`
-  above the workspace's 1.90 until a housekeeping PR raises the workspace floor.
+- **Rust version.** Typst 0.15 needs Rust 1.92. `rdx-render` first set its own `rust-version`;
+  the housekeeping PR after wave 3 raised the workspace floor to 1.92 and dropped the override.
 - **Order of redacted rows.** Elision hides each line's position, so "Personal, redacted" rows
   come after the shown lines. The PDF says so.
 - **Full envelopes render too.** `render.statement` verifies but can't tell a full envelope with

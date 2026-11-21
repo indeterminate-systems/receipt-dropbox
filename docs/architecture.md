@@ -70,13 +70,14 @@ clock directly; those come through the capability traits in layer 2.
 | `rdx-plan` | Plan types, plan validation and the executor. **Scaffolded in this PR.** |
 | `rdx-config` | Loads Nickel configuration and policy through `nickel-embed`, against the contracts in `nickel/rdx/` |
 | `rdx-pdf` | PDF text layer: lines and spans with positions, in pure Rust. See [ADR-P04](adr/ADR-P04-pdf-text-layer-reader.md) |
-| `rdx-statement` | Statement parsing (CSV, OFX, PDF layouts) behind the `statement-parser` extension point, with balance checks; OCR fallback through the `ocr` capability (piece 11) |
+| `rdx-statement` | Statement parsing (CSV, OFX, PDF layouts) behind the `statement-parser` extension point, with balance checks; takes `ocr.read`'s output for a document with no text layer |
 | `rdx-receipt` | Receipt and emailed-bill extraction (amount, date, merchant, reference) |
 | `rdx-match` | Candidate generation and scoring between statement lines and receipts, with tolerances from policy |
 | `rdx-envelope` | Gordian Envelope: one salted assertion per transaction, signing, elision of unmatched lines, verification (`bc-envelope`, `bc-components`); encryption to recipients comes with `rdx-keys`. See [ADR-P07](adr/ADR-P07-statement-envelopes.md) |
-| `rdx-keys` | Key hierarchy: passkey PRF to seed, device keys, SSKR recovery shares (`sskr`), rotation and revocation records |
-| `rdx-ledger` | Beancount writer and reader, with audit metadata on every entry. See [ADR-0003](adr/0003-beancount-ledger.md) |
-| `rdx-render` | Typst rendering of elided envelope data, including the root digest and a UR/QR of the envelope |
+| `rdx-keys` | Device keys wrapped by a passkey's PRF output, the recovery key and its SSKR shares, the key registry as a chain of signed Gordian Envelope events, encryption to recipients. See [ADR-P08](adr/ADR-P08-keys-and-recovery.md) and [Key management](#key-management) |
+| `rdx-ledger` | Beancount writer and reader, with audit metadata on every entry; CSV and XLSX export. See [ADR-0003](adr/0003-beancount-ledger.md) and [ADR-P09](adr/ADR-P09-beancount-ledger.md) |
+| `rdx-render` | Typst rendering of a verified, elided envelope, including the root digest and a UR/QR of the envelope. Large (it roughly triples `rdx.wasm`), so the PWA loads it only to publish and the Cloudflare Worker never links it. See [ADR-P10](adr/ADR-P10-typst-rendering.md) |
+| `rdx-ocr` | OCR for scanned PDFs and photos (`ocrs`, pure Rust), in the shape of the text layer so parsers don't change; its models are blobs fetched by digest. Runs only where plaintext is (PWA, local), never on a Worker. See [ADR-P11](adr/ADR-P11-ocr.md) |
 | `rdx-intake` | Intake rules: allowlist, SPF/DKIM/DMARC results, quarantine lifecycle, rate-limited replies |
 | `rdx-audit` | Append-only audit log: plan digests, input and output digests, who granted what |
 
@@ -94,11 +95,15 @@ host's audit log as a hash chain (`rdx_plan::run`, `rdx audit verify`).
 | `kv` | IndexedDB | Workers KV / D1 | Firestore | SQLite or directory |
 | `mail-out` | none | Email Workers send | Gmail API | outbox directory (never sent) |
 | `clock`, `random` | Web APIs | Workers runtime | WASI | WASI |
-| `secrets` | WebAuthn PRF unwrap | none (encrypt only) | none (encrypt only) | passkey or OS keychain |
-| `ocr` | Tesseract WASM | not offered | not offered | Tesseract WASM under wasmtime |
+| `secrets` | WebAuthn PRF unwrap | none (encrypt only) | none (encrypt only) | passkey file (development only) |
 
-The PWA is the only host with a `secrets` capability that can decrypt. A server host that is
-asked to run a step needing decryption fails the plan at validation time, before any effect.
+The PWA is the only host with a `secrets` capability that can decrypt (the local host's "passkey"
+is a file, for development). A server host that is asked to run a step needing decryption fails
+the plan at validation time, before any effect.
+
+OCR is not a capability: `ocr.read` is an op in `rdx-ocr` that reads its models from the blob
+store by digest (the dev shell provides them in `$RDX_OCR_MODELS`). It runs only on hosts that
+see plaintext, the PWA and the local host.
 
 ### 3. Extensions
 
@@ -123,8 +128,8 @@ same names, so the crate can be built two ways:
 
 | Host | Build | Notes |
 | :-- | :-- | :-- |
-| PWA | Rust UI (Leptos, client-side rendering) + core, `wasm32-unknown-unknown` via `wasm-bindgen` | WebAuthn PRF through `web-sys`; OPFS storage; Typst and Tesseract run in the page. The service worker is generated, not hand-written. |
-| Cloudflare | `worker` crate (`workers-rs`) | Email Routing hands mail to the Worker; encrypt on arrival to the sender's public keys from KV, store in R2, discard plaintext. |
+| PWA | Rust UI (Leptos, client-side rendering) + core, `wasm32-unknown-unknown` via `wasm-bindgen` | WebAuthn PRF through `web-sys`; OPFS storage; OCR runs in the page, with its models fetched and cached by digest and their CC-BY-SA-4.0 attribution shown; the Typst renderer is loaded only when someone publishes. The service worker is generated, not hand-written. |
+| Cloudflare | `worker` crate (`workers-rs`) | Email Routing hands mail to the Worker; encrypt on arrival to the sender's public keys from KV, store in R2, discard plaintext. Never links `rdx-render` and runs no OCR. |
 | Google (later) | Cloud Run service embedding wasmtime | Gmail push notifications through Pub/Sub; Drive folders as intake and blob store. Not scheduled; see the roadmap. |
 | Local | `rdx` (crate `rdx-cli`), built natively and as `rdx.wasm`, a WASI command that `wasmtime run` executes | Runs plans from the command line; the agents' code-mode entrypoint. State (blobs, kv, outbox, `audit.jsonl`) lives in `.rdx/`. `cargo xtask smoke-wasm` runs the smoke-test skill through `rdx.wasm` in CI. |
 
@@ -175,14 +180,16 @@ composed from ops: see [the TDD to skills workflow](workflow.md).
 
 1. The supporter picks a PDF. The core hashes it, encrypts it to the supporter's device keys and
    writes ciphertext to the blob store. The ciphertext digest becomes the statement's audit id.
-2. The text layer is read; if it is empty, OCR runs in the page.
+2. The text layer is read; if it is empty, or the upload is a photo, OCR (`ocr.read`) runs in
+   the page.
 3. A statement-parser extension turns text into lines with opening and closing balances.
 4. Each line becomes a salted assertion in a signed Gordian Envelope.
 
 ### Email intake (Cloudflare or Google)
 
 1. Check SPF/DKIM/DMARC results and the org allowlist. Reject anything not allowlisted.
-2. Known sender: encrypt each attachment to every active device key for that address, store
+2. Known sender: encrypt each attachment to every active device key for that address and its
+   recovery key, store
    ciphertext, discard plaintext.
 3. Unknown but allowlisted sender: encrypt to a quarantine key with an expiry, reply once (rate
    limited) with a PWA link to verify the address and create keys. On verification the PWA
@@ -201,12 +208,22 @@ composed from ops: see [the TDD to skills workflow](workflow.md).
 
 ## Key management
 
-- A passkey with the WebAuthn PRF extension yields a per-device secret; the core derives a
-  wrapping key from it and unwraps the supporter's seed. Users never see keys.
-- Each device has its own key pair; the address-to-keys map in `kv` lists active keys and records
-  rotations and revocations, signed by an existing device key.
-- Recovery: the seed is split with SSKR into shares (for example 2-of-3: another device, a printed
-  card, an org custodian). The custodian's share alone cannot decrypt.
+Decided in [ADR-P08](adr/ADR-P08-keys-and-recovery.md).
+
+- Each device has its own key pair (Ed25519 signing, X25519 receiving), stored in that device's
+  `kv` wrapped under a key derived from its passkey's WebAuthn PRF output. A passkey unwraps only
+  its own device's key; no seed is kept on any device. Users never see keys.
+- Onboarding draws a seed, derives a **recovery key** from it, splits the seed into SSKR shares
+  (for example 2-of-3: another person, a printed card, an org custodian) and forgets it. Every
+  document is encrypted to all active device keys **and** the recovery key, so enough shares
+  reopen everything after every device is lost; one custodian's share alone cannot.
+- An address's keys are a **registry** in `kv`: a chain of signed Gordian Envelope events
+  (`genesis`, `add`, `rotate`, `revoke`), each linked to the one before and signed by an active
+  device or the recovery key. Servers store it and encrypt to it, but cannot add a key.
+- Passkey output and recovery shares reach ops only through the **`secrets`** host capability,
+  never through plan arguments, outputs or the audit log. Servers don't offer it.
+- Adding a key re-encrypts kept envelopes to it (`envelope.add-recipients`) without re-encrypting
+  their content; revoking one drops it from future recipients.
 
 ## Repository layout
 
@@ -218,7 +235,7 @@ docs/
   roadmap.md           functionality pieces and their dependencies
   adr/                 decision records
   reference/           quick references: Agent Skills spec, Nickel
-crates/                Rust crates (rdx-plan today)
+crates/                Rust crates (listed in AGENTS.md)
 nickel/rdx/            Nickel API (api.ncl, ops/<domain>.ncl per domain crate) and contracts
 wit/                   WIT interfaces for capabilities and extensions
 .agents/skills/        Agent Skills (.claude/skills links here)

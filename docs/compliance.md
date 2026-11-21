@@ -339,6 +339,14 @@ What a verified redacted statement proves, and what it doesn't
   reimbursement: regular fixed amounts, claims without CFDIs, reimbursements to a contractor
   bundled with fees. The app reports; it never decides classification.
 
+### Third-party data the app ships (piece 14)
+
+- **OCR models (piece 11).** The `ocrs` text detection and recognition models are published by
+  their author under CC-BY-SA-4.0 (a mirror says MIT; the stricter licence is assumed). Ash
+  accepted attribution and share-alike on 2026-11-21. The PWA, which first sends the models to
+  supporters' browsers, shows their attribution and licence; the models themselves are not
+  modified, so share-alike covers redistributing them as published.
+
 ## Open questions for a contador or lawyer
 
 1. When a supporter pays an organization expense over $2,000 with their **personal card** and the

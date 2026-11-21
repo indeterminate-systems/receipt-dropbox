@@ -4,9 +4,7 @@ version = "0.1.0"
 description = "Receipt Dropbox viewable statements: Typst renders a verified, redacted statement envelope to PDF"
 edition.workspace = true
 license.workspace = true
-# Typst 0.15 needs Rust 1.92; the dev shell has a newer one. Raise the workspace's floor in a
-# housekeeping PR and drop this line.
-rust-version = "1.92"
+rust-version.workspace = true
 
 # `rdx` registers this crate's ops (its `register` function) when it is a dependency of
 # rdx-cli; see crates/rdx-cli/build.rs.
