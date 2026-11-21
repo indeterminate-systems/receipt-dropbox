@@ -3,7 +3,7 @@
     "dry_run": true,
     "notes": [],
     "ok": true,
-    "plan_digest": "sha256:fc5f5069713f8e0a598bf77b049fc0fcb0b29bcdfd04629553547f770189e13b",
+    "plan_digest": "sha256:993ed7839b882e155e304ff7e8f6ce0caff0bc4419761ecd3ac62e9cea40d5c0",
     "skill": "reconcile-statement",
     "steps": [
       {
@@ -137,6 +137,140 @@
         },
         "output_digest": "sha256:dbe36032f0bdc26ad1ca8eeb49bc03542c2af4354c254f34c465dca2a6e24ee7",
         "status": "done"
+      },
+      {
+        "id": "booking",
+        "op": "ledger.book",
+        "output": {
+          "entries": [
+            {
+              "date": "2026-03-03",
+              "line": {
+                "line": "l01",
+                "statement": "st-2026-03.s-0001"
+              },
+              "narration": "LANTERN CAFE CATERING #7435",
+              "payee": "Lantern Cafe Catering",
+              "postings": [
+                {
+                  "account": "Expenses:Events:Catering",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": 28974
+                  }
+                },
+                {
+                  "account": "Liabilities:Reimbursable:S-0001",
+                  "amount": {
+                    "currency": "USD",
+                    "minor": -28974
+                  }
+                }
+              ],
+              "receipt": "r-2026-03.s-0001.03",
+              "receipt_source": "sha256:545e8a660e04effac6192000501745f760d3e9f6cca918ae792c5025164d21f4",
+              "statement": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+              "supporter": "s-0001"
+            }
+          ],
+          "notes": [],
+          "skipped": [
+            {
+              "line": {
+                "line": "l02",
+                "statement": "st-2026-03.s-0001"
+              },
+              "reason": "rejected matches are not booked; confirm it first",
+              "receipt": "r-2026-03.s-0001.01"
+            }
+          ],
+          "statement": {
+            "currency": "USD",
+            "id": "st-2026-03.s-0001",
+            "original": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+            "period_end": "2026-03-31",
+            "supporter": "s-0001"
+          },
+          "summary": {
+            "entries": 1,
+            "reimbursable": {
+              "currency": "USD",
+              "minor": 28974
+            },
+            "uncategorized": 0
+          },
+          "text": "; Receipt Dropbox ledger (Beancount). Written by rdx's `ledger.post`, which rewrites the whole\n; file from its entries: change it through rdx, since `ledger.read` refuses hand edits.\n\n2026-03-03 open Expenses:Events:Catering\n2026-03-03 open Liabilities:Reimbursable:S-0001\n\n2026-03-03 * \"Lantern Cafe Catering\" \"LANTERN CAFE CATERING #7435\" ^st-2026-03.s-0001\n  supporter: \"s-0001\"\n  line: \"st-2026-03.s-0001/l01\"\n  receipt: \"r-2026-03.s-0001.03\"\n  receipt-source: \"sha256:545e8a660e04effac6192000501745f760d3e9f6cca918ae792c5025164d21f4\"\n  statement: \"sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86\"\n  Expenses:Events:Catering 289.74 USD\n  Liabilities:Reimbursable:S-0001 -289.74 USD\n\n2026-04-01 balance Liabilities:Reimbursable:S-0001 -289.74 USD\n  statement-id: \"st-2026-03.s-0001\"\n  supporter: \"s-0001\"\n  statement: \"sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86\"\n"
+        },
+        "output_digest": "sha256:2402c47e04cd68a4cdfddc9f41118eefb3ffa70a1ef0014e69a76fee8fc6fd04",
+        "status": "done"
+      },
+      {
+        "args": {
+          "booking": {
+            "entries": [
+              {
+                "date": "2026-03-03",
+                "line": {
+                  "line": "l01",
+                  "statement": "st-2026-03.s-0001"
+                },
+                "narration": "LANTERN CAFE CATERING #7435",
+                "payee": "Lantern Cafe Catering",
+                "postings": [
+                  {
+                    "account": "Expenses:Events:Catering",
+                    "amount": {
+                      "currency": "USD",
+                      "minor": 28974
+                    }
+                  },
+                  {
+                    "account": "Liabilities:Reimbursable:S-0001",
+                    "amount": {
+                      "currency": "USD",
+                      "minor": -28974
+                    }
+                  }
+                ],
+                "receipt": "r-2026-03.s-0001.03",
+                "receipt_source": "sha256:545e8a660e04effac6192000501745f760d3e9f6cca918ae792c5025164d21f4",
+                "statement": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+                "supporter": "s-0001"
+              }
+            ],
+            "notes": [],
+            "skipped": [
+              {
+                "line": {
+                  "line": "l02",
+                  "statement": "st-2026-03.s-0001"
+                },
+                "reason": "rejected matches are not booked; confirm it first",
+                "receipt": "r-2026-03.s-0001.01"
+              }
+            ],
+            "statement": {
+              "currency": "USD",
+              "id": "st-2026-03.s-0001",
+              "original": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+              "period_end": "2026-03-31",
+              "supporter": "s-0001"
+            },
+            "summary": {
+              "entries": 1,
+              "reimbursable": {
+                "currency": "USD",
+                "minor": 28974
+              },
+              "uncategorized": 0
+            },
+            "text": "; Receipt Dropbox ledger (Beancount). Written by rdx's `ledger.post`, which rewrites the whole\n; file from its entries: change it through rdx, since `ledger.read` refuses hand edits.\n\n2026-03-03 open Expenses:Events:Catering\n2026-03-03 open Liabilities:Reimbursable:S-0001\n\n2026-03-03 * \"Lantern Cafe Catering\" \"LANTERN CAFE CATERING #7435\" ^st-2026-03.s-0001\n  supporter: \"s-0001\"\n  line: \"st-2026-03.s-0001/l01\"\n  receipt: \"r-2026-03.s-0001.03\"\n  receipt-source: \"sha256:545e8a660e04effac6192000501745f760d3e9f6cca918ae792c5025164d21f4\"\n  statement: \"sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86\"\n  Expenses:Events:Catering 289.74 USD\n  Liabilities:Reimbursable:S-0001 -289.74 USD\n\n2026-04-01 balance Liabilities:Reimbursable:S-0001 -289.74 USD\n  statement-id: \"st-2026-03.s-0001\"\n  supporter: \"s-0001\"\n  statement: \"sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86\"\n"
+          },
+          "ledger": "main"
+        },
+        "id": "posted",
+        "op": "ledger.post",
+        "status": "skipped"
       }
     ]
   },
