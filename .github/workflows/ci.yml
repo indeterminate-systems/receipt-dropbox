@@ -21,7 +21,7 @@ jobs:
     name: Flake (lockfile, formatting, dev shell)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: DeterminateSystems/flake-checker-action@main
         with:
           fail-mode: true
@@ -34,7 +34,7 @@ jobs:
     name: Rust, WebAssembly and skills
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: DeterminateSystems/determinate-nix-action@v3
       - uses: Swatinem/rust-cache@v2
         with:
