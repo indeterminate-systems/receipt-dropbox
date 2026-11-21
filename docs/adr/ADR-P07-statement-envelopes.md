@@ -43,7 +43,7 @@ features, patched in through `[patch.crates-io]`; it goes when a release upstrea
 **No platform randomness.** Salt comes from the caller's generator, which hosts
 back with their `random` capability. In the browser build getrandom's backends always fail:
 `getrandom_backend="unsupported"` for 0.3 (`.cargo/config.toml`) and a custom function returning
-an error for 0.2 (`rdx-envelope/src/no_system_rng.rs`). An accidental call is an error, not a
+an error for 0.2 (`rdx-keys/src/no_system_rng.rs`, moved there by piece 8). An accidental call is an error, not a
 silent dependency on the platform.
 
 **Scope.** Sealing needs the supporter's key, and encrypting to recipients needs fresh content

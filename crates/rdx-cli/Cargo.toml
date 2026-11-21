@@ -16,6 +16,7 @@ path = "src/main.rs"
 [dependencies]
 rdx-envelope = { path = "../rdx-envelope" }
 rdx-host = { path = "../rdx-host", features = ["local"] }
+rdx-keys = { path = "../rdx-keys" }
 rdx-match = { path = "../rdx-match" }
 rdx-ocr = { path = "../rdx-ocr" }
 rdx-pdf = { path = "../rdx-pdf" }

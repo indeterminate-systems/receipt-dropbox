@@ -9,7 +9,9 @@ use std::rc::Rc;
 
 use sha2::{Digest, Sha256};
 
-use crate::{AuditLog, BlobStore, CapabilityError, Clock, Kv, MailOut, Message, Random, Result};
+use crate::{
+    AuditLog, BlobStore, CapabilityError, Clock, Kv, MailOut, Message, Random, Result, Secrets,
+};
 
 #[derive(Debug, Clone, Default)]
 pub struct MemoryBlobStore(Rc<RefCell<BTreeMap<String, Vec<u8>>>>);
@@ -128,5 +130,63 @@ impl AuditLog for MemoryAuditLog {
 
     fn last(&self) -> Result<Option<String>> {
         Ok(self.0.borrow().last().cloned())
+    }
+}
+
+/// A stand-in passkey and person: PRF output is SHA-256 of a fixed key and the salt, shown
+/// secrets are kept for the test to read, and `ask` answers from what the test put there.
+#[derive(Debug, Clone)]
+pub struct MemorySecrets {
+    passkey: [u8; 32],
+    shown: Rc<RefCell<Vec<(String, String)>>>,
+    answers: Rc<RefCell<BTreeMap<String, String>>>,
+}
+
+impl Default for MemorySecrets {
+    fn default() -> Self {
+        Self::new([7; 32])
+    }
+}
+
+impl MemorySecrets {
+    /// A different `passkey` stands for a different device's passkey.
+    pub fn new(passkey: [u8; 32]) -> Self {
+        Self {
+            passkey,
+            shown: Rc::default(),
+            answers: Rc::default(),
+        }
+    }
+
+    /// What was shown to the person, in order: `(label, secret)`.
+    pub fn shown(&self) -> Vec<(String, String)> {
+        self.shown.borrow().clone()
+    }
+
+    /// The answer the person gives when asked for `label`.
+    pub fn answer(&self, label: &str, secret: &str) {
+        self.answers
+            .borrow_mut()
+            .insert(label.to_owned(), secret.to_owned());
+    }
+}
+
+impl Secrets for MemorySecrets {
+    fn prf(&mut self, salt: &[u8]) -> Result<Vec<u8>> {
+        let mut h = Sha256::new();
+        h.update(self.passkey);
+        h.update(salt);
+        Ok(h.finalize().to_vec())
+    }
+
+    fn show(&mut self, label: &str, secret: &str) -> Result<()> {
+        self.shown
+            .borrow_mut()
+            .push((label.to_owned(), secret.to_owned()));
+        Ok(())
+    }
+
+    fn ask(&mut self, label: &str) -> Result<Option<String>> {
+        Ok(self.answers.borrow().get(label).cloned())
     }
 }

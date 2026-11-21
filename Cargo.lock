@@ -1880,6 +1880,7 @@ dependencies = [
  "nickel-embed",
  "rdx-envelope",
  "rdx-host",
+ "rdx-keys",
  "rdx-match",
  "rdx-ocr",
  "rdx-pdf",
@@ -1898,8 +1899,8 @@ dependencies = [
  "bc-components",
  "bc-envelope",
  "bc-rand",
- "getrandom 0.2.17",
  "rdx-host",
+ "rdx-keys",
  "rdx-model",
  "rdx-plan",
  "serde",
@@ -1917,6 +1918,25 @@ dependencies = [
  "sha2 0.10.9",
  "tempfile",
  "thiserror",
+]
+
+[[package]]
+name = "rdx-keys"
+version = "0.1.0"
+dependencies = [
+ "bc-components",
+ "bc-crypto",
+ "bc-envelope",
+ "bc-rand",
+ "getrandom 0.2.17",
+ "rand_core 0.9.5",
+ "rdx-host",
+ "rdx-plan",
+ "serde",
+ "serde_json",
+ "sskr",
+ "thiserror",
+ "zeroize",
 ]
 
 [[package]]
