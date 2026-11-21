@@ -20,6 +20,7 @@ rdx-match = { path = "../rdx-match" }
 rdx-pdf = { path = "../rdx-pdf" }
 rdx-plan = { path = "../rdx-plan" }
 rdx-receipt = { path = "../rdx-receipt" }
+rdx-render = { path = "../rdx-render" }
 rdx-statement = { path = "../rdx-statement" }
 serde_json.workspace = true
 

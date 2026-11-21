@@ -1,0 +1,83 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:099cdede94e4dcab7465eb488b89ca68d18a7700f598887e5ef306b6db39197b",
+    "skill": "publish-redacted-statement",
+    "steps": [
+      {
+        "id": "redacted",
+        "op": "envelope.redact",
+        "output": {
+          "envelope": "ur:envelope/lftpspmkcstpsojsjkjydpeydyeyendpdyeodmjkdpdydydyehoytpsoioiajzjljkinjtiotpsocyaeadutbeoytpsojeinjtjkjyinjykpjyinjljttpsojzfekshsjnjojzihcxfwhsjtjeoyadtpsojojpieksdmjkjyhsjyihjnihjtjydmkoehoytpsoiojljoihjtinjtiotpsocyaeadcptshdcxfsimuyeowfplmtfssegoksbdtbwyzmdsurtnurdsgtgybtgtgstdongwlrrotngahdcxguoettlyftbstobdpkgygudyrnrpoetoptskwkfziydnvlfxlniysgzcdkftmnidoytpsoisjljpinioinjthsjztpsoksfljkishseyecenftiyihhsetieiyihecehehethsieeodyihdyemidieiaiddyiahseyiheteyiaenieeeihetieemeheoemiaieeteeeoeciaiaenhshsecideoihemecemiaidiaihetenhdcxkoieemeytkndfwdrswgorkstsnlyknpdkgdlyndplemtwyfhihzmtaatprgltsyahdcxlslfvasnlyhhtyhgwydejyasmwkitojetkwzbktbmdyatiwtaxdsdwlsfttphfgmoytpsoinjkkpjojojljpjyihjptpsoiyjkdpdydydyehhdcxnsotdtcsnnwkhlbesodmpfioecfpjzknghemheisehghqzfgnnglwntanswlreiooytpsoinjzinjtihfxjlkpjtjytpsobnhdcxrebyosehrhktlbjyytjntotptblorfatkpmsktjyfxcnlbcstimkiehshnoladsfoytpsojejoihjpinjliegujyhsjpjytpsoimeydyeyendpdyeodpdyehoytpsoinjoihjpinjliefejtietpsoimeydyeyendpdyeodpeoehhdcxvojokoiosrdywlftndykbthfonbbdnspsfceiowdytdepmhpmuaxehbtynlnksvsoytpsojehsiaiajlkpjtjygthsjkjetpsoiedydydyehhdcxvswtcpzsstgdbesewtjzurcwfnctdrpstlimzsismkmysfvlrshygyfshftbrspkhdcxwdpahswysfeemybwndgahektjpditspfwkfebytyimfessgwluiogrpkfzwymshdhdcxwsswahwsktmohstdgtfshysfmsaomtbzykmezeaxlrcmbzcehptshehtjyjkecynoytpsoisiakpjpjpihjtiakktpsoiagogufyhdcxytsksfrppyfdfzjyurfnfdlkfmdabwdpbzbehsmynttajntaptfgpyyngomddltahdcxzcvardjpzmtbatltgrmonnaamolpctbamkknihbzcxcsbanyrtqddplkmnoxaodkoyaxtpsotansghlfaohdfzpyseryiacebgoxhynnpdpyrfahchletsaybwcljoehhgfwoyiokbwtenbboeldgwkshybkgwgmlndejnfrbbbtongaaefsfynykindmshyihjzdlttjplytlwpghrybdfrnsglwk",
+          "redacted": 12,
+          "review": [],
+          "root": "sha256:ad3a1ae003416b9d3c95f5bb7a1f8f81c4a05f585b4e64a6330d6faee3c47b9b",
+          "shown": 0
+        },
+        "output_digest": "sha256:805aed800b7091b0e05945abe89b3121077a15e49c3253c7e0fdf69869b65a2b",
+        "status": "done"
+      },
+      {
+        "id": "view",
+        "op": "envelope.verify",
+        "output": {
+          "account": {
+            "institution": "Example Bank",
+            "mask": "0001"
+          },
+          "currency": "USD",
+          "lines": [],
+          "original": "sha256:fea8dfe5118ad30e07bdcb0ca2e82c6d4e8d7137cd8435cc6aa5b3e757cbce86",
+          "period": {
+            "end": "2026-03-31",
+            "start": "2026-03-01"
+          },
+          "redacted_rows": 12,
+          "root": "sha256:ad3a1ae003416b9d3c95f5bb7a1f8f81c4a05f585b4e64a6330d6faee3c47b9b",
+          "statement": "st-2026-03.s-0001",
+          "summary": {
+            "closing": {
+              "currency": "USD",
+              "minor": 122128
+            },
+            "opening": {
+              "currency": "USD",
+              "minor": 74455
+            },
+            "redacted": {
+              "currency": "USD",
+              "minor": 47673
+            },
+            "shown": {
+              "currency": "USD",
+              "minor": 0
+            }
+          },
+          "supporter": "s-0001"
+        },
+        "output_digest": "sha256:603a3ab7d8c4b3d8e43cfa9703b855c7515325baeb9918089fcc595ae1a8ef15",
+        "status": "done"
+      },
+      {
+        "args": {
+          "envelope": {
+            "envelope": "ur:envelope/lftpspmkcstpsojsjkjydpeydyeyendpdyeodmjkdpdydydyehoytpsoioiajzjljkinjtiotpsocyaeadutbeoytpsojeinjtjkjyinjykpjyinjljttpsojzfekshsjnjojzihcxfwhsjtjeoyadtpsojojpieksdmjkjyhsjyihjnihjtjydmkoehoytpsoiojljoihjtinjtiotpsocyaeadcptshdcxfsimuyeowfplmtfssegoksbdtbwyzmdsurtnurdsgtgybtgtgstdongwlrrotngahdcxguoettlyftbstobdpkgygudyrnrpoetoptskwkfziydnvlfxlniysgzcdkftmnidoytpsoisjljpinioinjthsjztpsoksfljkishseyecenftiyihhsetieiyihecehehethsieeodyihdyemidieiaiddyiahseyiheteyiaenieeeihetieemeheoemiaieeteeeoeciaiaenhshsecideoihemecemiaidiaihetenhdcxkoieemeytkndfwdrswgorkstsnlyknpdkgdlyndplemtwyfhihzmtaatprgltsyahdcxlslfvasnlyhhtyhgwydejyasmwkitojetkwzbktbmdyatiwtaxdsdwlsfttphfgmoytpsoinjkkpjojojljpjyihjptpsoiyjkdpdydydyehhdcxnsotdtcsnnwkhlbesodmpfioecfpjzknghemheisehghqzfgnnglwntanswlreiooytpsoinjzinjtihfxjlkpjtjytpsobnhdcxrebyosehrhktlbjyytjntotptblorfatkpmsktjyfxcnlbcstimkiehshnoladsfoytpsojejoihjpinjliegujyhsjpjytpsoimeydyeyendpdyeodpdyehoytpsoinjoihjpinjliefejtietpsoimeydyeyendpdyeodpeoehhdcxvojokoiosrdywlftndykbthfonbbdnspsfceiowdytdepmhpmuaxehbtynlnksvsoytpsojehsiaiajlkpjtjygthsjkjetpsoiedydydyehhdcxvswtcpzsstgdbesewtjzurcwfnctdrpstlimzsismkmysfvlrshygyfshftbrspkhdcxwdpahswysfeemybwndgahektjpditspfwkfebytyimfessgwluiogrpkfzwymshdhdcxwsswahwsktmohstdgtfshysfmsaomtbzykmezeaxlrcmbzcehptshehtjyjkecynoytpsoisiakpjpjpihjtiakktpsoiagogufyhdcxytsksfrppyfdfzjyurfnfdlkfmdabwdpbzbehsmynttajntaptfgpyyngomddltahdcxzcvardjpzmtbatltgrmonnaamolpctbamkknihbzcxcsbanyrtqddplkmnoxaodkoyaxtpsotansghlfaohdfzpyseryiacebgoxhynnpdpyrfahchletsaybwcljoehhgfwoyiokbwtenbboeldgwkshybkgwgmlndejnfrbbbtongaaefsfynykindmshyihjzdlttjplytlwpghrybdfrnsglwk",
+            "redacted": 12,
+            "review": [],
+            "root": "sha256:ad3a1ae003416b9d3c95f5bb7a1f8f81c4a05f585b4e64a6330d6faee3c47b9b",
+            "shown": 0
+          },
+          "signer": "ur:signing-public-key/lfaohdcxnemtjsfyjppaolfymhkpiolpgyhgbsutdmhfneemntcpcybdecislnplvwnydkrnjylgmdhs\n"
+        },
+        "id": "pdf",
+        "op": "render.statement",
+        "status": "skipped"
+      }
+    ]
+  },
+  "inputs": {
+    "matches": "[]"
+  }
+}

@@ -1,0 +1,39 @@
+[package]
+name = "rdx-render"
+version = "0.1.0"
+description = "Receipt Dropbox viewable statements: Typst renders a verified, redacted statement envelope to PDF"
+edition.workspace = true
+license.workspace = true
+# Typst 0.15 needs Rust 1.92; the dev shell has a newer one. Raise the workspace's floor in a
+# housekeeping PR and drop this line.
+rust-version = "1.92"
+
+# `rdx` registers this crate's ops (its `register` function) when it is a dependency of
+# rdx-cli; see crates/rdx-cli/build.rs.
+[package.metadata.rdx]
+ops = true
+
+[dependencies]
+bc-components = { version = "0.31", default-features = false, features = ["ed25519"] }
+bc-envelope = { version = "0.43", default-features = false, features = ["salt", "signature", "ed25519", "known_value"] }
+# Pure Rust, no image rendering: the QR code is drawn as SVG by this crate.
+qrcode = { version = "0.14", default-features = false }
+rdx-envelope = { path = "../rdx-envelope" }
+rdx-model = { path = "../rdx-model" }
+# Ops and their registry only; plan loading (Nickel) is the host's business.
+rdx-plan = { path = "../rdx-plan", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+# The compiler and PDF exporter, with fonts compiled in: the core has no file system or network,
+# so nothing is fetched while rendering (no packages, no system fonts). See ADR-P10.
+typst = "0.15.1"
+typst-assets = { version = "0.15.1", features = ["fonts"] }
+# The compiled document type (`PagedDocument`), which `typst` doesn't re-export.
+typst-layout = "0.15.1"
+typst-pdf = "0.15.1"
+
+[dev-dependencies]
+rdx-host = { path = "../rdx-host" }
+rdx-pdf = { path = "../rdx-pdf" }
+bc-rand = "0.5"
