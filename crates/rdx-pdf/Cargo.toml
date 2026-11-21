@@ -6,6 +6,11 @@ edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
 
+# `rdx` registers this crate's ops (its `register` function) when it is a dependency of
+# rdx-cli; see crates/rdx-cli/build.rs.
+[package.metadata.rdx]
+ops = true
+
 [features]
 default = []
 # A minimal PDF writer (standard fonts, text only) for building synthetic fixtures.

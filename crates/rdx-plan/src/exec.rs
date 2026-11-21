@@ -81,6 +81,13 @@ impl Registry {
     pub fn get(&self, id: &str) -> Option<&dyn Op> {
         self.ops.get(id).map(|b| b.as_ref())
     }
+
+    /// The ids of every registered op, sorted.
+    pub fn ids(&self) -> Vec<&'static str> {
+        let mut ids: Vec<_> = self.ops.keys().copied().collect();
+        ids.sort_unstable();
+        ids
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

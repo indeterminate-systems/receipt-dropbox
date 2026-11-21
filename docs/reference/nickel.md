@@ -107,9 +107,13 @@ records such as `{ ref = "x" }`, as `api.ncl` does.
 
 ## In this repo
 
-- `nickel/rdx/api.ncl`: plan contracts and op constructors (the code-mode API).
+- `nickel/rdx/api.ncl`: plan contracts and the built-in ops' constructors (the code-mode API);
+  its `ops` merges in `ops.ncl`, which imports each domain's `ops/<domain>.ncl`.
+- `nickel/rdx/lib.ncl`: helpers for constructors (`step`, `ValueOrRef`, `Document`, …). A record's
+  fields are in scope inside it, so the file binds them as `step_`, `DocumentC`, … and exports
+  them under their plain names; writing `{ step = step }` would be infinite recursion.
 - `nickel/rdx/model.ncl`: contracts for the domain model's JSON (`Money`, `Statement`, `Receipt`,
-  `Match`, `Scenario`, …), for op constructors in `api.ncl` to reuse.
+  `Match`, `Scenario`, …), for op constructors to reuse.
 - **Known bug (nickel-lang-core 0.19):** a record contract on data that came from
   `import "x.json"` or `std.deserialize 'Json`, when the record has a nested record or array field,
   panics (`value.is_constant()` in `eval/fixpoint.rs`). Repro:

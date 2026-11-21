@@ -10,6 +10,9 @@ rust-version.workspace = true
 name = "rdx"
 path = "src/main.rs"
 
+# Domain crates (`[package.metadata.rdx] ops = true`) are registered by build.rs from this list:
+# adding one here is all `rdx` needs. One line each, so parallel pieces' additions merge cleanly
+# (see .gitattributes).
 [dependencies]
 rdx-envelope = { path = "../rdx-envelope" }
 rdx-host = { path = "../rdx-host", features = ["local"] }
@@ -20,5 +23,9 @@ rdx-receipt = { path = "../rdx-receipt" }
 rdx-statement = { path = "../rdx-statement" }
 serde_json.workspace = true
 
+[build-dependencies]
+toml = "1"
+
 [dev-dependencies]
+nickel-embed.workspace = true
 tempfile = "3"

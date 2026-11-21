@@ -6,6 +6,11 @@ edition.workspace = true
 license.workspace = true
 rust-version.workspace = true
 
+# `rdx` registers this crate's ops (its `register` function) when it is a dependency of
+# rdx-cli; see crates/rdx-cli/build.rs.
+[package.metadata.rdx]
+ops = true
+
 [dependencies]
 # Only what statements need: salted assertions and Ed25519 signatures. Encryption to recipients
 # comes with keys (roadmap piece 8). The default features add secp256k1 (C) and post-quantum

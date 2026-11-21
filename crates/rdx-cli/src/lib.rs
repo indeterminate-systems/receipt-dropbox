@@ -39,16 +39,14 @@ before anything ran, 3 the run finished but could not be recorded.
 ";
 
 /// Every op this host offers: the built-in ones and each domain crate's. `cargo xtask check` runs
-/// skill tests with the same registry, so register a new domain's ops here once.
+/// skill tests with the same registry. A domain crate is added by depending on it (see build.rs).
 pub fn registry() -> Registry {
     let mut registry = Registry::with_core();
-    rdx_envelope::register(&mut registry);
-    rdx_match::register(&mut registry);
-    rdx_pdf::register(&mut registry);
-    rdx_statement::register(&mut registry);
-    rdx_receipt::register(&mut registry);
+    register_domains(&mut registry);
     registry
 }
+
+include!(concat!(env!("OUT_DIR"), "/domains.rs"));
 
 /// Runs the command line and returns the exit status.
 pub fn main(args: &[String], out: &mut dyn Write, err: &mut dyn Write) -> u8 {

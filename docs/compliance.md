@@ -240,7 +240,7 @@ deadlines are **jurisdiction policy in Nickel, versioned by fiscal year**, never
 ### Redacted statements (piece 7)
 
 What a verified redacted statement proves, and what it doesn't
-([ADR-0005](adr/0005-statement-envelopes.md)):
+([ADR-P07](adr/ADR-P07-statement-envelopes.md)):
 
 - **It proves** that the shown lines, the opening and closing balances and the number of
   redacted rows are what the supporter's key signed, unchanged since, and that the shown lines

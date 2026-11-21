@@ -48,14 +48,15 @@ change both together.
 | :-- | :-- |
 | `crates/rdx-host` | host capability traits (blob store, kv, mail-out, clock, random, audit log), in-memory and local (directory) implementations |
 | `crates/rdx-plan` | plans (code-mode entrypoint): types, validation, executor, built-in ops, audit chain, Nickel loading |
-| `crates/rdx-cli` | `rdx`, the local host: `rdx run <skill>`, `rdx blob put FILE`, `rdx audit verify`; `rdx_cli::registry()` lists every op |
+| `crates/rdx-cli` | `rdx`, the local host: `rdx run <skill>`, `rdx blob put FILE`, `rdx audit verify`; `rdx_cli::registry()` holds every op, registered by `build.rs` from its domain-crate dependencies |
 | `crates/rdx-pdf` | PDF text layer (lines, spans, positions) and the `pdf.text` op; a fixture writer behind feature `write` |
 | `crates/rdx-statement` | statement parsers (CSV, OFX, the `example-bank` PDF layout), balance checks, the `statement.parse` op |
 | `crates/rdx-model` | domain model (money, dates, statements, receipts, matches, ledger entries) and the synthetic data generator (`rdx_model::synth`) |
 | `crates/rdx-envelope` | statements as signed Gordian Envelopes: seal, redact (elide unmatched lines), verify; `envelope.*` ops |
 | `crates/rdx-receipt` | receipt and bill extraction (emails, PDFs via `pdf.text`, HTML, text, CFDI XML), the `receipt-extractor` trait and the `receipt.extract` op |
 | `crates/rdx-match` | matching: proposes line ↔ receipt matches (exact, tolerance, other currency, split, instalments, partial) under a policy; op `matching.propose` |
-| `nickel/rdx/api.ncl` | plan contracts and op constructors agents write against |
+| `nickel/rdx/api.ncl` | plan contracts and the built-in ops' constructors agents write against; `rdx.ops` also merges in `ops.ncl` |
+| `nickel/rdx/ops/<domain>.ncl` | each domain crate's op constructors (`rdx.ops.<domain>.<op>`), listed one per line in `nickel/rdx/ops.ncl`; helpers in `nickel/rdx/lib.ncl` |
 | `nickel/rdx/matching.ncl` | the matching policy contract (tolerances, date windows, exchange rates) and its defaults |
 | `nickel/rdx/model.ncl` | contracts for the domain model's JSON, for op contracts to reuse |
 | `fixtures/synthetic/` | generated fixtures; `UPDATE_GOLDEN=1 cargo test -p rdx-model --test fixtures` rewrites them, and `UPDATE_GOLDEN=1 cargo test -p rdx-statement --test parse` the OFX and PDF statements |
@@ -69,9 +70,8 @@ change both together.
 ## Code mode
 
 Agents act on the system by running a skill's `scripts/main.ncl`, which evaluates to a plan, with
-`rdx run <skill>`. Don't
-add one-off tools or scripts that bypass plans: add an op (Rust `Op` + constructor in `api.ncl`)
-and use it from a skill. `rdx run` always dry-runs unless given `--execute`: show the person the
+`rdx run <skill>`. Don't add one-off tools or scripts that bypass plans: add an op (Rust `Op` +
+constructor in `nickel/rdx/ops/<domain>.ncl`; see `op-author`) and use it from a skill. `rdx run` always dry-runs unless given `--execute`: show the person the
 dry-run report (skipped steps list the arguments they would use) before running anything with
 effects. An op that touches the outside world declares the capabilities it needs (`Op::needs`) and
 reaches them only through `RunContext::host`.
@@ -90,7 +90,9 @@ reaches them only through `RunContext::host`.
 
 - Work on a branch and open a pull request against `main`.
 - Commit subjects start with the area: `plan: …`, `skills: …`, `docs: …`, `CI: …`.
-- Record decisions with real alternatives as ADRs in `docs/adr/`.
+- Record decisions with real alternatives as ADRs in `docs/adr/`, named by piece:
+  `ADR-P07-statement-envelopes.md`, never by the next free number (0001 to 0004 are the
+  architecture's own, from before pieces).
 - PR titles start with the roadmap piece, `[P01]` to `[P16]` (`[P15/P16]` for one that spans
   two), then the area: `[P02] host: …`. Work outside the roadmap uses the area alone.
 - **PR numbers ascend in merge order.** Open PRs in the order they should merge. If that order
@@ -109,10 +111,40 @@ reaches them only through `RunContext::host`.
   and check the next PR in order still merges cleanly and is green.
 - When a PR number, crate, command or path changes, update every reference to it in `docs/`,
   `AGENTS.md`, skills and project memory in the same PR.
-- Keep `docs/roadmap.md` current: when a piece merges, mark it done there; when a thread finds
-  new work, add it as a piece rather than leaving it in a PR description.
+- Keep `docs/roadmap.md` current through housekeeping PRs (see "Parallel work"): when a piece
+  merges it is marked done there, and new work a thread finds becomes a piece rather than a note
+  in a PR description.
 - Pins and toolchains move deliberately: `nix flake update`, `nickel-embed`'s `rev` and
   `cargo update` each go in their own PR, with `cargo xtask ci` green.
+
+## Parallel work
+
+Several pieces are built at once, each in its own thread and PR. These rules keep their PRs from
+conflicting:
+
+- **Shared docs belong to housekeeping PRs.** A feature PR doesn't edit `docs/roadmap.md`,
+  `AGENTS.md`, `docs/compliance.md` (its open questions included) or `docs/architecture.md`.
+  Its thread reports the changes they need; once a batch of pieces merges, the coordinator opens
+  one housekeeping PR that applies them all. No per-piece "mark done" PRs. Piece-specific
+  documentation goes in the crate (doc comments, a README), its skills, or its ADR.
+- **No central lists.** A domain crate registers its own ops: `[package.metadata.rdx] ops = true`
+  and one dependency line in `crates/rdx-cli/Cargo.toml` (`build.rs` generates the calls), and
+  its Nickel constructors in its own `nickel/rdx/ops/<domain>.ncl` with one line in
+  `nickel/rdx/ops.ncl`. Those two index files merge with `union` (`.gitattributes`), keeping both
+  sides' lines; see `op-author`. Prefer the same shape (a file per crate, discovered or indexed
+  one line each) for anything new that every piece would otherwise edit.
+- **ADRs are named by piece**, `ADR-P<nn>-<topic>.md`, so two pieces never take the same number.
+- **Merge main as soon as it moves.** While its PR is open, a thread watches `main` and merges it
+  into the branch locally (`git merge origin/main`, where the `union` driver applies; GitHub's
+  web merge ignores it), then re-runs `cargo xtask ci`, so a PR is clean and green before review.
+  For a `Cargo.lock` conflict, take `main`'s and let cargo add the branch's crates back:
+  `git checkout --theirs Cargo.lock && cargo metadata --format-version 1 >/dev/null`.
+- **Files have owners.** Before parallel threads start, the coordinator lists the shared files
+  each piece may touch (for example `wit/rdx.wit`, `nickel/rdx/model.ncl`, `rdx-model`,
+  `fixtures/README.md`) and assigns each one an owner. A thread tells the coordinator before
+  touching a file it doesn't own.
+- **Merge in number order.** Open PRs merge strictly by number; if one must jump ahead, renumber
+  as in "Commits and pull requests".
 
 ## Reference
 

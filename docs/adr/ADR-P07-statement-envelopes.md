@@ -1,4 +1,4 @@
-# ADR-0005: Statement envelopes, and Gordian Envelope without C
+# ADR-P07: Statement envelopes, and Gordian Envelope without C
 
 **Status:** Proposed
 **Date:** 2026-11-20
