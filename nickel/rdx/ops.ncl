@@ -6,6 +6,7 @@
 {
   envelope = import "ops/envelope.ncl",
   ledger = import "ops/ledger.ncl",
+  keys = import "ops/keys.ncl",
   matching = import "ops/matching.ncl",
   pdf = import "ops/pdf.ncl",
   receipt = import "ops/receipt.ncl",

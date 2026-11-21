@@ -1,0 +1,35 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:fc5c16d2449f147cfb9cf2d9ed6d834defdaeabf22bbe1b2ca321527711da87c",
+    "skill": "onboard-supporter",
+    "steps": [
+      {
+        "args": {
+          "address": "ana@example.org",
+          "device": "this-device",
+          "holders": [
+            "phone",
+            "printed card",
+            "treasurer",
+            "sister",
+            "bank box"
+          ],
+          "supporter": "s-0001",
+          "threshold": 3
+        },
+        "id": "keys",
+        "op": "keys.onboard",
+        "status": "skipped"
+      }
+    ]
+  },
+  "inputs": {
+    "address": "\"ana@example.org\"",
+    "holders": "[\"phone\", \"printed card\", \"treasurer\", \"sister\", \"bank box\"]",
+    "supporter": "\"s-0001\"",
+    "threshold": "3"
+  }
+}
