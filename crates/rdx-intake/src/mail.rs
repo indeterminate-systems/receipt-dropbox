@@ -6,20 +6,57 @@ use serde::Serialize;
 
 use crate::{Error, Policy};
 
-/// The one reply an unverified sender gets: the message, and the `Message-ID` it answers, which
-/// threads it under what they sent (and which Cloudflare requires of a reply).
+/// The one reply an email can get: the message, and the `Message-ID` it answers, which threads it
+/// under what they sent.
 ///
-/// Its text holds the claim link, the only copy of the quarantine key, so it is never part of a
-/// report or the audit log.
+/// A verification reply's text holds the claim link, the only copy of the quarantine key, so a
+/// reply is never part of a report or the audit log.
 #[derive(Clone, PartialEq, Eq)]
 pub struct Reply {
+    pub kind: ReplyKind,
     pub message: Message,
     pub in_reply_to: Option<String>,
+}
+
+/// Why intake replies.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum ReplyKind {
+    /// The setup link for a sender without keys (and any [`Ask`] for the same email). If it
+    /// can't be sent, the email must not be kept: no one could claim it.
+    Verification,
+    /// Only an [`Ask`]: the email is kept whether or not the reply goes out.
+    Ask,
+}
+
+/// Something intake asks the sender to send, because what arrived can't be used as it is.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum Ask {
+    /// A Wise tracking link arrived without the transfer's receipt: send the PDF.
+    WiseReceipt,
+}
+
+impl Ask {
+    fn text(self, intake: &str) -> String {
+        match self {
+            Ask::WiseReceipt => format!(
+                "Your email has a link to a Wise transfer but no receipt. We don't open links: \
+                 the page behind one shows payment details we'd have to read on a server, and it \
+                 can change or expire. Please send the transfer's receipt instead:\n\
+                 \n\
+                 1. Open the transfer in the Wise app or on wise.com.\n\
+                 2. Choose its receipt (Get receipt, or Download receipt) and save the PDF.\n\
+                 3. Email the PDF to {intake} from this address.\n"
+            ),
+        }
+    }
 }
 
 impl std::fmt::Debug for Reply {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Reply")
+            .field("kind", &self.kind)
             .field("to", &self.message.to)
             .field("in_reply_to", &self.in_reply_to)
             .finish_non_exhaustive()
@@ -74,11 +111,14 @@ pub(crate) fn verification(
     secret: &[u8; 32],
     expires_at: u64,
     in_reply_to: Option<String>,
+    ask: Option<Ask>,
 ) -> Reply {
     let link = claim_link(&policy.claim_url, address, secret);
     let intake = &policy.intake_address;
     let until = date(expires_at);
+    let ask = ask.map_or(String::new(), |a| format!("\n{}", a.text(intake)));
     Reply {
+        kind: ReplyKind::Verification,
         message: Message {
             to: address.to_owned(),
             subject: "Verify your address to send receipts".into(),
@@ -94,7 +134,28 @@ pub(crate) fn verification(
                  it. If you don't open it by {until}, what you sent is deleted unread and you'll \
                  need to send it again.\n\
                  \n\
-                 If you didn't write to {intake}, you can ignore this email.\n"
+                 If you didn't write to {intake}, you can ignore this email.\n\
+                 {ask}"
+            ),
+        },
+        in_reply_to,
+    }
+}
+
+/// A reply that only asks for something, to a sender whose email is kept either way.
+pub(crate) fn ask(policy: &Policy, address: &str, ask: Ask, in_reply_to: Option<String>) -> Reply {
+    let intake = &policy.intake_address;
+    let subject = match ask {
+        Ask::WiseReceipt => "Please send the Wise receipt as a PDF",
+    };
+    Reply {
+        kind: ReplyKind::Ask,
+        message: Message {
+            to: address.to_owned(),
+            subject: subject.into(),
+            text: format!(
+                "We received your email to {intake} and kept it, encrypted.\n\n{}",
+                ask.text(intake)
             ),
         },
         in_reply_to,

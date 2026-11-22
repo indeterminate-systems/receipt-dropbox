@@ -103,6 +103,9 @@ impl Op for Receive {
         }
         let mut out = serde_json::to_value(&received.outcome).expect("outcomes serialize");
         out["reply"] = json!(reply);
+        if let Some(ask) = received.asked {
+            out["asked"] = json!(ask);
+        }
         out["message_deleted"] = json!(!keep);
         Ok(out)
     }

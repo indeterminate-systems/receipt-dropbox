@@ -66,6 +66,16 @@ address without keys or quarantine is bounced with the date to try again. Automa
 On Cloudflare the reply uses Email Routing's `message.reply()`, which needs a DMARC pass (already
 required), answers only the sender, and is free on every plan.
 
+**Links are never opened; intake asks for the document.** An email that is only a Wise tracking
+link (`wise.com/<lang>/track/<id>`), with no PDF, image or XML that could be its receipt, is kept
+like any other email (encrypted to the sender's keys or the quarantine key), and its sender is
+asked to send the transfer's PDF receipt from the Wise app. Fetching the link would put payment
+details in plaintext on the server, and the page can change or expire. The ask is rate-limited
+like the setup reply (`intake/asked/<address>`, `reply_interval_days`) and never answers
+automatic mail. Email Routing allows one reply per email, so a first email from an address
+without keys gets the ask inside its setup reply. If an ask alone can't be sent, the email is
+still kept and the ask forgotten, so the next link tries again.
+
 **Expiry notices are best effort.** A notice after the sender has written nothing is a new
 email, not a reply: Cloudflare sends those to arbitrary addresses only through Email Sending, on
 the Workers Paid plan. The Worker sends them when a `RDX_EMAIL` `send_email` binding exists; the

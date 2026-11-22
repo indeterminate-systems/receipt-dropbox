@@ -39,6 +39,11 @@ The step's `output.status`:
   failed, too large, several senders in From, a link already sent recently, or an automatic
   email from an address without keys.
 
+`asked = "wise-receipt"`: the email (delivered or quarantined) holds a Wise tracking link and no
+receipt, so the reply asks the sender to send the transfer's PDF receipt. Intake never opens the
+link. A sender is asked at most once per `reply_interval_days`; a first email from an address
+without keys gets the request inside its setup reply.
+
 `message_deleted` is true: the plaintext .eml is gone from the blob store whatever the outcome.
 
 ## When it fails

@@ -16,6 +16,10 @@
 //!                       Expired (`sweep`) ─▶ deleted, sender told.
 //! ```
 //!
+//! An email that is only a Wise tracking link, with no receipt, is kept the same way, and its
+//! sender is asked (once per reply interval) to send the transfer's PDF receipt instead. Intake
+//! never opens the link ([`wise`]).
+//!
 //! The whole message is encrypted as one document (`rdx.intake.email.v1`), so the receipt
 //! extractor later sees exactly what was sent: body, attachments, forwarded headers. Plaintext
 //! exists only in the caller's memory during [`receive`].
@@ -30,13 +34,14 @@ pub mod claim;
 mod headers;
 mod mail;
 pub mod ops;
+mod wise;
 
 use bc_envelope::prelude::*;
 use rdx_host::{CapabilityError, Host, Message};
 use serde::{Deserialize, Serialize};
 use zeroize::Zeroize;
 
-pub use mail::{Reply, ReplyStatus, claim_link, mime, parse_claim_link};
+pub use mail::{Ask, Reply, ReplyKind, ReplyStatus, claim_link, mime, parse_claim_link};
 pub use ops::register;
 
 /// The `'isA'` of an encrypted email.
@@ -132,11 +137,13 @@ pub enum Outcome {
     },
 }
 
-/// [`receive`]'s result: the outcome, and the verification reply the host must send, if any.
+/// [`receive`]'s result: the outcome, and the reply the host must send, if any.
 #[derive(Debug)]
 pub struct Received {
     pub outcome: Outcome,
     pub reply: Option<Reply>,
+    /// What `reply` asks the sender to send, if anything. Holds no secrets.
+    pub asked: Option<Ask>,
 }
 
 /// One stored document, as listed in an inbox or a quarantine.
@@ -184,6 +191,11 @@ fn registry_key(address: &str) -> String {
     format!("keys/registry/{address}")
 }
 
+/// When an address was last asked to send something instead of what it sent (Unix ms).
+pub fn asked_key(address: &str) -> String {
+    format!("intake/asked/{address}")
+}
+
 /// The sender [`receive`] would act for, if the message names exactly one, so a host can load
 /// [`receive_keys`] before calling it.
 pub fn sender(raw: &[u8]) -> Option<String> {
@@ -197,6 +209,7 @@ pub fn receive_keys(address: &str) -> Vec<String> {
         inbox_key(address),
         quarantine_key(address),
         replied_key(address),
+        asked_key(address),
         QUARANTINE_INDEX.to_owned(),
     ]
 }
@@ -218,6 +231,7 @@ pub fn receive(host: &mut Host, policy: &Policy, raw: &[u8]) -> Result<Received>
     let reject = |reason: String, address: Option<String>| Received {
         outcome: Outcome::Rejected { reason, address },
         reply: None,
+        asked: None,
     };
     if raw.len() as u64 > policy.max_bytes {
         return Ok(reject(
@@ -269,13 +283,15 @@ pub fn receive(host: &mut Host, policy: &Policy, raw: &[u8]) -> Result<Received>
         let mut inbox: Inbox = load(host, &inbox_key(&address))?.unwrap_or_default();
         inbox.documents.push(entry.clone());
         save(host, &inbox_key(&address), &inbox)?;
+        let (reply, asked) = ask(host, policy, &fields, &address, raw, now)?;
         return Ok(Received {
             outcome: Outcome::Delivered {
                 address,
                 document: entry.id,
                 bytes: entry.bytes,
             },
-            reply: None,
+            reply,
+            asked,
         });
     }
 
@@ -295,6 +311,7 @@ pub fn receive(host: &mut Host, policy: &Policy, raw: &[u8]) -> Result<Received>
         let entry = store(host, raw, now, &[keys])?;
         q.documents.push(entry.clone());
         save(host, &key, &q)?;
+        let (reply, asked) = ask(host, policy, &fields, &address, raw, now)?;
         return Ok(Received {
             outcome: Outcome::Quarantined {
                 address,
@@ -302,7 +319,8 @@ pub fn receive(host: &mut Host, policy: &Policy, raw: &[u8]) -> Result<Received>
                 bytes: entry.bytes,
                 expires_at: q.expires_at,
             },
-            reply: None,
+            reply,
+            asked,
         });
     }
 
@@ -321,7 +339,7 @@ pub fn receive(host: &mut Host, policy: &Policy, raw: &[u8]) -> Result<Received>
         ));
     }
     // RFC 3834: never answer an automatic message, and without an answer nobody could claim it.
-    if headers::first(&fields, "auto-submitted").is_some_and(|v| !v.eq_ignore_ascii_case("no")) {
+    if automatic(&fields) {
         return Ok(reject(
             format!("{address} isn't set up yet, and automatic emails can't set it up"),
             Some(address),
@@ -349,8 +367,13 @@ pub fn receive(host: &mut Host, policy: &Policy, raw: &[u8]) -> Result<Received>
         save(host, QUARANTINE_INDEX, &index)?;
     }
     save(host, &replied_key(&address), &now)?;
+    // Email Routing allows one reply per email, so the setup reply carries any ask too.
+    let asked = wise::link_without_receipt(raw).then_some(Ask::WiseReceipt);
+    if asked.is_some() {
+        save(host, &asked_key(&address), &now)?;
+    }
     let in_reply_to = headers::first(&fields, "message-id").map(str::to_owned);
-    let reply = mail::verification(policy, &address, &secret, expires_at, in_reply_to);
+    let reply = mail::verification(policy, &address, &secret, expires_at, in_reply_to, asked);
     secret.zeroize();
     Ok(Received {
         outcome: Outcome::Quarantined {
@@ -360,7 +383,41 @@ pub fn receive(host: &mut Host, policy: &Policy, raw: &[u8]) -> Result<Received>
             expires_at,
         },
         reply: Some(reply),
+        asked,
     })
+}
+
+/// RFC 3834: never answer an automatic message.
+fn automatic(fields: &[(String, String)]) -> bool {
+    headers::first(fields, "auto-submitted").is_some_and(|v| !v.eq_ignore_ascii_case("no"))
+}
+
+/// For an email that was kept: a reply asking for what it lacks, at most once per reply
+/// interval, so intake can't be used to flood a mailbox.
+fn ask(
+    host: &mut Host,
+    policy: &Policy,
+    fields: &[(String, String)],
+    address: &str,
+    raw: &[u8],
+    now: u64,
+) -> Result<(Option<Reply>, Option<Ask>)> {
+    if automatic(fields) || !wise::link_without_receipt(raw) {
+        return Ok((None, None));
+    }
+    let interval = u64::from(policy.reply_interval_days) * DAY_MS;
+    if load::<u64>(host, &asked_key(address))?
+        .is_some_and(|last| now < last.saturating_add(interval))
+    {
+        return Ok((None, None));
+    }
+    save(host, &asked_key(address), &now)?;
+    let in_reply_to = headers::first(fields, "message-id").map(str::to_owned);
+    let ask = Ask::WiseReceipt;
+    Ok((
+        Some(mail::ask(policy, address, ask, in_reply_to)),
+        Some(ask),
+    ))
 }
 
 /// DMARC must pass, as judged by the configured server in the topmost results field, for the
