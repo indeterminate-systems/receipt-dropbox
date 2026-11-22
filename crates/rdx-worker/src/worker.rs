@@ -126,7 +126,15 @@ async fn email(message: ForwardableEmailMessage, env: Env, _ctx: Context) -> Res
     // Reply before writing: if the setup link can't be sent, nothing is kept and the sender is
     // asked to try again, rather than holding mail no one can claim.
     if let Some(reply) = &received.reply {
-        let mime = reply.to_mime(&policy.intake_address, Date::now().as_millis());
+        // No In-Reply-To or References: Email Routing sets both from the incoming email, and
+        // rejects a reply whose References differ from its own (the original's References plus
+        // its Message-ID), so threading headers built from the Message-ID alone fail.
+        let mime = rdx_intake::mime(
+            &reply.message,
+            &policy.intake_address,
+            Date::now().as_millis(),
+            None,
+        );
         let sent = match EmailMessage::new(&policy.intake_address, &reply.message.to, &mime) {
             Ok(m) => message.reply(&m).await.map(|_| ()),
             Err(e) => Err(e),
