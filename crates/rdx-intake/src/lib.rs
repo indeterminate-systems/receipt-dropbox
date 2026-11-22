@@ -11,7 +11,8 @@
 //!     └─ no keys yet ─▶ encrypt to a quarantine key for the address ─▶ blob, listed in
 //!                       intake/quarantine/<address>; the first time, reply once with a claim
 //!                       link that holds the quarantine key (the server keeps only its public
-//!                       half). Claimed (`release`) ─▶ re-encrypted to the new keys.
+//!                       half). Claimed (`release`, or over HTTP: `claim`) ─▶
+//!                       re-encrypted to the new keys.
 //!                       Expired (`sweep`) ─▶ deleted, sender told.
 //! ```
 //!
@@ -25,6 +26,7 @@
 //! See [ADR-P13](../../docs/adr/ADR-P13-email-intake.md).
 
 mod auth;
+pub mod claim;
 mod headers;
 mod mail;
 pub mod ops;
@@ -537,7 +539,7 @@ fn forget_quarantine(host: &mut Host, address: &str) -> Result<()> {
 }
 
 /// One document moved out of quarantine.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Moved {
     pub from: String,
     pub to: String,

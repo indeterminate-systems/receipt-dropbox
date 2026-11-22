@@ -7,7 +7,16 @@ main = "build/index.js"
 compatibility_date = "2026-11-01"
 
 [build]
-command = "worker-build --release"
+command = "cargo xtask claim-page && worker-build --release"
+
+# The claim page the setup reply links to (`/claim`), built by `cargo xtask claim-page`.
+# Cloudflare serves these files itself; only `/claim/open` and `/claim/release` reach the Worker.
+[assets]
+directory = "site"
+
+# The policy's `claim_url` must be served by this Worker. On a domain of your own (its DNS on
+# Cloudflare), add it as a custom domain, and Cloudflare creates the DNS record and certificate:
+# routes = [{ pattern = "app.yourorg.org", custom_domain = true }]
 
 # Key registries, inboxes and quarantines. Create it with
 # `wrangler kv namespace create RDX_KV` and paste the id it prints.

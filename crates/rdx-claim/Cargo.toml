@@ -1,0 +1,48 @@
+[package]
+name = "rdx-claim"
+version = "0.1.0"
+description = "Receipt Dropbox claim page: opens an intake setup link, makes the sender's passkey and keys, and moves their quarantined mail to them"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+# The cdylib is the page's WebAssembly (`cargo xtask claim-page`); the rlib is for tests.
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+rdx-host = { path = "../rdx-host" }
+rdx-intake = { path = "../rdx-intake" }
+rdx-keys = { path = "../rdx-keys" }
+# Ops and their registry only; plan loading (Nickel) is the host's business.
+rdx-plan = { path = "../rdx-plan", default-features = false }
+serde_json.workspace = true
+thiserror.workspace = true
+zeroize = "1"
+
+# The browser around the logic: DOM, WebAuthn, fetch. Only the browser build has them, so the
+# crate still builds and tests natively and for wasm32-wasip2.
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = [
+  "Window",
+  "Document",
+  "Element",
+  "HtmlElement",
+  "HtmlInputElement",
+  "Location",
+  "History",
+  "Navigator",
+  "CredentialsContainer",
+  "Crypto",
+  "Storage",
+  "Request",
+  "RequestInit",
+  "Response",
+  "Headers",
+] }
+
+[dev-dependencies]
+bc-envelope = { version = "0.43", default-features = false, features = ["known_value", "encrypt", "recipient"] }

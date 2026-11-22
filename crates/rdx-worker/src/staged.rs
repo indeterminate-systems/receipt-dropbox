@@ -228,6 +228,60 @@ mod tests {
         assert!(!backing.contains_key(rdx_intake::QUARANTINE_INDEX));
     }
 
+    /// The claim routes, as the Worker runs them: each loads only the keys its list names.
+    #[test]
+    fn a_claim_runs_against_staged_stores_with_the_keys_its_lists_name() {
+        let (mut backing, mut r2) = (BTreeMap::new(), BTreeMap::new());
+        let t0 = FixedClock::GOLDEN;
+        let first = run(&mut backing, &mut r2, t0);
+        let link = first.reply.unwrap().message.text;
+        let claim = rdx_claim::Claim::parse(&link).unwrap();
+
+        let staged = |keys: Vec<String>, backing: &BTreeMap<String, Vec<u8>>| {
+            let kv = StagedKv::default();
+            for k in keys {
+                kv.load(&k, backing.get(&k).cloned());
+            }
+            kv
+        };
+
+        // POST /claim/open
+        let request = claim.open_request(t0);
+        let address = rdx_intake::claim::request_address(&request).unwrap();
+        let kv = staged(rdx_intake::claim::open_keys(&address), &backing);
+        let host = Host::new().with_kv(kv).with_clock(FixedClock(t0));
+        let mut opened = rdx_intake::claim::open(&host, &request).unwrap();
+        opened.envelopes = opened
+            .documents
+            .iter()
+            .map(|d| String::from_utf8(r2[&d.id].clone()).unwrap())
+            .collect();
+
+        // The page.
+        let finished = claim
+            .finish(&opened, vec![3; 32], SeededRandom::new(9), t0)
+            .unwrap();
+
+        // POST /claim/release
+        let address = rdx_intake::claim::request_address(&finished.release.request).unwrap();
+        let kv = staged(rdx_intake::claim::release_keys(&address), &backing);
+        let blobs = StagedBlobs::default();
+        let mut host = Host::new()
+            .with_kv(kv.clone())
+            .with_blob_store(blobs.clone())
+            .with_clock(FixedClock(t0));
+        let moved = rdx_intake::claim::accept(&mut host, &finished.release).unwrap();
+        apply(&mut backing, &mut r2, &kv, &blobs);
+
+        assert_eq!(moved.len(), 1);
+        assert_eq!(r2.len(), 1);
+        assert!(r2.contains_key(&moved[0].to));
+        assert!(backing.contains_key("keys/registry/ben@example.org"));
+        assert!(!backing.contains_key("intake/quarantine/ben@example.org"));
+        let next = run(&mut backing, &mut r2, t0 + 1000);
+        assert!(matches!(next.outcome, Outcome::Delivered { .. }));
+    }
+
     #[test]
     fn reading_a_key_that_was_not_loaded_fails() {
         let mut kv = StagedKv::default();

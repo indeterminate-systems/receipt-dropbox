@@ -5,8 +5,11 @@
 //! - `RDX_INTAKE_POLICY` (var): the policy as JSON, exported from Nickel at deploy time.
 //! - `RDX_EMAIL` (send_email, optional): expiry notices. Sending to arbitrary addresses needs the
 //!   Workers Paid plan; without the binding, the setup reply's own warning is the only notice.
+//! - Static assets (`[assets]`): the claim page (`/claim`), built by `cargo xtask claim-page`.
+//!   Cloudflare serves them without running the Worker; `fetch` gets only the API routes below.
 
 use rdx_host::{CapabilityError, Clock, Host, Random};
+use rdx_intake::claim::{self, Release};
 use rdx_intake::{Outcome, Policy};
 use wasm_bindgen::JsCast;
 use worker::*;
@@ -198,4 +201,97 @@ async fn sweep(env: &Env) -> Result<()> {
         }
     }
     Ok(())
+}
+
+/// The claim page's API (`rdx_intake::claim`). Requests are signed by the claim link's key and
+/// carry only ciphertext; nothing here can decrypt. Everything else is a static asset or 404.
+#[event(fetch)]
+async fn fetch(mut req: Request, env: Env, _ctx: Context) -> Result<Response> {
+    let route = (req.method(), req.path());
+    let answer = match (&route.0, route.1.as_str()) {
+        (Method::Post, "/claim/open") => match req.json::<serde_json::Value>().await {
+            Ok(body) => match body["request"].as_str() {
+                Some(r) => claim_open(&env, r).await,
+                None => Err(Refused(400, "the body needs a `request`".into())),
+            },
+            Err(_) => Err(Refused(400, "the body isn't JSON".into())),
+        },
+        (Method::Post, "/claim/release") => match req.json::<Release>().await {
+            Ok(release) => claim_release(&env, &release).await,
+            Err(_) => Err(Refused(400, "the body isn't a release request".into())),
+        },
+        _ => return Response::error("Not found", 404),
+    };
+    match answer {
+        Ok(r) => Ok(r),
+        Err(Refused(status, why)) => {
+            // Status only: the address and request stay out of the logs.
+            console_log!("claim {}: {status}", route.1);
+            Ok(Response::from_json(&serde_json::json!({ "error": why }))?.with_status(status))
+        }
+    }
+}
+
+/// A refusal the page shows: an HTTP status and the reason, which carries no secrets.
+struct Refused(u16, String);
+
+impl From<rdx_intake::Error> for Refused {
+    fn from(e: rdx_intake::Error) -> Self {
+        use rdx_intake::Error as E;
+        let status = match &e {
+            E::ClaimLink(_) => 400,
+            E::WrongClaim(_) => 403,
+            E::NothingQuarantined(_) => 404,
+            _ => {
+                console_error!("claim failed: {e}");
+                return Refused(500, "something went wrong on the server; try again".into());
+            }
+        };
+        Refused(status, e.to_string())
+    }
+}
+
+impl From<Error> for Refused {
+    fn from(e: Error) -> Self {
+        console_error!("claim storage failed: {e}");
+        Refused(500, "storage is unavailable right now; try again".into())
+    }
+}
+
+async fn claim_open(env: &Env, request: &str) -> std::result::Result<Response, Refused> {
+    let address = claim::request_address(request)?;
+    let kv = load(&env.kv(KV)?, &claim::open_keys(&address)).await?;
+    let host = Host::new().with_kv(kv).with_clock(JsClock);
+    let mut opened = claim::open(&host, request)?;
+    let bucket = env.bucket(BLOBS)?;
+    for d in &opened.documents {
+        let bytes = match bucket.get(&d.id).execute().await? {
+            Some(object) => match object.body() {
+                Some(body) => body.bytes().await?,
+                None => Vec::new(),
+            },
+            None => Vec::new(),
+        };
+        opened.envelopes.push(
+            String::from_utf8(bytes)
+                .map_err(|_| Refused(500, format!("document `{}` is missing or damaged", d.id)))?,
+        );
+    }
+    Ok(Response::from_json(&opened)?)
+}
+
+async fn claim_release(env: &Env, release: &Release) -> std::result::Result<Response, Refused> {
+    let address = claim::request_address(&release.request)?;
+    let kv = load(&env.kv(KV)?, &claim::release_keys(&address)).await?;
+    let blobs = StagedBlobs::default();
+    let mut host = Host::new()
+        .with_kv(kv.clone())
+        .with_blob_store(blobs.clone())
+        .with_clock(JsClock);
+    let moved = claim::accept(&mut host, release)?;
+    write(env, &kv, &blobs).await?;
+    console_log!("claim released: {} document(s)", moved.len());
+    Ok(Response::from_json(
+        &serde_json::json!({ "moved": moved.len() }),
+    )?)
 }
