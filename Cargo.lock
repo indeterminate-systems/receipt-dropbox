@@ -3141,6 +3141,7 @@ dependencies = [
  "rdx-host",
  "rdx-keys",
  "rdx-plan",
+ "rdx-receipt",
  "serde",
  "serde_json",
  "thiserror",

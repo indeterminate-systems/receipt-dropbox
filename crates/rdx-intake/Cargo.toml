@@ -16,6 +16,8 @@ bc-envelope = { version = "0.43", default-features = false, features = ["signatu
 bc-components = { version = "0.31", default-features = false, features = ["ed25519"] }
 rdx-host = { path = "../rdx-host" }
 rdx-keys = { path = "../rdx-keys" }
+# Its MIME reader only, to see whether an email is a payment link with no receipt.
+rdx-receipt = { path = "../rdx-receipt" }
 # Ops and their registry only; plan loading (Nickel) is the host's business.
 rdx-plan = { path = "../rdx-plan", default-features = false }
 serde.workspace = true

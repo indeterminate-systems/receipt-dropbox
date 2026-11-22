@@ -7,7 +7,9 @@ use std::rc::Rc;
 
 use rdx_host::memory::{FixedClock, MemorySecrets, Outbox, SeededRandom};
 use rdx_host::{BlobStore, Host, Kv};
-use rdx_intake::{Allow, Outcome, Policy, parse_claim_link, receive, release, status, sweep};
+use rdx_intake::{
+    Allow, Ask, Outcome, Policy, ReplyKind, parse_claim_link, receive, release, status, sweep,
+};
 use rdx_keys::{Keys, envelope_from_ur};
 
 /// Blob store and kv that tests can list, to check what was kept.
@@ -509,4 +511,164 @@ fn the_secrets_capability_carries_the_claim_link_for_the_release_op() {
     let out = serde_json::to_string(&report).unwrap();
     assert!(!out.contains("claim#"), "the link leaked into the report");
     assert!(status(&f.host).unwrap().is_empty());
+}
+
+/// What a supporter sends when they share a Wise transfer from the app: a tracking link and no
+/// receipt. Quoted-printable, as mail apps send it, so the link is split by a soft line break.
+fn wise_link_email(from: &str, attachment: Option<(&str, &str)>) -> Vec<u8> {
+    let attachment = attachment.map_or(String::new(), |(media_type, name)| {
+        format!(
+            "--outer\r\n\
+             Content-Type: {media_type}; name=\"{name}\"\r\n\
+             Content-Disposition: attachment; filename=\"{name}\"\r\n\
+             Content-Transfer-Encoding: base64\r\n\
+             \r\n\
+             JVBERi0xLjQKJSBzeW50aGV0aWMK\r\n"
+        )
+    });
+    format!(
+        "Authentication-Results: {}\r\n\
+         From: Ana Ruiz <{from}>\r\n\
+         To: receipts@intake.example.org\r\n\
+         Subject: Rent for the studio\r\n\
+         Message-ID: <synthetic-wise@mail.example.net>\r\n\
+         MIME-Version: 1.0\r\n\
+         Content-Type: multipart/mixed; boundary=\"outer\"\r\n\
+         \r\n\
+         --outer\r\n\
+         Content-Type: multipart/alternative; boundary=\"alt\"\r\n\
+         \r\n\
+         --alt\r\n\
+         Content-Type: text/plain; charset=utf-8\r\n\
+         Content-Transfer-Encoding: quoted-printable\r\n\
+         \r\n\
+         Here's the transfer for November:\r\n\
+         https://wise.com/gb/track/synthetic0a1b2c3d?utm_source=3Dshare&utm_medium=\r\n\
+         =3Dapp\r\n\
+         --alt\r\n\
+         Content-Type: text/html; charset=utf-8\r\n\
+         \r\n\
+         <p>Here's the transfer for November: <a href=\"https://wise.com/gb/track/synthetic0a1b2c3d\">track it</a></p>\r\n\
+         --alt--\r\n\
+         {attachment}\
+         --outer--\r\n",
+        pass(from.rsplit_once('@').unwrap().1),
+    )
+    .into_bytes()
+}
+
+#[test]
+fn a_wise_link_without_a_receipt_is_kept_and_answered_with_how_to_send_the_pdf() {
+    let mut f = fixture(T0);
+    let keys = onboard(&mut f.host, "ana@example.org");
+    let p = policy();
+    let raw = wise_link_email("ana@example.org", None);
+
+    let got = receive(&mut f.host, &p, &raw).unwrap();
+
+    // Kept like any other email: encrypted to Ana's keys, the link never fetched or stored plain.
+    let Outcome::Delivered { document, .. } = &got.outcome else {
+        panic!("expected delivery, got {:?}", got.outcome)
+    };
+    let opened = rdx_keys::decrypt(&stored(&f.blobs, document), &keys).unwrap();
+    assert_eq!(rdx_intake::message_bytes(&opened).unwrap(), raw);
+    for id in f.blobs.ids().into_iter().chain(f.kv.ids()) {
+        let b = f.blobs.read(&id).or_else(|| f.kv.read(&id)).unwrap();
+        assert!(
+            !b.windows(9).any(|w| w == b"wise.com/"),
+            "the link is stored in plaintext at {id}"
+        );
+    }
+    // One reply, asking for the PDF; it doesn't repeat the link.
+    assert_eq!(got.asked, Some(Ask::WiseReceipt));
+    let reply = got.reply.as_ref().expect("a reply asking for the receipt");
+    assert_eq!(reply.kind, ReplyKind::Ask);
+    assert_eq!(reply.message.to, "ana@example.org");
+    assert!(reply.message.text.contains("PDF"), "{}", reply.message.text);
+    assert!(reply.message.text.contains("receipts@intake.example.org"));
+    assert!(!reply.message.text.contains("synthetic0a1b2c3d"));
+    assert!(!reply.message.text.contains("claim#"));
+
+    // Another link the next day: kept, but no second reply until the interval has passed.
+    f.at(T0 + DAY);
+    let again = receive(&mut f.host, &p, &raw).unwrap();
+    assert!(matches!(again.outcome, Outcome::Delivered { .. }));
+    assert!(again.reply.is_none());
+    assert_eq!(again.asked, None);
+    f.at(T0 + 7 * DAY);
+    let later = receive(&mut f.host, &p, &raw).unwrap();
+    assert_eq!(later.asked, Some(Ask::WiseReceipt));
+}
+
+#[test]
+fn a_wise_link_with_its_receipt_attached_needs_no_reply() {
+    let mut f = fixture(T0);
+    onboard(&mut f.host, "ana@example.org");
+    let raw = wise_link_email("ana@example.org", Some(("application/pdf", "receipt.pdf")));
+    let got = receive(&mut f.host, &policy(), &raw).unwrap();
+    assert!(matches!(got.outcome, Outcome::Delivered { .. }));
+    assert!(got.reply.is_none());
+    assert_eq!(got.asked, None);
+}
+
+#[test]
+fn only_wise_tracking_links_count() {
+    let mut f = fixture(T0);
+    onboard(&mut f.host, "ana@example.org");
+    let base = String::from_utf8(wise_link_email("ana@example.org", None)).unwrap();
+    for other in [
+        "https://wise.com/invite/u/ana",
+        "https://wise.com.track.example/gb/track/x",
+        "https://notwise.com/gb/track/x",
+    ] {
+        let raw = base
+            .replace(
+                "https://wise.com/gb/track/synthetic0a1b2c3d?utm_source=3Dshare&utm_medium=\r\n=3Dapp",
+                other,
+            )
+            .replace("https://wise.com/gb/track/synthetic0a1b2c3d", other);
+        let got = receive(&mut f.host, &policy(), raw.as_bytes()).unwrap();
+        assert!(got.reply.is_none(), "{other} got a reply");
+    }
+}
+
+#[test]
+fn automatic_mail_with_a_wise_link_gets_no_reply() {
+    let mut f = fixture(T0);
+    onboard(&mut f.host, "ana@example.org");
+    let raw = String::from_utf8(wise_link_email("ana@example.org", None))
+        .unwrap()
+        .replacen("Subject:", "Auto-Submitted: auto-generated\r\nSubject:", 1);
+    let got = receive(&mut f.host, &policy(), raw.as_bytes()).unwrap();
+    assert!(matches!(got.outcome, Outcome::Delivered { .. }));
+    assert!(got.reply.is_none());
+}
+
+#[test]
+fn an_unverified_sender_s_wise_link_is_asked_about_in_the_setup_reply() {
+    let mut f = fixture(T0);
+    let p = policy();
+    let raw = wise_link_email("ben@example.org", None);
+
+    // Email Routing allows one reply per email, so the setup reply carries the request too.
+    let first = receive(&mut f.host, &p, &raw).unwrap();
+    assert!(matches!(first.outcome, Outcome::Quarantined { .. }));
+    assert_eq!(first.asked, Some(Ask::WiseReceipt));
+    let reply = first.reply.as_ref().unwrap();
+    assert_eq!(reply.kind, ReplyKind::Verification);
+    assert!(reply.message.text.contains("claim#"));
+    assert!(reply.message.text.contains("PDF"));
+
+    // A link while the quarantine waits: no second setup link, and the PDF was asked for already.
+    f.at(T0 + DAY);
+    let second = receive(&mut f.host, &p, &raw).unwrap();
+    assert!(matches!(second.outcome, Outcome::Quarantined { .. }));
+    assert!(second.reply.is_none());
+
+    // A different sender already in quarantine from an ordinary email gets the request alone.
+    let carl = email("carl@example.org", &pass("example.org"));
+    receive(&mut f.host, &p, &carl).unwrap();
+    let link = receive(&mut f.host, &p, &wise_link_email("carl@example.org", None)).unwrap();
+    assert!(matches!(link.outcome, Outcome::Quarantined { .. }));
+    assert_eq!(link.reply.as_ref().unwrap().kind, ReplyKind::Ask);
 }

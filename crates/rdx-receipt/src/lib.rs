@@ -32,6 +32,7 @@ use serde::{Deserialize, Serialize};
 
 pub use cfdi::Cfdi;
 pub use html::to_text as html_to_text;
+pub use mime::{Email, parse as parse_email};
 pub use op::{ExtractOp, register};
 pub use text::Text;
 

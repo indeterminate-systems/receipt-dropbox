@@ -8,9 +8,9 @@
 //! - Static assets (`[assets]`): the claim page (`/claim`), built by `cargo xtask claim-page`.
 //!   Cloudflare serves them without running the Worker; `fetch` gets only the API routes below.
 
-use rdx_host::{CapabilityError, Clock, Host, Random};
+use rdx_host::{CapabilityError, Clock, Host, Kv, Random};
 use rdx_intake::claim::{self, Release};
-use rdx_intake::{Outcome, Policy};
+use rdx_intake::{Outcome, Policy, ReplyKind};
 use wasm_bindgen::JsCast;
 use worker::*;
 
@@ -142,10 +142,18 @@ async fn email(message: ForwardableEmailMessage, env: Env, _ctx: Context) -> Res
             Ok(m) => message.reply(&m).await.map(|_| ()),
             Err(e) => Err(e),
         };
-        if let Err(e) = sent {
-            console_error!("reply failed: {e:?}");
-            message.set_reject(TRY_AGAIN);
-            return Ok(());
+        match (sent, reply.kind) {
+            (Ok(()), _) => {}
+            (Err(e), ReplyKind::Verification) => {
+                console_error!("reply failed: {e:?}");
+                message.set_reject(TRY_AGAIN);
+                return Ok(());
+            }
+            // The email is kept anyway; forget the ask, so the next one tries again.
+            (Err(e), ReplyKind::Ask) => {
+                console_error!("ask failed: {e:?}");
+                let _ = kv.clone().delete(&rdx_intake::asked_key(&reply.message.to));
+            }
         }
     }
     if let Err(e) = write(&env, &kv, &blobs).await {
@@ -157,6 +165,9 @@ async fn email(message: ForwardableEmailMessage, env: Env, _ctx: Context) -> Res
     let mut log = serde_json::to_value(&received.outcome).unwrap_or_default();
     if let Some(o) = log.as_object_mut() {
         o.remove("address");
+        if let Some(ask) = received.asked {
+            o.insert("asked".into(), serde_json::json!(ask));
+        }
     }
     console_log!("{log}");
     Ok(())
