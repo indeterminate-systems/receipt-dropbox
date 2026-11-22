@@ -342,6 +342,20 @@ What a verified redacted statement proves, and what it doesn't
   reimbursement: regular fixed amounts, claims without CFDIs, reimbursements to a contractor
   bundled with fees. The app reports; it never decides classification.
 
+### The live deployment (piece 13)
+
+- Since 2026-11-22, email intake runs on Cloudflare (Email Routing, a Worker, KV and R2) for
+  costacombat.com. Mail sent to `triage@accounting.costacombat.com` reaches the Worker in memory
+  and is stored only encrypted; setup replies come from `triage@costacombat.com`, because
+  Cloudflare refuses a Worker's reply from a subdomain. Cloudflare is therefore the host open
+  question 6 asks about.
+- The allowlist names individual addresses only, no domains. It is supporters' personal data, so
+  it lives in a git-ignored local policy on the operator's machine and reaches the Worker as a
+  deploy variable; it is never committed.
+- Senders without keys claim their mail at `app.costacombat.com/claim`, which makes their keys
+  in the browser; the server only ever sees ciphertext and signed requests
+  ([ADR-P13 claim page](adr/ADR-P13-claim-page.md)).
+
 ### Third-party data the app ships (piece 14)
 
 - **OCR models (piece 11).** The `ocrs` text detection and recognition models are published by
