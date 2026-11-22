@@ -75,7 +75,7 @@ in
 let PolicyC = {
   intake_address
     | Address
-    | doc "The address supporters send statements and bills to; verification replies come from it. Use a subdomain only intake receives mail for, like receipts@receipts.example.org.",
+    | doc "The address verification replies come from, and the one supporters send to unless Email Routing sends a subdomain address (like receipts@receipts.example.org) to the Worker too. On Cloudflare it must be at the main domain: Email Routing refuses replies from a subdomain.",
 
   claim_url
     | HttpsUrl

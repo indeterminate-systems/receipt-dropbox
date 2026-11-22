@@ -39,8 +39,14 @@ You need a Cloudflare account (the free plan works) and a domain whose DNS is on
 4. **Write the policy.** Edit [`policy.ncl`](policy.ncl): the intake address, the PWA's claim
    URL, and who may send (`allow.domains` for whole domains, `allow.addresses` for volunteers'
    own mailboxes). `nickel export --import-path ../../nickel policy.ncl` checks it.
+   With a subdomain, set `intake_address` to an address at the main domain, such as
+   `receipts@yourorg.org`: it is the sender of the setup reply, and Cloudflare refuses a Worker's
+   reply from a subdomain ("mail from is not from the correct domain"). Route that address to
+   the Worker too (step 7), so answers to the reply reach intake.
 5. **Create the storage**, from this directory, in the dev shell plus Wrangler
-   (`nix shell nixpkgs#wrangler nixpkgs#worker-build`):
+   (`nix shell nixpkgs#wrangler`) and `worker-build` 0.9, which must match the `worker` crate
+   (Nixpkgs has 0.8.7, which refuses to build it): `cargo install worker-build@~0.9.0 --locked`,
+   with `pkg-config` and OpenSSL in the shell (`nix shell nixpkgs#pkg-config nixpkgs#openssl`):
 
    ```sh
    wrangler login
@@ -55,7 +61,10 @@ You need a Cloudflare account (the free plan works) and a domain whose DNS is on
    ```
 
 7. **Route the address to the Worker.** *Email Routing → Routing rules → Create address*:
-   the intake address, action *Send to a Worker*, Worker `rdx-intake`.
+   the intake address, action *Send to a Worker*, Worker `rdx-intake`; with a subdomain, also the
+   main-domain `intake_address` from step 4. Or with Wrangler:
+   `wrangler email routing rules create yourorg.org --match-type literal --match-field to
+   --match-value receipts@receipts.yourorg.org --action-type worker --action-value rdx-intake`.
 8. **Try it.** Send an email from an allowed address that hasn't been onboarded: you should get
    "Verify your address to send receipts" back within a minute, and `wrangler tail` shows
    `{"status":"quarantined",…}`. From an address not on the list, you get a bounce saying so.
