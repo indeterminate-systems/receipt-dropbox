@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Verify your address · Receipt Dropbox</title>
+  <style>
+    :root { color-scheme: light dark; --fg: #1d1d1f; --bg: #fafaf7; --muted: #5f6368; --accent: #1a5fb4; --box: #eef1f5; }
+    @media (prefers-color-scheme: dark) { :root { --fg: #ececec; --bg: #17181a; --muted: #a0a4a8; --accent: #78aeed; --box: #24262a; } }
+    body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.5 system-ui, sans-serif; }
+    main { max-width: 36rem; margin: 0 auto; padding: 3rem 1rem; }
+    h1 { font-size: 1.6rem; margin: 0 0 1rem; }
+    h2 { font-size: 1.15rem; margin: 2rem 0 .5rem; }
+    #status { color: var(--muted); min-height: 1.5em; }
+    button { font: inherit; padding: .7rem 1.2rem; border: 0; border-radius: .5rem; background: var(--accent); color: #fff; cursor: pointer; }
+    button[disabled] { opacity: .5; cursor: progress; }
+    pre { white-space: pre-wrap; word-break: break-all; background: var(--box); padding: 1rem; border-radius: .5rem; font-size: .85rem; user-select: all; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Verify your address</h1>
+  <p id="status">Loading…</p>
+  <noscript><p>This page needs JavaScript and WebAssembly to make your passkey.</p></noscript>
+
+  <section id="start" hidden>
+    <p>Mail you sent from <strong id="address"></strong> is waiting, encrypted, for you to set up.
+      Make a passkey on this device: it unlocks your own encryption keys, and from now on your
+      mail is encrypted to them the moment it arrives. Your keys are made here, in this page;
+      the server never sees them.</p>
+    <p><button id="go" type="button">Make a passkey and claim my mail</button></p>
+  </section>
+
+  <section id="done" hidden>
+    <h2>Your recovery share</h2>
+    <p>If you lose this passkey, this share is the only way back to your mail. Save it now in a
+      password manager or print it, and keep it private. It won't be shown again.</p>
+    <pre id="share"></pre>
+  </section>
+</main>
+<!-- wasm-bindgen's loader for the page's Rust (crates/rdx-claim); no other script. -->
+<script type="module">import init from "/claim-app/rdx_claim.js"; init();</script>
+</body>
+</html>

@@ -22,3 +22,7 @@ serde_json.workspace = true
 worker = "0.9"
 js-sys = "0.3"
 web-sys = { version = "0.3", features = ["Crypto"] }
+
+[dev-dependencies]
+# The claim page's logic, to run the claim routes end to end against the staging layer.
+rdx-claim = { path = "../rdx-claim" }

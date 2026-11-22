@@ -10,6 +10,8 @@
 //! - `cargo xtask doctor`: checks that the shell has the toolchain, wasm targets and tools.
 //! - `cargo xtask ci`: everything CI runs, in the same order, so a local run predicts CI.
 //! - `cargo xtask demo [OUT]`: runs the pipeline end to end on synthetic documents (see `demo.rs`).
+//! - `cargo xtask claim-page [OUT]`: builds the intake claim page for the Worker to serve (see
+//!   `claim_page.rs`).
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -17,6 +19,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 mod ci;
+mod claim_page;
 mod demo;
 mod doctor;
 
@@ -40,9 +43,10 @@ fn main() -> ExitCode {
         }
         Some("ci") => ci::run(&root()),
         Some("demo") => demo::run(&root(), args.get(1).map(String::as_str)),
+        Some("claim-page") => claim_page::run(&root(), args.get(1).map(String::as_str)),
         _ => {
             eprintln!(
-                "usage: cargo xtask <check [SKILL…] | check-wit | smoke-wasm | doctor | ci | demo [OUT]>"
+                "usage: cargo xtask <check [SKILL…] | check-wit | smoke-wasm | doctor | ci | demo [OUT] | claim-page [OUT]>"
             );
             ExitCode::from(2)
         }

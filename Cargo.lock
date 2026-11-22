@@ -3065,6 +3065,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "rdx-claim"
+version = "0.1.0"
+dependencies = [
+ "bc-envelope",
+ "js-sys",
+ "rdx-host",
+ "rdx-intake",
+ "rdx-keys",
+ "rdx-plan",
+ "serde_json",
+ "thiserror",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+ "zeroize",
+]
+
+[[package]]
 name = "rdx-cli"
 version = "0.1.0"
 dependencies = [
@@ -3286,6 +3304,7 @@ name = "rdx-worker"
 version = "0.1.0"
 dependencies = [
  "js-sys",
+ "rdx-claim",
  "rdx-host",
  "rdx-intake",
  "serde_json",

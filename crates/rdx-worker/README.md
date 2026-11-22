@@ -36,8 +36,8 @@ You need a Cloudflare account (the free plan works) and a domain whose DNS is on
    "Move to Email Routing from another provider" first). Then open that domain's *Settings*, and
    under *Subdomains* add `receipts.yourorg.org`; Cloudflare adds its MX, SPF and DKIM records.
    Add and verify one destination address of your own if it asks (intake never forwards to it).
-4. **Write the policy.** Edit [`policy.ncl`](policy.ncl): the intake address, the PWA's claim
-   URL, and who may send (`allow.domains` for whole domains, `allow.addresses` for volunteers'
+4. **Write the policy.** Edit [`policy.ncl`](policy.ncl): the intake address, the claim
+   URL (see step 6), and who may send (`allow.domains` for whole domains, `allow.addresses` for volunteers'
    own mailboxes). `nickel export --import-path ../../nickel policy.ncl` checks it.
    With a subdomain, set `intake_address` to an address at the main domain, such as
    `receipts@yourorg.org`: it is the sender of the setup reply, and Cloudflare refuses a Worker's
@@ -60,6 +60,12 @@ You need a Cloudflare account (the free plan works) and a domain whose DNS is on
    wrangler deploy --var RDX_INTAKE_POLICY:"$(nickel export --format json --import-path ../../nickel policy.ncl)"
    ```
 
+   The deploy also builds and uploads the claim page (`cargo xtask claim-page`, from crate
+   `rdx-claim`), which the Worker serves at `/claim`. The policy's `claim_url` must point there:
+   either `https://rdx-intake.<account>.workers.dev/claim`, or, on a domain of your own, a custom
+   domain for the Worker (uncomment `routes` in `wrangler.toml`; Cloudflare creates the DNS record
+   and certificate). Passkeys belong to the domain, so pick the one the PWA will use.
+
 7. **Route the address to the Worker.** *Email Routing → Routing rules → Create address*:
    the intake address, action *Send to a Worker*, Worker `rdx-intake`; with a subdomain, also the
    main-domain `intake_address` from step 4. Or with Wrangler:
@@ -68,6 +74,33 @@ You need a Cloudflare account (the free plan works) and a domain whose DNS is on
 8. **Try it.** Send an email from an allowed address that hasn't been onboarded: you should get
    "Verify your address to send receipts" back within a minute, and `wrangler tail` shows
    `{"status":"quarantined",…}`. From an address not on the list, you get a bounce saying so.
+   Open the reply's link, make a passkey, and save the recovery share it shows: the mail moves
+   to your new keys (`claim released: 1 document(s)`), and your next email is delivered
+   straight to them (`{"status":"delivered",…}`).
+
+### The claim page
+
+The setup link opens `/claim`, a small page in Rust (crate `rdx-claim`, compiled to
+WebAssembly) that stands in for the PWA (piece 14) until it exists. It reads the address and the
+quarantine key from the link's fragment, which the browser never sends, then:
+
+1. `POST /claim/open` with a request signed by the quarantine key: the Worker checks the
+   signature against the public half it kept and returns the quarantined envelopes, still
+   encrypted.
+2. Makes a passkey (WebAuthn with the PRF extension) and runs `keys.onboard` in the page: a
+   device key wrapped by the passkey, one recovery share shown once, and a registry signed by the
+   recovery key.
+3. Decrypts each envelope with the quarantine key and encrypts it to the new keys, in the page.
+4. `POST /claim/release` with the registry and the new envelopes, named by digest in a request
+   signed by the quarantine key. The Worker checks the signature (the proof of the mailbox that
+   publishing a registry needs), the registry, and that every waiting document is accounted for;
+   then it stores the registry and the new envelopes, lists them in the inbox and deletes the
+   quarantine.
+
+The wrapped device key stays in the browser's storage (`rdx/keys/device/<address>`), so only
+the passkey unlocks it. The passkey needs a browser and provider with the PRF extension (current
+Chrome, Edge, Safari and Firefox with most platform passkeys and security keys); the page says so
+if it is missing. Design and server checks: `rdx_intake::claim`.
 
 ### Optional: expiry notices
 
@@ -77,9 +110,9 @@ Sending* for the intake subdomain (Workers Paid plan) and uncomment the `RDX_EMA
 
 ## What it can't do yet
 
-- Claiming a quarantine and reading delivered mail need the PWA (piece 14): its claim page and
-  the Worker routes it will call. Until then, mail from onboarded senders is stored and listed
-  per address in KV (`intake/inbox/<address>`), and quarantined mail waits and expires.
+- Reading delivered mail needs the PWA (piece 14). Until then, mail is stored encrypted and
+  listed per address in KV (`intake/inbox/<address>`). The claim page sets up one device with one
+  recovery share; more devices, share holders and supporter ids are the PWA's.
 - Auto-forwarding rules that keep the merchant's `From` are bounced; supporters forward by hand.
 
 ## Limits

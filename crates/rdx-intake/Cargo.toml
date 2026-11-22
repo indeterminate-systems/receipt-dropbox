@@ -12,7 +12,7 @@ rust-version.workspace = true
 ops = true
 
 [dependencies]
-bc-envelope = { version = "0.43", default-features = false, features = ["known_value", "encrypt", "recipient"] }
+bc-envelope = { version = "0.43", default-features = false, features = ["signature", "ed25519", "known_value", "encrypt", "recipient"] }
 bc-components = { version = "0.31", default-features = false, features = ["ed25519"] }
 rdx-host = { path = "../rdx-host" }
 rdx-keys = { path = "../rdx-keys" }
