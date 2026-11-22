@@ -1,0 +1,18 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": false,
+    "plan_digest": "sha256:e7a4cff0a6cb7867e59f263d8b599c4510ca3ac613026bf6635a4d3f4308b645",
+    "skill": "open-granted-original",
+    "steps": [
+      {
+        "error": "envelope.open: no `sha256:0000000000000000000000000000000000000000000000000000000000000000` in the blob store",
+        "id": "statement",
+        "op": "envelope.open",
+        "status": "failed"
+      }
+    ]
+  },
+  "inputs": {}
+}

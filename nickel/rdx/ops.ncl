@@ -4,6 +4,7 @@
 # merges this file with `union`, keeping both sides' lines. rdx-cli's tests/api.rs checks that
 # these constructors and rdx's registered ops are the same set.
 {
+  audit = import "ops/audit.ncl",
   envelope = import "ops/envelope.ncl",
   intake = import "ops/intake.ncl",
   keys = import "ops/keys.ncl",

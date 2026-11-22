@@ -57,6 +57,11 @@ fn kv_key(name: &str) -> String {
     format!("ledger/{name}")
 }
 
+/// Every version of a named ledger, oldest first: a JSON list of digests.
+fn versions_key(name: &str) -> String {
+    format!("ledger-versions/{name}")
+}
+
 /// The ledger and the digest of its text (`None`: a name with nothing posted yet).
 fn load(op: &str, host: &Host, at: &Location) -> Result<(Ledger, Option<Digest>), OpError> {
     let digest = match at {
@@ -152,8 +157,8 @@ struct PostArgs {
 }
 
 /// `ledger.post { booking, ledger }`: adds a `ledger.book` output to the named ledger, stores the
-/// new version in the blob store and points `ledger/<name>` at it. Posting the same booking again
-/// changes nothing. Has effects.
+/// new version in the blob store, points `ledger/<name>` at it and appends it to
+/// `ledger-versions/<name>`. Posting the same booking again changes nothing. Has effects.
 struct Post;
 
 impl Op for Post {
@@ -197,6 +202,24 @@ impl Op for Post {
             .kv
             .as_mut()
             .ok_or_else(|| OpError::new(format!("{op} ran without the `kv` capability")))?;
+        // The history first: if pointing `ledger/<name>` at the new version failed, the list would
+        // name a version that was never current, which is harmless.
+        let mut versions: Vec<String> = match kv.get(&versions_key(&name))? {
+            Some(bytes) => serde_json::from_slice(&bytes).map_err(|e| {
+                OpError::new(format!(
+                    "{op}: kv `{}` is unreadable: {e}",
+                    versions_key(&name)
+                ))
+            })?,
+            None => previous.iter().map(|d| d.as_str().to_owned()).collect(),
+        };
+        if versions.last() != Some(&digest) {
+            versions.push(digest.clone());
+            kv.put(
+                &versions_key(&name),
+                serde_json::to_string(&versions).unwrap().as_bytes(),
+            )?;
+        }
         kv.put(
             &kv_key(&name),
             serde_json::to_string(&digest).unwrap().as_bytes(),

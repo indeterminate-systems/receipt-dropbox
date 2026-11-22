@@ -12,7 +12,8 @@
 //! - [`export`] writes a ledger as CSV or XLSX, one row per posting.
 //!
 //! The crate does no I/O. Its ops ([`register`]) keep each version of a ledger in the host's blob
-//! store, named by digest, with a kv entry `ledger/<name>` pointing at the current one.
+//! store, named by digest, with a kv entry `ledger/<name>` pointing at the current one and
+//! `ledger-versions/<name>` listing every version, oldest first.
 //!
 //! [`LedgerEntry`]: rdx_model::LedgerEntry
 

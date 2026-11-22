@@ -75,3 +75,42 @@ fn a_last_line_that_is_not_an_entry_is_an_error() {
     let mut host = Host::memory().with_audit_log(log);
     assert!(run(&plan("x"), &Registry::with_core(), &mut host).is_err());
 }
+
+#[test]
+fn the_log_keeps_digests_of_outputs_and_skipped_arguments_not_the_values() {
+    let log = MemoryAuditLog::default();
+    let mut host = Host::memory().with_audit_log(log.clone());
+    host.kv
+        .as_mut()
+        .unwrap()
+        .put("statement", br#"{"l05":"PHARMACY -312.40"}"#)
+        .unwrap();
+    // A dry run: the read's output and the skipped write's arguments both hold the line.
+    let plan: Plan = serde_json::from_value(json!({
+        "version": 1, "skill": "t", "goal": "g", "dry_run": true,
+        "steps": [
+            { "id": "secret", "op": "kv.get", "args": { "key": "statement" } },
+            { "op": "kv.put", "args": { "key": "copy", "value": { "ref": "secret" } } }
+        ]
+    }))
+    .unwrap();
+    let outcome = run(&plan, &Registry::with_core(), &mut host).unwrap();
+    // The caller still gets everything.
+    let note = &outcome.report.steps[0];
+    assert_eq!(note.output, Some(json!({ "l05": "PHARMACY -312.40" })));
+    assert!(outcome.report.steps[1].args.is_some());
+
+    let line = &log.lines()[0];
+    assert!(!line.contains("PHARMACY"), "{line}");
+    let entry: Value = serde_json::from_str(line).unwrap();
+    let steps = &entry["entry"]["report"]["steps"];
+    assert_eq!(steps[0].get("output"), None);
+    assert_eq!(steps[0]["output_digest"], json!(note.output_digest));
+    assert_eq!(steps[1].get("args"), None);
+    assert_eq!(
+        steps[1]["args_digest"],
+        json!(rdx_plan::digest(
+            outcome.report.steps[1].args.as_ref().unwrap()
+        ))
+    );
+}

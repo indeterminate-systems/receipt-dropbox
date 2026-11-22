@@ -3,7 +3,12 @@
 //! Each line is the canonical JSON of `{ "digest": d, "entry": e }`, where `e` is
 //! `{ "at_unix_ms", "prev", "report" }`, `prev` is the previous line's digest (null for the first)
 //! and `d` is `digest(e)`. Changing, removing or reordering a line breaks the chain, which
-//! [`verify`] reports. Piece 12 of the roadmap links ledger entries to these digests.
+//! [`verify`] reports.
+//!
+//! The log keeps digests, not values: each step's `output` is dropped (its `output_digest`
+//! stays) and a skipped step's `args` become `args_digest`. Outputs and arguments can hold a
+//! statement in the clear (`statement.parse`, `envelope.open`), and the log may go to an auditor
+//! (ADR-P12). The caller still gets the whole report from [`run`].
 
 use rdx_host::{CapabilityError, Host};
 use serde_json::{Value, json};
@@ -69,13 +74,26 @@ fn record(report: &RunReport, host: &mut Host) -> Result<Option<String>, Capabil
     let entry = json!({
         "at_unix_ms": at,
         "prev": prev,
-        "report": serde_json::to_value(report).expect("reports serialize"),
+        "report": digests_only(report),
     });
     let digest = crate::digest(&entry);
     log.append(&crate::canonical_json(
         &json!({ "digest": digest, "entry": entry }),
     ))?;
     Ok(Some(digest))
+}
+
+/// The report as the log keeps it: outputs and skipped steps' arguments replaced by digests.
+fn digests_only(report: &RunReport) -> Value {
+    let mut value = serde_json::to_value(report).expect("reports serialize");
+    for step in value["steps"].as_array_mut().into_iter().flatten() {
+        let step = step.as_object_mut().expect("steps are objects");
+        step.remove("output");
+        if let Some(args) = step.remove("args") {
+            step.insert("args_digest".into(), Value::String(crate::digest(&args)));
+        }
+    }
+    value
 }
 
 fn parse_line(line: &str) -> Option<(String, Value)> {

@@ -131,6 +131,20 @@ fn an_executed_run_posts_reads_and_exports() {
         post1["digest"]
     );
 
+    // Every version, oldest first: the audit log keeps only digests of outputs (ADR-P12), so
+    // this is where an earlier version is found.
+    let versions = host
+        .kv
+        .as_ref()
+        .unwrap()
+        .get("ledger-versions/main")
+        .unwrap()
+        .unwrap();
+    assert_eq!(
+        serde_json::from_slice::<Value>(&versions).unwrap(),
+        serde_json::json!([post0["digest"], post1["digest"]])
+    );
+
     let store = host.blob_store.as_ref().unwrap();
     let csv = step(&report, "csv");
     assert_eq!(csv["media_type"], "text/csv");
