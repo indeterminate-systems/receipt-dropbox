@@ -1,0 +1,117 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:366686bdb4127177adcfc807d0d9562eb07acd56c0124bab6ef1dc09ed2070b8",
+    "skill": "verify-cfdi",
+    "steps": [
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "extractor": "cfdi",
+          "fields": {
+            "date": "2026-03-18",
+            "kind": "bill",
+            "merchant": "GASOLINERA EJEMPLO",
+            "reference": "G-3310",
+            "total": {
+              "currency": "MXN",
+              "minor": 250000
+            }
+          },
+          "fiscal": {
+            "cfdi_type": "I",
+            "issuer_rfc": "IIA040805DZ4",
+            "payment_form": "01",
+            "payment_method": "PUE",
+            "receiver_name": "ORGANIZACIÓN DE PRUEBA",
+            "receiver_rfc": "XIA190128J61",
+            "uuid": "1A2B3C4D-0000-4000-8000-000000000003",
+            "version": "4.0"
+          },
+          "missing": [],
+          "receipt": {
+            "date": "2026-03-18",
+            "id": "r-33db9f6962ad3b67",
+            "kind": "bill",
+            "merchant": "GASOLINERA EJEMPLO",
+            "reference": "G-3310",
+            "source": "sha256:33db9f6962ad3b679fa0f17c1521a77b206ff1dafb39aacf43dfa32e9b1daf38",
+            "supporter": "s-0001",
+            "total": {
+              "currency": "MXN",
+              "minor": 250000
+            }
+          },
+          "source": "sha256:33db9f6962ad3b679fa0f17c1521a77b206ff1dafb39aacf43dfa32e9b1daf38",
+          "status": "complete",
+          "warnings": []
+        },
+        "output_digest": "sha256:7f349965b7e950f8fd32c99a9408ea702f4965df33cc106a49770dc7b921d978",
+        "status": "done"
+      },
+      {
+        "id": "proof",
+        "op": "fiscal.check",
+        "output": {
+          "assessments": [
+            {
+              "basis": "cfdi",
+              "findings": [
+                {
+                  "code": "fuel-paid-cash",
+                  "fix": "Pay for fuel by card or transfer.",
+                  "message": "fuel (`Gasolina regular`, ClaveProdServ 15101514) was paid in cash, which is never deductible, whatever the amount",
+                  "severity": "error"
+                },
+                {
+                  "code": "cash-over-threshold",
+                  "fix": "Pay amounts over the threshold by card or transfer.",
+                  "message": "2500.00 MXN was paid in cash; over 2000.00 MXN, a cash payment isn't deductible even with a CFDI (LISR art. 27 fr. III)",
+                  "severity": "error"
+                }
+              ],
+              "meta": {
+                "cfdi": "1A2B3C4D-0000-4000-8000-000000000003",
+                "forma-pago": "01",
+                "metodo-pago": "PUE",
+                "proof": "not_supported",
+                "rfc-emisor": "IIA040805DZ4",
+                "rfc-receptor": "XIA190128J61",
+                "sat-checked": "2026-03-20T10:00:00Z",
+                "sat-status": "vigente"
+              },
+              "proof": "not_supported",
+              "receipt": "r-33db9f6962ad3b67"
+            }
+          ],
+          "policy": {
+            "fiscal_year": 2026,
+            "kind": "company",
+            "requires_cfdi": true,
+            "rules_confirmed": false
+          },
+          "summary": {
+            "needs_review": 0,
+            "not_supported": 1,
+            "payment_evidence_only": 0,
+            "supported": 0
+          },
+          "warnings": [
+            "The 2026 proof rules are not confirmed by a contador yet: treat these results as research, not advice (docs/compliance.md)."
+          ]
+        },
+        "output_digest": "sha256:8a47acfd230f344f4836b8ac5fbe03a657d8e94b80233ccf9e866b63324c4474",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "cfdi": "import \"../fixtures/fiscal/cfdi-fuel-cash.xml\" as 'Text",
+    "policy": "{ kind = \"company\", fiscal_year = 2026, profile = { rfc = \"XIA190128J61\", name = \"ORGANIZACIÓN DE PRUEBA\", postcode = \"06000\", regime = \"603\" } }",
+    "sat": "{ status = \"vigente\", efos = \"none\", checked = \"2026-03-20T10:00:00Z\" }",
+    "supporter": "\"s-0001\""
+  }
+}

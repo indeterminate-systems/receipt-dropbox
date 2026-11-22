@@ -1,0 +1,111 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:ba4f6de935ec31846e7b00b1c3e3a1dac2f249aff6eedeed059df6096d69d7c7",
+    "skill": "verify-cfdi",
+    "steps": [
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "extractor": "cfdi",
+          "fields": {
+            "date": "2026-03-14",
+            "kind": "bill",
+            "merchant": "PAPELERÍA EJEMPLO",
+            "reference": "B-77",
+            "total": {
+              "currency": "MXN",
+              "minor": 58000
+            }
+          },
+          "fiscal": {
+            "cfdi_type": "I",
+            "issuer_rfc": "EKU9003173C9",
+            "payment_form": "04",
+            "payment_method": "PUE",
+            "receiver_name": "SIMPATIZANTE DE PRUEBA",
+            "receiver_rfc": "CACX7605101P8",
+            "uuid": "1A2B3C4D-0000-4000-8000-000000000002",
+            "version": "4.0"
+          },
+          "missing": [],
+          "receipt": {
+            "date": "2026-03-14",
+            "id": "r-c5d2b9ab8a6d7519",
+            "kind": "bill",
+            "merchant": "PAPELERÍA EJEMPLO",
+            "reference": "B-77",
+            "source": "sha256:c5d2b9ab8a6d7519d24155867c4d1a0ae1679ea7c254d0e6409574fde096cc1a",
+            "supporter": "s-0001",
+            "total": {
+              "currency": "MXN",
+              "minor": 58000
+            }
+          },
+          "source": "sha256:c5d2b9ab8a6d7519d24155867c4d1a0ae1679ea7c254d0e6409574fde096cc1a",
+          "status": "complete",
+          "warnings": []
+        },
+        "output_digest": "sha256:5f430e2cce057ada3977a42883d11bb8bed04051af713b13a1cb14a6a5ee3471",
+        "status": "done"
+      },
+      {
+        "id": "proof",
+        "op": "fiscal.check",
+        "output": {
+          "assessments": [
+            {
+              "basis": "cfdi",
+              "findings": [
+                {
+                  "code": "cfdi-to-other-rfc",
+                  "fix": "Ask the issuer to cancel it and issue it again to RFC XIA190128J61, ORGANIZACIÓN DE PRUEBA, postcode 06000, regime 603, UsoCFDI G03. If the issuer can't, the supporter would have to invoice the organization themselves; ask a contador before doing that.",
+                  "message": "the CFDI is issued to RFC CACX7605101P8 (SIMPATIZANTE DE PRUEBA), not to the organization's RFC XIA190128J61: it is that taxpayer's expense, not the organization's",
+                  "severity": "error"
+                }
+              ],
+              "meta": {
+                "cfdi": "1A2B3C4D-0000-4000-8000-000000000002",
+                "forma-pago": "04",
+                "metodo-pago": "PUE",
+                "proof": "not_supported",
+                "rfc-emisor": "EKU9003173C9",
+                "rfc-receptor": "CACX7605101P8",
+                "sat-checked": "2026-03-20T10:00:00Z",
+                "sat-status": "vigente"
+              },
+              "proof": "not_supported",
+              "receipt": "r-c5d2b9ab8a6d7519"
+            }
+          ],
+          "policy": {
+            "fiscal_year": 2026,
+            "kind": "company",
+            "requires_cfdi": true,
+            "rules_confirmed": false
+          },
+          "summary": {
+            "needs_review": 0,
+            "not_supported": 1,
+            "payment_evidence_only": 0,
+            "supported": 0
+          },
+          "warnings": [
+            "The 2026 proof rules are not confirmed by a contador yet: treat these results as research, not advice (docs/compliance.md)."
+          ]
+        },
+        "output_digest": "sha256:6cde22a1335b152a74cfdffcab9ee02494920e20d63f50c4de441a330e0ae973",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "cfdi": "import \"../fixtures/fiscal/cfdi-to-supporter.xml\" as 'Text",
+    "policy": "{ kind = \"company\", fiscal_year = 2026, profile = { rfc = \"XIA190128J61\", name = \"ORGANIZACIÓN DE PRUEBA\", postcode = \"06000\", regime = \"603\" } }",
+    "sat": "{ status = \"vigente\", efos = \"none\", checked = \"2026-03-20T10:00:00Z\" }",
+    "supporter": "\"s-0001\""
+  }
+}

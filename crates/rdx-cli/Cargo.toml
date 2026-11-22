@@ -15,6 +15,7 @@ path = "src/main.rs"
 # (see .gitattributes).
 [dependencies]
 rdx-envelope = { path = "../rdx-envelope" }
+rdx-fiscal = { path = "../rdx-fiscal" }
 rdx-host = { path = "../rdx-host", features = ["local"] }
 rdx-intake = { path = "../rdx-intake" }
 rdx-keys = { path = "../rdx-keys" }

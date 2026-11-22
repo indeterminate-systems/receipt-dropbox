@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="4.0" Serie="T" Folio="5521" Fecha="2026-03-09T13:45:00" FormaPago="04" SubTotal="301.72" Moneda="MXN" Total="350.00" TipoDeComprobante="I" Exportacion="01" MetodoPago="PUE" LugarExpedicion="06000">
+  <cfdi:InformacionGlobal Periodicidad="01" Meses="03" Año="2026"/>
+  <cfdi:Emisor Rfc="EKU9003173C9" Nombre="CAFETERÍA EJEMPLO" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="XAXX010101000" Nombre="PUBLICO EN GENERAL" DomicilioFiscalReceptor="06000" RegimenFiscalReceptor="616" UsoCFDI="S01"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="90101500" Cantidad="1" ClaveUnidad="E48" Descripcion="Consumo" ValorUnitario="301.72" Importe="301.72" ObjetoImp="02"/>
+  </cfdi:Conceptos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="1A2B3C4D-0000-4000-8000-000000000006" FechaTimbrado="2026-03-09T13:46:00" RfcProvCertif="SPR190613I52" SelloCFD="synthetic" NoCertificadoSAT="00000000000000000000" SelloSAT="synthetic"/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

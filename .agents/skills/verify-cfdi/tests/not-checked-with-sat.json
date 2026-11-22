@@ -1,0 +1,109 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:46b1ed88673bb8c9eecbac769cb83b34c08e0b135685a1d6341b962c6d1dddf8",
+    "skill": "verify-cfdi",
+    "steps": [
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "extractor": "cfdi",
+          "fields": {
+            "date": "2026-03-12",
+            "kind": "bill",
+            "merchant": "PAPELERÍA EJEMPLO",
+            "reference": "A-1187",
+            "total": {
+              "currency": "MXN",
+              "minor": 116000
+            }
+          },
+          "fiscal": {
+            "cfdi_type": "I",
+            "issuer_rfc": "EKU9003173C9",
+            "payment_form": "04",
+            "payment_method": "PUE",
+            "receiver_name": "ORGANIZACIÓN DE PRUEBA",
+            "receiver_rfc": "XIA190128J61",
+            "uuid": "6F1E2D3C-4B5A-4978-8899-AABBCCDDEEFF",
+            "version": "4.0"
+          },
+          "missing": [],
+          "receipt": {
+            "date": "2026-03-12",
+            "id": "r-470a049c6b72f52a",
+            "kind": "bill",
+            "merchant": "PAPELERÍA EJEMPLO",
+            "reference": "A-1187",
+            "source": "sha256:470a049c6b72f52a7ff31d2ed646c51481af9b2004d029a696e714b28099a700",
+            "supporter": "s-0002",
+            "total": {
+              "currency": "MXN",
+              "minor": 116000
+            }
+          },
+          "source": "sha256:470a049c6b72f52a7ff31d2ed646c51481af9b2004d029a696e714b28099a700",
+          "status": "complete",
+          "warnings": []
+        },
+        "output_digest": "sha256:94383b0aa382a20c6bcef6b390fe9d7cf56ce17b9a113486f2a85c269e1acc6a",
+        "status": "done"
+      },
+      {
+        "id": "proof",
+        "op": "fiscal.check",
+        "output": {
+          "assessments": [
+            {
+              "basis": "cfdi",
+              "findings": [
+                {
+                  "code": "sat-unchecked",
+                  "fix": "Check it with the SAT verification service (UUID, issuer and receiver RFC, total) and pass the result as `sat`.",
+                  "message": "the CFDI's status hasn't been checked with the SAT yet",
+                  "severity": "review"
+                }
+              ],
+              "meta": {
+                "cfdi": "6F1E2D3C-4B5A-4978-8899-AABBCCDDEEFF",
+                "forma-pago": "04",
+                "metodo-pago": "PUE",
+                "proof": "needs_review",
+                "rfc-emisor": "EKU9003173C9",
+                "rfc-receptor": "XIA190128J61",
+                "sat-status": "unchecked"
+              },
+              "proof": "needs_review",
+              "receipt": "r-470a049c6b72f52a"
+            }
+          ],
+          "policy": {
+            "fiscal_year": 2026,
+            "kind": "company",
+            "requires_cfdi": true,
+            "rules_confirmed": false
+          },
+          "summary": {
+            "needs_review": 1,
+            "not_supported": 0,
+            "payment_evidence_only": 0,
+            "supported": 0
+          },
+          "warnings": [
+            "The 2026 proof rules are not confirmed by a contador yet: treat these results as research, not advice (docs/compliance.md)."
+          ]
+        },
+        "output_digest": "sha256:38443b8ac2c992b93914071848b18bea24713c93c9fd810ccf4e0390d48acd58",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "cfdi": "import \"../fixtures/receipts/cfdi-ingreso.xml\" as 'Text",
+    "policy": "{ kind = \"company\", fiscal_year = 2026, profile = { rfc = \"XIA190128J61\", name = \"ORGANIZACIÓN DE PRUEBA\", postcode = \"06000\", regime = \"603\" } }",
+    "supporter": "\"s-0002\""
+  }
+}

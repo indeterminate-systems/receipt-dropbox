@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="4.0" Serie="B" Folio="78" Fecha="2026-03-14T09:30:00" FormaPago="04" SubTotal="500.00" Moneda="MXN" Total="580.00" TipoDeComprobante="I" Exportacion="01" MetodoPago="PUE" LugarExpedicion="06700">
+  <cfdi:Emisor Rfc="EKU9003173C9" Nombre="PAPELERÍA EJEMPLO" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="CACX7605101P8" Nombre="SIMPATIZANTE DE PRUEBA" DomicilioFiscalReceptor="06700" RegimenFiscalReceptor="612" UsoCFDI="G03"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="44121600" Cantidad="5" ClaveUnidad="H87" Descripcion="Folders" ValorUnitario="100.00" Importe="500.00" ObjetoImp="02"/>
+  </cfdi:Conceptos>
+  <cfdi:Complemento>
+  </cfdi:Complemento>
+</cfdi:Comprobante>
