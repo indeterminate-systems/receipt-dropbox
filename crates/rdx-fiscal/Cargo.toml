@@ -1,0 +1,25 @@
+[package]
+name = "rdx-fiscal"
+version = "0.1.0"
+description = "Receipt Dropbox fiscal proof: CFDI 4.0 parsing and checks of expenses against the organization's proof policy"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+# `rdx` registers this crate's ops (its `register` function) when it is a dependency of
+# rdx-cli; see crates/rdx-cli/build.rs.
+[package.metadata.rdx]
+ops = true
+
+[dependencies]
+rdx-model = { path = "../rdx-model" }
+# Only the `Op` trait and registry; plan loading (Nickel) is the host's business.
+rdx-plan = { path = "../rdx-plan", default-features = false }
+# Pure Rust, read-only XML tree; already in the lock through the renderer.
+roxmltree = "0.21"
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+rdx-plan = { path = "../rdx-plan" }

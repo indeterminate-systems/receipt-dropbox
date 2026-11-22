@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="4.0" Serie="S" Folio="901" Fecha="2026-03-02T10:00:00" FormaPago="99" SubTotal="5000.00" Moneda="MXN" Total="5800.00" TipoDeComprobante="I" Exportacion="01" MetodoPago="PPD" LugarExpedicion="06000">
+  <cfdi:Emisor Rfc="EKU9003173C9" Nombre="SALÓN DE EVENTOS EJEMPLO" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="XIA190128J61" Nombre="ORGANIZACIÓN DE PRUEBA" DomicilioFiscalReceptor="06000" RegimenFiscalReceptor="603" UsoCFDI="G03"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="80141900" Cantidad="1" ClaveUnidad="E48" Descripcion="Renta de salón" ValorUnitario="5000.00" Importe="5000.00" ObjetoImp="02"/>
+  </cfdi:Conceptos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="1A2B3C4D-0000-4000-8000-000000000004" FechaTimbrado="2026-03-02T10:01:00" RfcProvCertif="SPR190613I52" SelloCFD="synthetic" NoCertificadoSAT="00000000000000000000" SelloSAT="synthetic"/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

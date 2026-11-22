@@ -3088,6 +3088,7 @@ version = "0.1.0"
 dependencies = [
  "nickel-embed",
  "rdx-envelope",
+ "rdx-fiscal",
  "rdx-host",
  "rdx-intake",
  "rdx-keys",
@@ -3115,6 +3116,18 @@ dependencies = [
  "rdx-keys",
  "rdx-model",
  "rdx-plan",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "rdx-fiscal"
+version = "0.1.0"
+dependencies = [
+ "rdx-model",
+ "rdx-plan",
+ "roxmltree 0.21.2",
  "serde",
  "serde_json",
  "thiserror",

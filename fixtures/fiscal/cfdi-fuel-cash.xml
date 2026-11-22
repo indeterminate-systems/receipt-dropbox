@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" Version="4.0" Serie="G" Folio="3310" Fecha="2026-03-18T18:02:11" FormaPago="01" SubTotal="2155.17" Moneda="MXN" Total="2500.00" TipoDeComprobante="I" Exportacion="01" MetodoPago="PUE" LugarExpedicion="06000">
+  <cfdi:Emisor Rfc="IIA040805DZ4" Nombre="GASOLINERA EJEMPLO" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="XIA190128J61" Nombre="ORGANIZACIÓN DE PRUEBA" DomicilioFiscalReceptor="06000" RegimenFiscalReceptor="603" UsoCFDI="G03"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="15101514" Cantidad="96.5" ClaveUnidad="LTR" Descripcion="Gasolina regular" ValorUnitario="22.3333" Importe="2155.17" ObjetoImp="02"/>
+  </cfdi:Conceptos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="1A2B3C4D-0000-4000-8000-000000000003" FechaTimbrado="2026-03-18T18:03:00" RfcProvCertif="SPR190613I52" SelloCFD="synthetic" NoCertificadoSAT="00000000000000000000" SelloSAT="synthetic"/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

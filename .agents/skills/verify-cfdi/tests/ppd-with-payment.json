@@ -1,0 +1,105 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:e95abbfe8044623ad0f68d43f7a454661a85f17eea4e431611a922082fa29a9f",
+    "skill": "verify-cfdi",
+    "steps": [
+      {
+        "id": "receipt",
+        "op": "receipt.extract",
+        "output": {
+          "extractor": "cfdi",
+          "fields": {
+            "date": "2026-03-02",
+            "kind": "bill",
+            "merchant": "SALÓN DE EVENTOS EJEMPLO",
+            "reference": "S-901",
+            "total": {
+              "currency": "MXN",
+              "minor": 580000
+            }
+          },
+          "fiscal": {
+            "cfdi_type": "I",
+            "issuer_rfc": "EKU9003173C9",
+            "payment_form": "99",
+            "payment_method": "PPD",
+            "receiver_name": "ORGANIZACIÓN DE PRUEBA",
+            "receiver_rfc": "XIA190128J61",
+            "uuid": "1A2B3C4D-0000-4000-8000-000000000004",
+            "version": "4.0"
+          },
+          "missing": [],
+          "receipt": {
+            "date": "2026-03-02",
+            "id": "r-b4cab067b6d7213d",
+            "kind": "bill",
+            "merchant": "SALÓN DE EVENTOS EJEMPLO",
+            "reference": "S-901",
+            "source": "sha256:b4cab067b6d7213d7110f3fe137bc755f06921a6d3999780400704e9f61ed79d",
+            "supporter": "s-0001",
+            "total": {
+              "currency": "MXN",
+              "minor": 580000
+            }
+          },
+          "source": "sha256:b4cab067b6d7213d7110f3fe137bc755f06921a6d3999780400704e9f61ed79d",
+          "status": "complete",
+          "warnings": []
+        },
+        "output_digest": "sha256:874b1cc45c059789d8d173070902edf16342725eb241919720a0ed95f893b886",
+        "status": "done"
+      },
+      {
+        "id": "proof",
+        "op": "fiscal.check",
+        "output": {
+          "assessments": [
+            {
+              "basis": "cfdi",
+              "findings": [],
+              "meta": {
+                "cfdi": "1A2B3C4D-0000-4000-8000-000000000004",
+                "forma-pago": "99",
+                "metodo-pago": "PPD",
+                "proof": "supported",
+                "rfc-emisor": "EKU9003173C9",
+                "rfc-receptor": "XIA190128J61",
+                "sat-checked": "2026-03-20T10:00:00Z",
+                "sat-status": "vigente"
+              },
+              "proof": "supported",
+              "receipt": "r-b4cab067b6d7213d"
+            }
+          ],
+          "policy": {
+            "fiscal_year": 2026,
+            "kind": "company",
+            "requires_cfdi": true,
+            "rules_confirmed": false
+          },
+          "summary": {
+            "needs_review": 0,
+            "not_supported": 0,
+            "payment_evidence_only": 0,
+            "supported": 1
+          },
+          "warnings": [
+            "The 2026 proof rules are not confirmed by a contador yet: treat these results as research, not advice (docs/compliance.md)."
+          ]
+        },
+        "output_digest": "sha256:486055ce9e916c213ee3e66c32a1c3b750152a7c30d27dbbe6c1f302721ba946",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "cfdi": "import \"../fixtures/fiscal/cfdi-ppd.xml\" as 'Text",
+    "payments": "[import \"../fixtures/fiscal/pago-ppd.xml\" as 'Text]",
+    "policy": "{ kind = \"company\", fiscal_year = 2026, profile = { rfc = \"XIA190128J61\", name = \"ORGANIZACIÓN DE PRUEBA\", postcode = \"06000\", regime = \"603\" } }",
+    "sat": "{ status = \"vigente\", efos = \"none\", checked = \"2026-03-20T10:00:00Z\" }",
+    "supporter": "\"s-0001\""
+  }
+}

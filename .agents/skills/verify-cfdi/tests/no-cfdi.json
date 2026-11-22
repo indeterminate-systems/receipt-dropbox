@@ -1,0 +1,58 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:914b1cf192f0d17bf6bcb079d3418676becad696f36b528a00ef8dcb8fbd89bb",
+    "skill": "verify-cfdi",
+    "steps": [
+      {
+        "id": "proof",
+        "op": "fiscal.check",
+        "output": {
+          "assessments": [
+            {
+              "findings": [
+                {
+                  "code": "cfdi-missing",
+                  "fix": "Ask Cafetería Ejemplo to issue a CFDI to RFC XIA190128J61, ORGANIZACIÓN DE PRUEBA, postcode 06000, regime 603, UsoCFDI G03.",
+                  "message": "no CFDI: the statement line shows the supporter paid, but under the `nonprofit` policy that is payment evidence only; for a non-profit an expense without its CFDI counts as remanente distribuible, on which the organization pays ISR",
+                  "severity": "error"
+                }
+              ],
+              "meta": {
+                "proof": "payment_evidence_only",
+                "purpose": "Snacks for volunteers"
+              },
+              "proof": "payment_evidence_only",
+              "receipt": "r-cafe-0309"
+            }
+          ],
+          "policy": {
+            "fiscal_year": 2026,
+            "kind": "nonprofit",
+            "requires_cfdi": true,
+            "rules_confirmed": false
+          },
+          "summary": {
+            "needs_review": 0,
+            "not_supported": 0,
+            "payment_evidence_only": 1,
+            "supported": 0
+          },
+          "warnings": [
+            "The 2026 proof rules are not confirmed by a contador yet: treat these results as research, not advice (docs/compliance.md)."
+          ]
+        },
+        "output_digest": "sha256:361225a8dc9b366911f762a6a48edcab138bd10abdbd9b3c6ffddc66a308b447",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {
+    "policy": "{ kind = \"nonprofit\", fiscal_year = 2026, profile = { rfc = \"XIA190128J61\", name = \"ORGANIZACIÓN DE PRUEBA\", postcode = \"06000\", regime = \"603\" } }",
+    "purpose": "\"Snacks for volunteers\"",
+    "receipt": "{ id = \"r-cafe-0309\", supporter = \"s-0001\", kind = \"receipt\", merchant = \"Cafetería Ejemplo\", date = \"2026-03-09\", total = { minor = 35000, currency = \"MXN\" }, source = \"sha256:1111111111111111111111111111111111111111111111111111111111111111\" }",
+    "supporter": "\"s-0001\""
+  }
+}
