@@ -31,7 +31,8 @@ let ValueOrRef = lib.ValueOrRef in
   post
     | doc m%"
       Adds a `ledger.book` output (`booking`, usually `rdx.ref` to that step) to the named
-      ledger, stores the new version in the blob store and points kv `ledger/<name>` at it.
+      ledger, stores the new version in the blob store, points kv `ledger/<name>` at it and
+      appends it to `ledger-versions/<name>`.
       Re-posting is harmless: entries already booked identically are counted, a line booked
       differently is refused. Output: `digest`, `previous`, `added`, `already_booked`. Has effects.
     "%

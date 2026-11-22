@@ -14,6 +14,7 @@ path = "src/main.rs"
 # adding one here is all `rdx` needs. One line each, so parallel pieces' additions merge cleanly
 # (see .gitattributes).
 [dependencies]
+rdx-audit = { path = "../rdx-audit" }
 rdx-envelope = { path = "../rdx-envelope" }
 rdx-host = { path = "../rdx-host", features = ["local"] }
 rdx-intake = { path = "../rdx-intake" }

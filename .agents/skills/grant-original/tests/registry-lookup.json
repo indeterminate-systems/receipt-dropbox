@@ -1,0 +1,18 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": false,
+    "plan_digest": "sha256:defd8d0fc8d7064999479363ab92709b519256cda5034be730c22a045d3bd3d2",
+    "skill": "grant-original",
+    "steps": [
+      {
+        "error": "keys.recipients: `accountant@example.org` has no keys yet; onboard it first (`onboard-supporter`)",
+        "id": "keys",
+        "op": "keys.recipients",
+        "status": "failed"
+      }
+    ]
+  },
+  "inputs": {}
+}

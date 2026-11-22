@@ -1,0 +1,30 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:913baf499b4f4ab4dce81c3c18d6d59b24d2a4d6ad2e5f1c6d74943b3cd5605f",
+    "skill": "grant-original",
+    "steps": [
+      {
+        "args": {
+          "address": "supporter1@example.org",
+          "grantee": "accountant@example.org",
+          "original": true,
+          "reason": "2026 annual audit",
+          "statement": "st-2026-03.s-0001",
+          "to": [
+            "ur:crypto-pubkeys/lftansgohdcxredidrnyhlnefzihclvepyfsvaemgsylfxamlstaprdnrsrkfmlukpaelrdtfgprtansgrhdcxdpvwhkrdgdlfdivohpeyzcrlbnnseswynbhfzcnynysbbkaobehgpdtpmkurhkhgaodwnswm"
+          ]
+        },
+        "id": "grant",
+        "op": "audit.grant",
+        "status": "skipped"
+      }
+    ]
+  },
+  "inputs": {
+    "keys": "[\"ur:crypto-pubkeys/lftansgohdcxredidrnyhlnefzihclvepyfsvaemgsylfxamlstaprdnrsrkfmlukpaelrdtfgprtansgrhdcxdpvwhkrdgdlfdivohpeyzcrlbnnseswynbhfzcnynysbbkaobehgpdtpmkurhkhgaodwnswm\"]",
+    "reason": "\"2026 annual audit\""
+  }
+}

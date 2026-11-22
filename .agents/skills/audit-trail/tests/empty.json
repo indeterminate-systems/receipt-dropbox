@@ -1,0 +1,41 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [
+      "ledger `main` has nothing posted yet",
+      "audit.trail: the ledger has no entries"
+    ],
+    "ok": true,
+    "plan_digest": "sha256:2d51d903a406ec9ee050c9aeaa761d5823f745f10136d8a65d0dcf938e853693",
+    "skill": "audit-trail",
+    "steps": [
+      {
+        "id": "ledger",
+        "op": "ledger.read",
+        "output": {
+          "balances": [],
+          "digest": null,
+          "entries": [],
+          "ledger": "main",
+          "text": "; Receipt Dropbox ledger (Beancount). Written by rdx's `ledger.post`, which rewrites the whole\n; file from its entries: change it through rdx, since `ledger.read` refuses hand edits.\n"
+        },
+        "output_digest": "sha256:2302dcf23f70f3350139c04ad381745d42bb8ed4e31a96726fae81c38967b984",
+        "status": "done"
+      },
+      {
+        "id": "trail",
+        "op": "audit.trail",
+        "output": {
+          "entries": [],
+          "ledger": null,
+          "ok": true,
+          "problems": [],
+          "statements": []
+        },
+        "output_digest": "sha256:0024870fa8f45e4ec4915a0ef4fc587895c01c747eeb99e26d77ba14ae658c29",
+        "status": "done"
+      }
+    ]
+  },
+  "inputs": {}
+}

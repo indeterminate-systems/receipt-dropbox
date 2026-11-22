@@ -1,0 +1,25 @@
+{
+  "expect": {
+    "dry_run": true,
+    "notes": [],
+    "ok": true,
+    "plan_digest": "sha256:617e4361cf6b7aedcada12c9ee5bbc56ff9fea5511bd8fd95cc7a89b6a3efe10",
+    "skill": "grant-original",
+    "steps": [
+      {
+        "args": {
+          "address": "supporter1@example.org",
+          "grantee": "accountant@example.org",
+          "reason": "grant ended",
+          "statement": "st-2026-03.s-0001"
+        },
+        "id": "revoke",
+        "op": "audit.revoke",
+        "status": "skipped"
+      }
+    ]
+  },
+  "inputs": {
+    "revoke": "true"
+  }
+}

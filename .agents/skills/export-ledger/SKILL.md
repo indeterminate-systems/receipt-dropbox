@@ -40,8 +40,8 @@ The `ledger` step's output:
 - `text`: the Beancount file itself, for an accountant using Fava or `bean-check`.
 - `digest`: this version's digest; `null` and a note "nothing posted yet" for an empty ledger.
 - The step fails with `edited outside rdx`: the stored ledger is not what rdx wrote. Don't fix
-  it by hand; tell the person, and point the kv entry back at the last good version (each
-  `ledger.post` in the audit log names `previous` and `digest`).
+  it by hand; tell the person, and point the kv entry back at the last good version (kv
+  `ledger-versions/<name>` lists every version rdx posted, oldest first).
 
 With `--execute`, the `export` step's output names the file: `document` (its digest in the blob
 store), `file_name`, `media_type` and `rows` (one row per posting). On the local host the file is

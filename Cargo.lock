@@ -3065,6 +3065,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "rdx-audit"
+version = "0.1.0"
+dependencies = [
+ "bc-components",
+ "bc-envelope",
+ "rdx-envelope",
+ "rdx-host",
+ "rdx-keys",
+ "rdx-ledger",
+ "rdx-model",
+ "rdx-plan",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "thiserror",
+]
+
+[[package]]
 name = "rdx-claim"
 version = "0.1.0"
 dependencies = [
@@ -3087,6 +3105,7 @@ name = "rdx-cli"
 version = "0.1.0"
 dependencies = [
  "nickel-embed",
+ "rdx-audit",
  "rdx-envelope",
  "rdx-host",
  "rdx-intake",

@@ -1,0 +1,31 @@
+[package]
+name = "rdx-audit"
+version = "0.1.0"
+description = "Receipt Dropbox audit trail: custody records of encrypted originals, grants to accountants, and the trail from ledger entries and viewable rows to receipts and originals"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+# `rdx` registers this crate's ops (its `register` function) when it is a dependency of
+# rdx-cli; see crates/rdx-cli/build.rs.
+[package.metadata.rdx]
+ops = true
+
+[dependencies]
+# The same features rdx-keys uses: Ed25519 signatures on custody events, no C.
+bc-envelope = { version = "0.43", default-features = false, features = ["signature", "ed25519", "known_value", "encrypt", "recipient"] }
+bc-components = { version = "0.31", default-features = false, features = ["ed25519"] }
+rdx-envelope = { path = "../rdx-envelope" }
+rdx-host = { path = "../rdx-host" }
+rdx-keys = { path = "../rdx-keys" }
+rdx-model = { path = "../rdx-model" }
+# Ops and their registry only; plan loading (Nickel) is the host's business.
+rdx-plan = { path = "../rdx-plan", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+rdx-ledger = { path = "../rdx-ledger" }
+rdx-plan = { path = "../rdx-plan" }
