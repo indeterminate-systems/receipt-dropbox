@@ -19,8 +19,8 @@ green.
 | 10 | **Typst rendering** | Typst compiled into the core, a statement template fed only from elided envelope data: "Personal, redacted" rows, opening and closing balances, total redacted, root digest, UR/QR | `publish-redacted-statement` | 7 |
 | 11 | **OCR fallback** | Pure-Rust OCR (`ocrs`) as the `ocr.read` op, used when a PDF has no text layer and for photos | adds a step to `ingest-statement` | 4 |
 | 12 | **Audit trail and grants** | Append-only audit log linking ledger entries and viewable rows to receipts and encrypted originals; uploader-granted access to an original for an accountant | `grant-original`, `audit-trail` | 7, 9 |
-| 13 | **Email intake on Cloudflare** | Allowlist and SPF/DKIM/DMARC checks, encrypt-on-arrival to sender keys, quarantine key with expiry, one rate-limited verification reply, expiry cleanup; a `workers-rs` host with R2 and KV. Email Routing hands the message to the Worker in memory, so plaintext never rests anywhere. (A hosted inbox such as AgentMail was considered: it stores messages in plaintext by default, which breaks "plaintext discarded"; it could be a later `intake-adapter` if deletion is shown to purge attachments.) The Worker never links `rdx-render` (piece 10) and runs no OCR (piece 11): both need plaintext. | `receive-email`, `triage-quarantine` | 2, 8 |
-| 14 | **PWA** | Leptos client-side app in Rust: passkey unlock, OPFS storage, upload folder, match review, publishing, accountant view; installable and offline. The `secrets` prompts, including a bank statement's password (label `statement-password-<12 hex>`). For email intake (piece 13): the claim page that reads a setup link's fragment, onboards the address and releases its quarantined mail, and HTTP routes on the Worker to fetch inbox and quarantined blobs and to publish a key registry, which must require proof of the mailbox (for example a signature by its quarantine key). Loads the Typst renderer (piece 10) only when someone publishes; fetches and caches the OCR models (piece 11) by digest and shows their CC-BY-SA-4.0 attribution | – (people use it; agents use skills) | 2, 8; integrates 4 to 10 |
+| 13 | **Email intake on Cloudflare** | Allowlist and SPF/DKIM/DMARC checks, encrypt-on-arrival to sender keys, quarantine key with expiry, one rate-limited verification reply, expiry cleanup; a `workers-rs` host with R2 and KV. Email Routing hands the message to the Worker in memory, so plaintext never rests anywhere. (A hosted inbox such as AgentMail was considered: it stores messages in plaintext by default, which breaks "plaintext discarded"; it could be a later `intake-adapter` if deletion is shown to purge attachments.) The Worker never links `rdx-render` (piece 10) and runs no OCR (piece 11): both need plaintext. A minimal claim page on the same Worker (`/claim`, crate `rdx-claim`) where a sender without keys opens the setup link, makes a passkey and device key in the browser and releases their quarantined mail; every request is signed by the link's quarantine key, which proves the mailbox ([ADR-P13 claim page](adr/ADR-P13-claim-page.md)) | `receive-email`, `triage-quarantine` | 2, 8 |
+| 14 | **PWA** | Leptos client-side app in Rust: passkey unlock, OPFS storage, upload folder, match review, publishing, accountant view; installable and offline. The `secrets` prompts, including a bank statement's password (label `statement-password-<12 hex>`). For email intake (piece 13): replaces the minimal claim page at `/claim` with its own, picking up the wrapped device key that page leaves in `localStorage` (`rdx/keys/device/<address>`), adds recovery holders and more devices, and adds HTTP routes on the Worker to fetch inbox blobs. Loads the Typst renderer (piece 10) only when someone publishes; fetches and caches the OCR models (piece 11) by digest and shows their CC-BY-SA-4.0 attribution | – (people use it; agents use skills) | 2, 8; integrates 4 to 10 |
 | 15 | **Fiscal proof and reimbursement claims** | A per-organization **proof policy** ([compliance](compliance.md#it-depends-on-what-kind-of-organization-it-is) R0): `company`, `nonprofit`, `donataria-autorizada`, `individual` (persona física, with a `sat-registered` flag; employees are supporters, payroll out of scope) or `informal-group` (no RFC: the receipt, or a CFDI to the supporter or *público en general*, is the proof). The policy picks which of R1 to R10 apply: CFDI 4.0 XML capture and parsing, receptor checks against the organization's fiscal profile, SAT status and art. 69-B checks as a host capability (re-run at month close and before the annual return), CFDI ↔ statement line ↔ reimbursement transfer matching, cash and fuel flags, fiscal ledger metadata, claims with approval and deadlines, viáticos export for payroll, a US accountable-plan profile; for a donataria, donation receipts, the administration cap and transparency report data; foreign vendors' invoices as proof with IVA and withholding flags (R17); thresholds and policies as Nickel per fiscal year | `verify-cfdi`, `claim-reimbursement` | 3, 5, 6, 9 |
 | 16 | **Supporter data rights and retention** | [Compliance](compliance.md) R11 to R15: privacy notice and recorded consent (LFPDPPP), ARCO requests (export, correct, delete, object) from the PWA, partial and pre-redacted statement uploads, retention per document class with legal hold (delete originals, keep digests and redacted envelopes), worker-classification signals | `retention-sweep`, `handle-data-request` | 7, 8, 12 |
 
@@ -64,7 +64,7 @@ generator.
 wave 1 (done):               1   2   3
 wave 2 (done):               4   5   6   7
 wave 3 (done):               8   9   10  11
-wave 4 (in progress):        12  13  14  15
+wave 4 (in progress):        12  13 (done)  14  15
 wave 5:                      16
 ```
 
@@ -98,14 +98,22 @@ Done, waves 1 and 2 merged by 2026-11-20, wave 3 by 2026-11-21:
   ([ADR-P11](adr/ADR-P11-ocr.md)). The models are CC-BY-SA-4.0; Ash accepted attribution and
   share-alike (2026-11-21).
 
-Wave 4, so far (2026-11-21):
+Wave 4, so far (2026-11-22):
 
-- Piece 13 (#34): crates `rdx-intake` (ops `intake.receive`, `intake.status`, `intake.sweep`,
-  `intake.release`; policy in `nickel/rdx/intake.ncl`) and `rdx-worker` (the Email Routing
+- Piece 13 (#34, #37, #38), done: crates `rdx-intake` (ops `intake.receive`, `intake.status`,
+  `intake.sweep`, `intake.release`; policy in `nickel/rdx/intake.ncl`) and `rdx-worker` (the Email Routing
   Worker), skills `receive-email` and `triage-quarantine`. Each email is kept whole as one
   envelope encrypted to the sender's keys; for a sender without keys, the quarantine key lives
   only in the setup link sent to them, so the server can't open quarantined mail
-  ([ADR-P13](adr/ADR-P13-email-intake.md)). Added `Keys::from_secret` to `rdx-keys`.
+  ([ADR-P13](adr/ADR-P13-email-intake.md)). Added `Keys::from_secret` to `rdx-keys`. #37 lets
+  Email Routing set the reply's threading headers. #38 adds the claim page: crate `rdx-claim`,
+  built by `cargo xtask claim-page` and served by the Worker at `/claim`, with `POST /claim/open`
+  and `POST /claim/release` ([ADR-P13 claim page](adr/ADR-P13-claim-page.md)). Deployed on
+  Cloudflare for costacombat.com on 2026-11-22: mail to `triage@accounting.costacombat.com`
+  reaches the Worker, setup replies come from `triage@costacombat.com` (Cloudflare refuses a
+  Worker's reply from a subdomain), and the claim page is live at `app.costacombat.com/claim`.
+  The allowlist names addresses only and lives in a git-ignored local policy on the operator's
+  machine, never in the repo.
 - Piece 4, password-protected statements (#35): `rdx-pdf` decrypts PDF standard security
   (revisions 2 to 6) in memory, and `rdx-statement` adds `statement.unlock` (asks through
   `secrets`, or tries the account's remembered password) and `statement.remember-password` (keeps

@@ -32,6 +32,7 @@ elision. Read [docs/architecture.md](docs/architecture.md) before changing anyth
 | `cargo xtask check [SKILL…]` | validates skills against the Agent Skills spec and repo rules, evaluates each product skill's `scripts/main.ncl` and compares its dry-run reports with `tests/*.json` |
 | `UPDATE_GOLDEN=1 cargo xtask check <skill>` | accepts new golden reports (review the diff) |
 | `cargo xtask check-wit` | the capability interfaces in `wit/rdx.wit` match the `rdx-host` traits |
+| `cargo xtask claim-page [OUT]` | builds the claim page (`rdx-claim` for the browser) into `crates/rdx-worker/site`, which the Worker serves; `wrangler.toml` runs it before `worker-build` |
 | `cargo xtask smoke-wasm` | builds `rdx` for `wasm32-wasip2` and runs `plan-smoke-test` with it under `wasmtime` |
 | `cargo fmt`, `cargo clippy --all-targets` | formatting and lints; CI runs both |
 
@@ -61,6 +62,7 @@ change both together.
 | `crates/rdx-ocr` | OCR for scanned PDFs and photos (ocrs), in the text layer's shape; op `ocr.read`. Its models are blobs; the dev shell puts them in `$RDX_OCR_MODELS` |
 | `crates/rdx-intake` | email intake rules: sender checks (allowlist, DMARC from the receiving server's `Authentication-Results`), encrypt to the sender's keys, quarantine under a key only the sender's setup link holds, one rate-limited reply, expiry; `intake.*` ops |
 | `crates/rdx-worker` | the Cloudflare Email Routing Worker (`workers-rs`, built only for `wasm32-unknown-unknown`) around `rdx-intake`, staging KV and R2 around the synchronous core; setup in its README |
+| `crates/rdx-claim` | the claim page the intake Worker serves at `/claim`: in the browser, makes a passkey and device key for a sender without keys and releases their quarantined mail, signing each request with the setup link's quarantine key ([ADR-P13 claim page](docs/adr/ADR-P13-claim-page.md)) |
 | `nickel/rdx/api.ncl` | plan contracts and the built-in ops' constructors agents write against; `rdx.ops` also merges in `ops.ncl` |
 | `nickel/rdx/ops/<domain>.ncl` | each domain crate's op constructors (`rdx.ops.<domain>.<op>`), listed one per line in `nickel/rdx/ops.ncl`; helpers in `nickel/rdx/lib.ncl` |
 | `nickel/rdx/matching.ncl` | the matching policy contract (tolerances, date windows, exchange rates) and its defaults |
